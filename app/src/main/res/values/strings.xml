@@ -1,9 +1,13 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Iruñapp</string>
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
 
     <!-- Change the following strings as required -->
     <string name="back4app_app_id">Qzk8sGh31MvniNznswsCSecB3xRkbvR09xs8BFgr</string>
     <string name="back4app_client_key">Ixwjr0fMKaKHVOwwAayYIreukIpprB1tYXBnG9NJ</string>
     <string name="boton">Boton</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="tab_text_1">Lugares</string>
+    <string name="tab_text_2">Mapas</string>
+    <string name="tab_text_3">Rutas</string>
 </resources>
