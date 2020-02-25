@@ -5,9 +5,10 @@
     <!-- Change the following strings as required -->
     <string name="back4app_app_id">Qzk8sGh31MvniNznswsCSecB3xRkbvR09xs8BFgr</string>
     <string name="back4app_client_key">Ixwjr0fMKaKHVOwwAayYIreukIpprB1tYXBnG9NJ</string>
-    <string name="boton">Boton</string>
-    <string name="title_activity_main2">Main2Activity</string>
-    <string name="tab_text_1">Lugares</string>
-    <string name="tab_text_2">Mapas</string>
-    <string name="tab_text_3">Rutas</string>
+    <string name="title_activity_main2">Iruñapp</string>
+    <string name="lugares">Lugares</string>
+    <string name="mapa">Mapa</string>
+    <string name="rutas">Rutas</string>
+    <string name="ver_mas">Ver más</string>
+    <string name="como_llegar">Como llegar</string>
 </resources>
