@@ -1,9 +1,25 @@
 <resources>
-    <string name="app_name">My Application</string>
-    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
+    <string name="app_name">Irunapp</string>
 
-    <!-- Change the following strings as required -->
+    <!-- Tokens para la conexion con el servidor Parse-->
+    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
     <string name="back4app_app_id">Qzk8sGh31MvniNznswsCSecB3xRkbvR09xs8BFgr</string>
     <string name="back4app_client_key">Ixwjr0fMKaKHVOwwAayYIreukIpprB1tYXBnG9NJ</string>
     <string name="boton">Boton</string>
+
+    <!-- Strings del  Mapa -->
+        <!--Tokens mapa -->
+    <string name="map_token">pk.eyJ1IjoiaXJ1bmFwcCIsImEiOiJjazcyMDRkbGowNGVhM2Vud2xmcHhraXVrIn0.DzS0V3QRI35Ds9qXhhuBNg</string>
+    <string name="map_style_basic">mapbox://styles/irunapp/ck720snyp0s0f1io8add5kxrj</string>
+    <string name="map_style_road">mapbox://styles/irunapp/ck720osjv0www1ipg3lrjfbrn</string>
+        <!--Boton Flotante del mapa -->
+    <string name="boton_flotante">Cerrar Menú</string>
+    <string name="modo_mapa">Cambio Satelite/Básico</string>
+    <string name="boton_localizar">Ubícame</string>
+        <!-- Mensajes mapa -->
+    <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
+    <string name="gps_desactivado"> Los servicios de ubicación estan desactivados</string>
+    <string name="net_desactivada"> Los servicios de red estan desactivados</string>
+    <string name="activar_gps"> Activar </string>
+    <string name="cancelar_gps"> Cancelar </string>
 </resources>
