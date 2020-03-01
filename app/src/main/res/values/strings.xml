@@ -24,4 +24,6 @@
     <string name="cancelar_gps"> Cancelar </string>
     <string name="cargando_mapa">Cargando mapa, por favor espere...</string>
     <string name="serviciosDesactivados">Sin servicios de ubicación/red no se podrán obtener las ubicaciones cercanas</string>
+    <string name="obteniendoUbicacion">Obteniendo su ubicación...</string>
+    <string name="obteniendoAlertas">Obteniendo lugares cercanos a su ubicación por favor espere...</string>
 </resources>
