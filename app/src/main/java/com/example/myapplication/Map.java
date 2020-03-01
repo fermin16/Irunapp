@@ -1,9 +1,11 @@
 package com.example.myapplication;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -28,11 +30,21 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+
 public class Map extends AppCompatActivity {
 
     //Macros:
     private final int ACTIVAR_UBICACION = 0; //Codigo de la actividad que nos servira para saber si el usuario a activado o no la ubicacion
     private final double ZOOM_FIND = 15.0; //Zoom al pulsar el boton de localizacion
+
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -40,6 +52,7 @@ public class Map extends AppCompatActivity {
     private Style.Builder SatelliteStyle;
     private Style.OnStyleLoaded loadedStyle; //Variable que almacenara el estilo cargado en el mapa con sus añadidos
     private boolean style; //Varible que indica si el style es el basico (false) o satelite (true)
+    private Semaphore loading_style; //Variable que determina si el style del mapa está cargando.
     private MapboxMap mapboxMap;
 
     //Menu de boton flotante y sus botones:
@@ -51,6 +64,7 @@ public class Map extends AppCompatActivity {
     private PermissionsManager permissionsManager;
     private LocationComponent locationComponent; //Variable para obtener la localizacion actual
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
+    private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +73,7 @@ public class Map extends AppCompatActivity {
         setContentView(R.layout.activity_map);
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+        loading_style = new Semaphore(1);
 
         //Instanciamos el Boton flotante con el mnú y los botones de localización y cambio de estilo:
         BotonFlotante = (FloatingActionMenu) findViewById(R.id.BotonFlotante);
@@ -70,11 +85,11 @@ public class Map extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!style){
-                    mapboxMap.setStyle(SatelliteStyle,loadedStyle);
+                    changeStyle(SatelliteStyle,loadedStyle);
                     style = true;
                 }
                 else {
-                    mapboxMap.setStyle(BasicStyle, loadedStyle);
+                    changeStyle(BasicStyle,loadedStyle);
                     style = false;
                 }
             }
@@ -92,6 +107,26 @@ public class Map extends AppCompatActivity {
         BasicStyle = new Style.Builder().fromUri(getString(R.string.map_style_basic));
         SatelliteStyle = new Style.Builder().fromUri(getString(R.string.map_style_road));
 
+        //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
+        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+
+        //Crear un BroadCastReciever para saber cuando un usuario activa o desactiva los servicios de ubicacion:
+        mGpsSwitchStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                if (intent.getAction().matches("android.location.PROVIDERS_CHANGED")){ //Si han cambiado los proveedores de servicio o de locaizacion
+                    //Comprobar los servicios de red y ubicacion:
+                    if(!checkLocationServices()) {
+                        Toast.makeText(context,getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
+                    }
+                    else{ //Si se han activado
+                        findMe(); //Mostrar localizacion
+                    }
+                }
+            }
+        };
+
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
@@ -104,7 +139,14 @@ public class Map extends AppCompatActivity {
                         enableLocationComponent(style);
                     }
                 };
-                mapboxMap.setStyle(BasicStyle, loadedStyle);
+                List<Feature> symbolLayerIconFeatureList = new ArrayList<>();
+                symbolLayerIconFeatureList.add(Feature.fromGeometry(
+                        Point.fromLngLat(-57.225365, -33.213144)));
+                symbolLayerIconFeatureList.add(Feature.fromGeometry(
+                        Point.fromLngLat(-54.14164, -33.981818)));
+                symbolLayerIconFeatureList.add(Feature.fromGeometry(
+                        Point.fromLngLat(-56.990533, -30.583266)));
+                changeStyle(BasicStyle,loadedStyle);
             }
         });
     }
@@ -190,21 +232,36 @@ public class Map extends AppCompatActivity {
     public void findMe(){
         //Comprobar que los servicios de ubicacion estan activados:
         if(checkLocationServices()) {
-            try {
-                //Hacer el indicador visible
-                locationComponent.setLocationComponentEnabled(true);
+            if(loading_style.tryAcquire()) {
+                try {
+                    //Hacer el indicador visible
+                    locationComponent.setLocationComponentEnabled(true);
 
-                //Colocar el modo de la camara en Tracking
-                locationComponent.setCameraMode(CameraMode.TRACKING);
+                    //Colocar el modo de la camara en Tracking
+                    locationComponent.setCameraMode(CameraMode.TRACKING);
 
-                //Establecer el compas (brujula)
-                locationComponent.setRenderMode(RenderMode.COMPASS);
+                    //Hacer zoom a la ubicacion del usuario
+                    locationComponent.zoomWhileTracking(ZOOM_FIND);
 
-                //Hacer zoom a la ubicacion del usuario
-                locationComponent.zoomWhileTracking(ZOOM_FIND);
-            }catch(SecurityException e){
-                Log.v("Última localización","No se pudo obtener la última localizacion del usuario");
+                    //Devolver el permiso del semaforo
+                    loading_style.release();
+                } catch (SecurityException e) {
+                    Log.v("Última localización", "No se pudo obtener la última localizacion del usuario");
+                }
             }
+            else{
+                Toast.makeText(this,getString(R.string.cargando_mapa),Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void changeStyle(Style.Builder newStyle,Style.OnStyleLoaded loadStyle){
+        try {
+            loading_style.acquire();
+            mapboxMap.setStyle(newStyle,loadStyle);
+            loading_style.release();
+        } catch (InterruptedException e) {
+            Log.v("Cambio de estilo", "No se ha podido cambiar de estilo");
         }
     }
 
@@ -223,6 +280,7 @@ public class Map extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
     }
 
     @Override
@@ -245,6 +303,7 @@ public class Map extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         super.onDestroy();
         mapView.onDestroy();
     }
