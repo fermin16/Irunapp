@@ -33,8 +33,10 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
+                android:visibility="visible"
                 app:menu_fab_label="@string/boton_flotante"
-                tools:ignore="MissingConstraints">
+                tools:ignore="MissingConstraints"
+                tools:visibility="visible">
 
                 <com.github.clans.fab.FloatingActionButton
                     android:id="@+id/BotonCambioMapa"

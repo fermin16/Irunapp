@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,6 +17,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Toast;
 
 import com.example.myapplication.Modelos.Alert;
@@ -23,6 +26,9 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -40,6 +46,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.parse.FindCallback;
@@ -63,10 +75,11 @@ public class Map extends AppCompatActivity {
     public static final int MAX_DISTANCIA = 3; //Distancia maxima en kilometros para compobar los puntos cercanos
     private final int TIEMPO_REFRESCO = 15000; //Tiempo de refresco del hijo en milisegundos
     private final int MAX_PUNTOS = 50; //Numero maximo de puntos cercanos que se le muestran al usuario
-    private final String DESTINATION_SOURCE = "destination-source-id"; //Vairiable que almacena la fuente para el layer que aparece al hacer click en el mapa
-    private final String DESTINATION_LAYER = "destination-symbol-layer-id"; //Variable que almacena el nombre del layer que aparece al hacer click en el mapa.
-    private final String CLUSTER_SOURCE = "cluster-source-id"; //Vairiable que almacena la fuente para el layer cluster.
-    private final String CLUSTER_LAYER = "destination-cluster-layer-id"; //Variable que almacena el nombre del cluster layer.
+    private final int CAMERA_ANIMATION = 3000; //Duración de la animación de la camara (milisegundos)
+    private static final String MAKI_ICON_CAFE = "cafe-15";
+    private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
+    private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
+    private final int ANIMACION_ICONO = 30; //Animación del tamaño del icono en milisegundos
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -75,7 +88,8 @@ public class Map extends AppCompatActivity {
     private Style.OnStyleLoaded loadedStyle; //Variable que almacenara el estilo cargado en el mapa con sus añadidos
     private boolean style; //Varible que indica si el style es el basico (false) o satelite (true)
     private Semaphore loading_style; //Variable que determina si el style del mapa está cargando.
-    private MapboxMap mapboxMap;
+    private MapboxMap mapboxMap; //Instancia del mapa generado
+    private SymbolManager symbolManager; //Symbol manager para manejar los eventos y la creación de marcadores
 
     //Menu de boton flotante y sus botones:
     private FloatingActionMenu BotonFlotante;
@@ -88,6 +102,8 @@ public class Map extends AppCompatActivity {
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
     private Handler manejador; //Handler que maneja los mensajes del hilo hijo.
+    private Symbol markerSelected; //Variable que indica si un marcador esta o no seleccionado.
+    private ValueAnimator markerAnimator; //Animador para cuando se selecciona un marker del mapa
 
     //Componentes del hilo hijo:
     private boolean stop; //Variable que comprueba si el Activity está detenido.
@@ -107,6 +123,9 @@ public class Map extends AppCompatActivity {
         loading_style = new Semaphore(1);
         semaforo_puntos = new Semaphore(1);
 
+        //Inicializar marcador seleccionado a null:
+        markerSelected = null;
+
         //Inicializar el handler del main thread:
          manejador = new Handler(getApplicationContext().getMainLooper()){
              @Override
@@ -120,6 +139,7 @@ public class Map extends AppCompatActivity {
         //Instanciamos el Boton flotante con el mnú y los botones de localización y cambio de estilo:
         BotonFlotante = (FloatingActionMenu) findViewById(R.id.BotonFlotante);
         BotonFlotante.setClosedOnTouchOutside(true);
+        BotonFlotante.getMenuIconView().setImageResource(R.drawable.botonmapaflotante);
         BotonFlotante.bringToFront();
 
         BotonMapa = (FloatingActionButton) findViewById(R.id.BotonCambioMapa);
@@ -180,52 +200,26 @@ public class Map extends AppCompatActivity {
 
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(@NonNull MapboxMap mapboxMap) {
+            public void onMapReady(@NonNull final MapboxMap mapboxMap) {
                 Map.this.mapboxMap = mapboxMap;
 
                 //Iinicializar la variable que almacenara los añadidos del mapa
                 loadedStyle = new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
-                        addClusterSymbolLayer(style);
-                        addDestinationIconSymbolLayer(style);
+                        // Set up a SymbolManager instance
+                        symbolManager = new SymbolManager(mapView, mapboxMap, style);
+
+                        symbolManager.setIconAllowOverlap(false);
+                        symbolManager.setTextAllowOverlap(false);
+
+
                         enableLocationComponent(style);
                     }
                 };
                 changeStyle(BasicStyle,loadedStyle);
             }
         });
-    }
-
-    /* Metodo que se encarga de añadir el layer a el mapa: */
-    private void addLayer(String layer, String source, Style loadedMapStyle){
-        SymbolLayer symbolLayer = new SymbolLayer(layer, source);
-        symbolLayer.withProperties(
-                iconImage("destination-icon-id"),
-                iconAllowOverlap(true)
-        );
-        loadedMapStyle.addLayer(symbolLayer);
-    }
-
-    /*Metodo que se encarga de añadir el layer del marker al mapa cuando se le añade un estilo al mismo. */
-    private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
-        loadedMapStyle.addImage("destination-icon-id",
-                BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
-        GeoJsonSource geoJsonSource = new GeoJsonSource(DESTINATION_SOURCE);
-        if(loadedMapStyle.getSource(DESTINATION_SOURCE) == null) { //comprobar que no esta cargado el estilo por si acaso hay un cambio rapido de estilos
-            loadedMapStyle.addSource(geoJsonSource);
-            addLayer(DESTINATION_LAYER, DESTINATION_SOURCE, loadedMapStyle);
-        }
-    }
-
-    private void addClusterSymbolLayer(@ NonNull Style loadedMapStyle){
-        loadedMapStyle.addImage("destination-icon-id",
-                BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
-        GeoJsonSource geoJsonSource = new GeoJsonSource(CLUSTER_SOURCE);
-        if(loadedMapStyle.getSource(CLUSTER_SOURCE) == null) { //comprobar que no esta cargado el estilo por si acaso hay un cambio rapido de estilos
-            loadedMapStyle.addSource(geoJsonSource);
-            addLayer(CLUSTER_LAYER, CLUSTER_SOURCE, loadedMapStyle);
-        }
     }
 
     /* Metodo que se encarga de activar el elemento de localizacion, para ello pide permisos al usuario
@@ -421,23 +415,84 @@ public class Map extends AppCompatActivity {
         if(semaforo_puntos.tryAcquire()) {
             List<Feature> lista = new ArrayList<>();
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
-                //Obtener la fuente GeoJSON
-                GeoJsonSource source = mapboxMap.getStyle().getSourceAs(CLUSTER_SOURCE);
-
                 //Crear la lista de Feature a partir de los objetos devueltos en la lista, despues de realizar la query
                 for (ParseObject alerta : listaPuntos) {
                     ParseGeoPoint loc = ((Alert) alerta).getLocalizacion();
-                    lista.add(Feature.fromGeometry(Point.fromLngLat(loc.getLongitude(), loc.getLatitude())));
-                }
 
-                //Apartir de lista de Feature construir una FeatureCollection y añadirla a la fuente para mostrarla
-                FeatureCollection feature = FeatureCollection.fromFeatures(lista);
-                if (source != null) {
-                    source.setGeoJson(feature);
+                    // Add symbol at specified lat/lon
+                    Symbol symbol = symbolManager.create(new SymbolOptions()
+                            .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
+                            .withIconImage(MAKI_ICON_CAFE)
+                            .withIconSize(TAMANO_MIN_ICONO)
+                            .withDraggable(false)); //No permitir el movimiento del icono
+
+                    // Add click listener and change the symbol to a cafe icon on click
+                    symbolManager.addClickListener(new OnSymbolClickListener() {
+                        @Override
+                        public void onAnnotationClick(final Symbol symbol) {
+                            Toast.makeText(Map.this,
+                                    "HOLA MUNDO", Toast.LENGTH_SHORT).show();
+                            selectMarker(symbol);
+                        }
+                    });
                 }
                 loading_style.release();
             }
             semaforo_puntos.release();
+        }
+    }
+
+    /** Metodo que anima la camara y la lleva hasta el lugar indicado mediante las coordenadas de un objeto Symbol **/
+    private void animateCamera(Symbol symbol){
+        CameraPosition position = new CameraPosition.Builder()
+                .target(new LatLng(symbol.getLatLng())) // Sets the new camera position
+                .zoom(ZOOM_FIND) // Sets the zoom
+                .build(); // Creates a CameraPosition from the builder
+
+        mapboxMap.animateCamera(CameraUpdateFactory
+                .newCameraPosition(position), CAMERA_ANIMATION);
+    }
+
+    /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
+    * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
+    private void selectMarker(final Symbol symbol) {
+        if((markerSelected == null) || (!symbol.equals(markerSelected))) {
+            System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
+            deselectMarker(markerSelected);
+            animateCamera(symbol);
+            markerAnimator = new ValueAnimator();
+            markerAnimator.setObjectValues(TAMANO_MAX_ICONO, TAMANO_MIN_ICONO);
+            markerAnimator.setDuration(ANIMACION_ICONO);
+            markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    symbol.setIconSize((float) markerAnimator.getAnimatedValue());
+                }
+            });
+            markerSelected = symbol;
+            markerAnimator.start();
+            symbolManager.update(symbol);
+        }
+    }
+
+    /* Metodo que permite deseleccionar un marcador del mapa haciendolo más pequeño mediante una animación.
+    * Comprobar que hay un marcador seleccionado.*/
+    private void deselectMarker(final Symbol symbol) {
+        if(markerSelected != null) {
+            System.out.println("ADIOSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+            markerAnimator.setObjectValues(TAMANO_MIN_ICONO, TAMANO_MAX_ICONO);
+            markerAnimator.setDuration(ANIMACION_ICONO);
+            markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    symbol.setIconSize((float) markerAnimator.getAnimatedValue());
+                }
+            });
+            markerAnimator.start();
+            symbolManager.update(symbol);
+            markerSelected = null;
         }
     }
 

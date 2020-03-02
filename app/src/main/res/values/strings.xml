@@ -14,7 +14,7 @@
     <string name="map_style_road">mapbox://styles/irunapp/ck720osjv0www1ipg3lrjfbrn</string>
         <!--Boton Flotante del mapa -->
     <string name="boton_flotante">Cerrar Menú</string>
-    <string name="modo_mapa">Cambio Satelite/Básico</string>
+    <string name="modo_mapa">Satélite/Estándar</string>
     <string name="boton_localizar">Ubícame</string>
         <!-- Mensajes mapa -->
     <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
