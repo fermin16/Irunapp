@@ -52,8 +52,8 @@ public class PestanaLugares extends Fragment {
         listaLugares.add(new ItemLista(0, "Lugar 2", "Abierto todo el día"));
 
         ListaLugares adapterListaLugares = new ListaLugares(getActivity(), listaLugares);
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(manager);
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity()); //IMPORTANTE
+        recyclerView.setLayoutManager(manager); //IMPORTANTE
         recyclerView.setAdapter(adapterListaLugares);
 
         return root;
