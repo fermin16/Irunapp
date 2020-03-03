@@ -1,6 +1,6 @@
 package com.example.myapplication;
 
-import android.animation.ObjectAnimator;
+
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Toast;
 
 import com.example.myapplication.Modelos.Alert;
@@ -43,17 +41,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -64,8 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
 public class Map extends AppCompatActivity {
 
@@ -79,7 +68,7 @@ public class Map extends AppCompatActivity {
     private static final String MAKI_ICON_CAFE = "cafe-15";
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
-    private final int ANIMACION_ICONO = 30; //Animación del tamaño del icono en milisegundos
+    private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -109,7 +98,8 @@ public class Map extends AppCompatActivity {
     private boolean stop; //Variable que comprueba si el Activity está detenido.
     private boolean pause; //Variable que indica si el Activity esta pausado.
     private Thread hijo; //Variable que contiene a la intancia del hijo.
-    private Semaphore semaforo_puntos; //Semaforo para controlar cuando el main esta printeando los puntos
+    private List<Symbol> lista_symbol; //Lista que almacenará los Simbolos añadidos al mapa
+    private List<Symbol>  query; //Lista que almacenará los Simbolos añadidos al mapa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,20 +109,22 @@ public class Map extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
 
-        //Inicializar los semaforod
+        //Inicializar los semaforos
         loading_style = new Semaphore(1);
-        semaforo_puntos = new Semaphore(1);
 
         //Inicializar marcador seleccionado a null:
         markerSelected = null;
+
+        //Inicizalizar la lista de puntos:
+        lista_symbol = new ArrayList<>();
 
         //Inicializar el handler del main thread:
          manejador = new Handler(getApplicationContext().getMainLooper()){
              @Override
              public void handleMessage(Message msg) {
                     super.handleMessage(msg);
-                    ArrayList<ParseObject> listaPuntos = (ArrayList<ParseObject>) msg.obj;
-                    mostrarPuntos(listaPuntos);
+                    ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
+                    mostrarPuntos(lista_puntos);
              }
          };
 
@@ -147,11 +139,11 @@ public class Map extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!style){
-                    changeStyle(SatelliteStyle,loadedStyle);
+                    set_style(SatelliteStyle);
                     style = true;
                 }
                 else {
-                    changeStyle(BasicStyle,loadedStyle);
+                    set_style(BasicStyle);
                     style = false;
                 }
             }
@@ -197,29 +189,7 @@ public class Map extends AppCompatActivity {
                 }
             }
         };
-
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-                Map.this.mapboxMap = mapboxMap;
-
-                //Iinicializar la variable que almacenara los añadidos del mapa
-                loadedStyle = new Style.OnStyleLoaded() {
-                    @Override
-                    public void onStyleLoaded(@NonNull Style style) {
-                        // Set up a SymbolManager instance
-                        symbolManager = new SymbolManager(mapView, mapboxMap, style);
-
-                        symbolManager.setIconAllowOverlap(false);
-                        symbolManager.setTextAllowOverlap(false);
-
-
-                        enableLocationComponent(style);
-                    }
-                };
-                changeStyle(BasicStyle,loadedStyle);
-            }
-        });
+        set_style(BasicStyle);
     }
 
     /* Metodo que se encarga de activar el elemento de localizacion, para ello pide permisos al usuario
@@ -330,10 +300,37 @@ public class Map extends AppCompatActivity {
     }
 
     /** Este método permite cambiar de estilo de mapa evitando posibles riesgos a la hora de obtener la ubicación o de hacer un cambio rápido de estilos**/
-    public void changeStyle(Style.Builder newStyle,Style.OnStyleLoaded loadStyle){
+    public void set_style(final Style.Builder newStyle){
         try {
             loading_style.acquire();
-            mapboxMap.setStyle(newStyle,loadStyle);
+            mapView.getMapAsync(mapboxMap -> {
+                Map.this.mapboxMap = mapboxMap;
+
+                //Iinicializar la variable que almacenara los añadidos del mapa
+                loadedStyle = new Style.OnStyleLoaded() {
+                    @Override
+                    public void onStyleLoaded(@NonNull Style style) {
+                        if(symbolManager!=null)
+                            symbolManager.deleteAll();
+                        // Set up a SymbolManager instance
+                        symbolManager = new SymbolManager(mapView, mapboxMap, style);
+                        // Add click listener and change the symbol to a cafe icon on click
+                        symbolManager.addClickListener(new OnSymbolClickListener() {
+                            @Override
+                            public void onAnnotationClick(final Symbol symbol) {
+                                Toast.makeText(Map.this,
+                                        "HOLA MUNDO", Toast.LENGTH_SHORT).show();
+                                selectMarker(symbol);
+                            }
+                        });
+                        symbolManager.setIconAllowOverlap(false);
+                        symbolManager.setTextAllowOverlap(true);
+                        markerSelected = null;
+                        enableLocationComponent(style);
+                    }
+                };
+                mapboxMap.setStyle(newStyle,loadedStyle);
+            });
             loading_style.release();
         } catch (InterruptedException e) {
             Log.v("Cambio de estilo", "No se ha podido cambiar de estilo");
@@ -374,12 +371,7 @@ public class Map extends AppCompatActivity {
                                     @Override
                                     public void done(List<ParseObject> queryresult, ParseException e) {
                                         if(e == null) {
-                                            //Comprobar el resultado de la query:
-                                            if (!queryresult.isEmpty()) {
-                                                Message msg = new Message();
-                                                msg.obj = queryresult;
-                                                manejador.sendMessage(msg);
-                                            }
+                                            guardarAlertas(queryresult);
                                         }
                                     }
                                 });
@@ -398,48 +390,49 @@ public class Map extends AppCompatActivity {
     /* Metodo que pasa los puntos que recoge el hilo hijo. requiere de acceso al semaforo por si el padre esta mostrando los puntos.
     * Los puntos se envían a traves de un mensaje con el handler del main */
     private void guardarAlertas(List<ParseObject> queryresult){
-        try {
-            semaforo_puntos.acquire();
-            manejador.sendMessage(new Message());
-            semaforo_puntos.release();
-        } catch (InterruptedException e) {
-            Log.v("Hijo interrumpido","El hijo ha sido interrumpido cuando enviaba los puntos");
-        }
+            Message msg = new Message();
+            msg.obj = queryresult;
+            manejador.sendMessage(msg);
     }
 
     /*Metodo que utilizará el hilo main para obetener los puntos que ha leido el hijo y mostrarlos en el mapa.
     * El padre es el que muestra puesto que invocar metodos de mapbox en un hilo worker, lleva a errores y cuelgues
     * en la aplicación.*/
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
-        //Comprobar el acceso a la lista de puntos:
-        if(semaforo_puntos.tryAcquire()) {
-            List<Feature> lista = new ArrayList<>();
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
-                //Crear la lista de Feature a partir de los objetos devueltos en la lista, despues de realizar la query
-                for (ParseObject alerta : listaPuntos) {
-                    ParseGeoPoint loc = ((Alert) alerta).getLocalizacion();
-
-                    // Add symbol at specified lat/lon
-                    Symbol symbol = symbolManager.create(new SymbolOptions()
-                            .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
-                            .withIconImage(MAKI_ICON_CAFE)
-                            .withIconSize(TAMANO_MIN_ICONO)
-                            .withDraggable(false)); //No permitir el movimiento del icono
-
-                    // Add click listener and change the symbol to a cafe icon on click
-                    symbolManager.addClickListener(new OnSymbolClickListener() {
-                        @Override
-                        public void onAnnotationClick(final Symbol symbol) {
-                            Toast.makeText(Map.this,
-                                    "HOLA MUNDO", Toast.LENGTH_SHORT).show();
-                            selectMarker(symbol);
+                //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
+                if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
+                    symbolManager.delete(lista_symbol);
+                }
+                //Caso en el que ninguna lista es vacia y hay que añadir elementos
+                else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
+                    //Eliminar los puntos actuales
+                    symbolManager.delete(lista_symbol);
+                    //Limpiar la lista de puntos y volver a añadirlos:
+                    lista_symbol.clear();
+                    float icon_size;
+                    //Añadir nuevos puntos
+                    for (ParseObject alerta : listaPuntos) {
+                        ParseGeoPoint loc = ((Alert) alerta).getLocalizacion();
+                        if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
+                            icon_size = TAMANO_MAX_ICONO;
                         }
-                    });
+                        else
+                            icon_size = TAMANO_MIN_ICONO;
+                        // Add symbol at specified lat/lon
+                            Symbol symbol = symbolManager.create(new SymbolOptions()
+                                    .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
+                                    .withIconImage(MAKI_ICON_CAFE)
+                                    .withIconSize(icon_size)
+                                    .withDraggable(false)); //No permitir el movimiento del icono
+                            lista_symbol.add(symbol);
+                    }
+                }
+                if(markerSelected != null){
+                    lista_symbol.add(markerSelected);
                 }
                 loading_style.release();
             }
-            semaforo_puntos.release();
-        }
     }
 
     /** Metodo que anima la camara y la lleva hasta el lugar indicado mediante las coordenadas de un objeto Symbol **/
@@ -457,19 +450,12 @@ public class Map extends AppCompatActivity {
     * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
     private void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
-            System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
             deselectMarker(markerSelected);
             animateCamera(symbol);
             markerAnimator = new ValueAnimator();
             markerAnimator.setObjectValues(TAMANO_MAX_ICONO, TAMANO_MIN_ICONO);
             markerAnimator.setDuration(ANIMACION_ICONO);
-            markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-                @Override
-                public void onAnimationUpdate(ValueAnimator animator) {
-                    symbol.setIconSize((float) markerAnimator.getAnimatedValue());
-                }
-            });
+            markerAnimator.addUpdateListener(animator -> symbol.setIconSize((float) markerAnimator.getAnimatedValue()));
             markerSelected = symbol;
             markerAnimator.start();
             symbolManager.update(symbol);
@@ -479,20 +465,10 @@ public class Map extends AppCompatActivity {
     /* Metodo que permite deseleccionar un marcador del mapa haciendolo más pequeño mediante una animación.
     * Comprobar que hay un marcador seleccionado.*/
     private void deselectMarker(final Symbol symbol) {
-        if(markerSelected != null) {
-            System.out.println("ADIOSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
-            markerAnimator.setObjectValues(TAMANO_MIN_ICONO, TAMANO_MAX_ICONO);
-            markerAnimator.setDuration(ANIMACION_ICONO);
-            markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-                @Override
-                public void onAnimationUpdate(ValueAnimator animator) {
-                    symbol.setIconSize((float) markerAnimator.getAnimatedValue());
-                }
-            });
-            markerAnimator.start();
-            symbolManager.update(symbol);
+        if (markerSelected != null){
             markerSelected = null;
+            symbolManager.deleteAll();
+            symbolManager.update(lista_symbol);
         }
     }
 
@@ -563,6 +539,10 @@ public class Map extends AppCompatActivity {
                 hijo.interrupt(); //Interrumpir el hilo
         }
         unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+        //Eliminar el animador.
+        if (markerAnimator != null) {
+            markerAnimator.cancel();
+        }
         super.onDestroy();
         mapView.onDestroy();
     }
