@@ -4,6 +4,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="250dp">
 
+
     <ImageView
         android:id="@+id/imagen_principal"
         android:layout_width="match_parent"
