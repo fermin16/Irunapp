@@ -16,6 +16,8 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.myapplication.Modelos.Alert;
@@ -50,6 +52,7 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +112,10 @@ public class Map extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
 
+        ListView listView = findViewById(R.id.AjustesMapa);
+        listView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new String[] {"Copy","Paste","Delete","Cut","Convert","Open"}));
+
+
         //Inicializar los semaforos
         loading_style = new Semaphore(1);
 
@@ -157,6 +164,7 @@ public class Map extends AppCompatActivity {
             }
         });
 
+
         //Inicializar los dos estilos de mapa:
         BasicStyle = new Style.Builder().fromUri(getString(R.string.map_style_basic));
         SatelliteStyle = new Style.Builder().fromUri(getString(R.string.map_style_road));
@@ -176,6 +184,9 @@ public class Map extends AppCompatActivity {
                         Toast.makeText(context,getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
                     }
                     else{ //Si se han activado
+                        //Comprobamos si es la primera vez que se activan
+                        if(locationComponent == null)
+                            enableLocationComponent(mapboxMap.getStyle());
                         findMe(); //Mostrar localizacion
                         if(hijo!=null) {//Si el hijo estaba dormido, reactivarlo:
                             if (pause)
@@ -252,7 +263,12 @@ public class Map extends AppCompatActivity {
                         public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION);
                         }
-                    }).setNegativeButton(R.string.cancelar_gps, null)
+                    }).setNegativeButton(R.string.cancelar_gps, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getApplicationContext(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
+                        }
+                    })
                     .show();
             return false;
         }

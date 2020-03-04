@@ -1,57 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Map">
+    tools:context=".Map"
+    android:id="@+id/PanelDeslizante"
+    app:umanoDragView="@id/drawview"
+    app:umanoScrollableView="@id/AjustesMapa"
+    android:layout_gravity="bottom"
+    android:gravity="bottom"
+    app:umanoPanelHeight="68sp"
+    app:umanoOverlay="false"
+    app:umanoParallaxOffset="100dp"
+    app:umanoShadowHeight="4dp">
 
-    <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/mapView"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
-        mapbox:layout_constraintBottom_toBottomOf="parent"
-        mapbox:layout_constraintEnd_toEndOf="parent"
-        mapbox:layout_constraintHorizontal_bias="0.0"
-        mapbox:layout_constraintStart_toStartOf="parent"
-        mapbox:layout_constraintTop_toTopOf="parent"
-        mapbox:mapbox_cameraTargetLat="42.8168700"
-        mapbox:mapbox_cameraTargetLng=" -1.6432300"
-        mapbox:mapbox_cameraTilt="0"
-        mapbox:mapbox_cameraZoom="12">
+        xmlns:mapbox="http://schemas.android.com/apk/res-auto">
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            mapbox:layout_constraintBottom_toBottomOf="parent"
+            mapbox:layout_constraintEnd_toEndOf="parent"
+            mapbox:layout_constraintHorizontal_bias="0.0"
+            mapbox:layout_constraintStart_toStartOf="parent"
+            mapbox:layout_constraintTop_toTopOf="parent"
+            mapbox:mapbox_cameraTargetLat="42.8168700"
+            mapbox:mapbox_cameraTargetLng=" -1.6432300"
+            mapbox:mapbox_cameraTilt="0"
+            mapbox:mapbox_cameraZoom="12">
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.github.clans.fab.FloatingActionMenu
+                    android:id="@+id/BotonFlotante"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:visibility="visible"
+                    app:menu_fab_label="@string/boton_flotante"
+                    tools:ignore="MissingConstraints"
+                    tools:visibility="visible">
+
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/BotonCambioMapa"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/cambiomapa"
+                        app:fab_label="@string/modo_mapa" />
+
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/FindMe"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/miubicacion"
+                        app:fab_label="@string/boton_localizar" />
+                </com.github.clans.fab.FloatingActionMenu>
+            </RelativeLayout>
+        </com.mapbox.mapboxsdk.maps.MapView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:id="@+id/drawview"
+        android:clickable="true">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <com.github.clans.fab.FloatingActionMenu
-                android:id="@+id/BotonFlotante"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:visibility="visible"
-                app:menu_fab_label="@string/boton_flotante"
-                tools:ignore="MissingConstraints"
-                tools:visibility="visible">
-
-                <com.github.clans.fab.FloatingActionButton
-                    android:id="@+id/BotonCambioMapa"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/cambiomapa"
-                    app:fab_label="@string/modo_mapa" />
-
-                <com.github.clans.fab.FloatingActionButton
-                    android:id="@+id/FindMe"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/miubicacion"
-                    app:fab_label="@string/boton_localizar" />
-            </com.github.clans.fab.FloatingActionMenu>
+            android:layout_height="68dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="16sp"
+                android:text="Action">
+            </TextView>
         </RelativeLayout>
-    </com.mapbox.mapboxsdk.maps.MapView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/AjustesMapa">
+        </ListView>
+    </LinearLayout>
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

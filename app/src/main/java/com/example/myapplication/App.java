@@ -11,7 +11,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ParseObject.registerSubclass(User.class);
         ParseObject.registerSubclass(Alert.class);
 
         Parse.initialize(new Parse.Configuration.Builder(this)
