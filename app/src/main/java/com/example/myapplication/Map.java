@@ -20,6 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.myapplication.Modelos.Alert;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -35,14 +39,7 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
@@ -52,9 +49,9 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -72,6 +69,7 @@ public class Map extends AppCompatActivity {
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
     private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
+    private final double DISTANCIA_MINIMA = 0.1; //Distancia minima para considerar un punto
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -102,7 +100,6 @@ public class Map extends AppCompatActivity {
     private boolean pause; //Variable que indica si el Activity esta pausado.
     private Thread hijo; //Variable que contiene a la intancia del hijo.
     private List<Symbol> lista_symbol; //Lista que almacenará los Simbolos añadidos al mapa
-    private List<Symbol>  query; //Lista que almacenará los Simbolos añadidos al mapa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,7 +318,16 @@ public class Map extends AppCompatActivity {
             loading_style.acquire();
             mapView.getMapAsync(mapboxMap -> {
                 Map.this.mapboxMap = mapboxMap;
-
+                //Añadir Listener al mapa:
+                mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                    @Override
+                    public boolean onMapClick(@NonNull LatLng point) {
+                        if(markerSelected != null){
+                            deselectMarker(markerSelected);
+                        }
+                        return false;
+                    }
+                });
                 //Iinicializar la variable que almacenara los añadidos del mapa
                 loadedStyle = new Style.OnStyleLoaded() {
                     @Override
