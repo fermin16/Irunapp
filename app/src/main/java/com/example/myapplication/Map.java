@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -50,6 +51,7 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +71,6 @@ public class Map extends AppCompatActivity {
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
     private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
-    private final double DISTANCIA_MINIMA = 0.1; //Distancia minima para considerar un punto
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -80,6 +81,7 @@ public class Map extends AppCompatActivity {
     private Semaphore loading_style; //Variable que determina si el style del mapa está cargando.
     private MapboxMap mapboxMap; //Instancia del mapa generado
     private SymbolManager symbolManager; //Symbol manager para manejar los eventos y la creación de marcadores
+    MapboxMap.OnMapClickListener mapListener; //Listener del mapa
 
     //Menu de boton flotante y sus botones:
     private FloatingActionMenu BotonFlotante;
@@ -93,6 +95,7 @@ public class Map extends AppCompatActivity {
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
     private Handler manejador; //Handler que maneja los mensajes del hilo hijo.
     private Symbol markerSelected; //Variable que indica si un marcador esta o no seleccionado.
+    private int simboloActivado; //Valor entero que indique que un marker acaba de ser seleccionado por el listener de symbolmanager y no debe ser deseleccionado
     private ValueAnimator markerAnimator; //Animador para cuando se selecciona un marker del mapa
 
     //Componentes del hilo hijo:
@@ -108,9 +111,6 @@ public class Map extends AppCompatActivity {
         setContentView(R.layout.activity_map);
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-
-        ListView listView = findViewById(R.id.AjustesMapa);
-        listView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, new String[] {"Copy","Paste","Delete","Cut","Convert","Open"}));
 
 
         //Inicializar los semaforos
@@ -318,16 +318,6 @@ public class Map extends AppCompatActivity {
             loading_style.acquire();
             mapView.getMapAsync(mapboxMap -> {
                 Map.this.mapboxMap = mapboxMap;
-                //Añadir Listener al mapa:
-                mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
-                    @Override
-                    public boolean onMapClick(@NonNull LatLng point) {
-                        if(markerSelected != null){
-                            deselectMarker(markerSelected);
-                        }
-                        return false;
-                    }
-                });
                 //Iinicializar la variable que almacenara los añadidos del mapa
                 loadedStyle = new Style.OnStyleLoaded() {
                     @Override
@@ -342,7 +332,24 @@ public class Map extends AppCompatActivity {
                             public void onAnnotationClick(final Symbol symbol) {
                                 Toast.makeText(Map.this,
                                         "HOLA MUNDO", Toast.LENGTH_SHORT).show();
+                                System.out.println("HOLA1");
+                                simboloActivado = 1;
                                 selectMarker(symbol);
+                            }
+                        });
+                        if(mapListener !=null)
+                            mapboxMap.removeOnMapClickListener(mapListener);
+                        //Añadir Listener al mapa:
+                        mapboxMap.addOnMapClickListener(mapListener = new MapboxMap.OnMapClickListener() {
+                            @Override
+                            public boolean onMapClick(@NonNull LatLng point) {
+                                //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
+                                simboloActivado--;
+                                if((markerSelected != null) && simboloActivado!=0){
+                                    System.out.println("Hola2");
+                                    deselectMarker(markerSelected);
+                                }
+                                return false;
                             }
                         });
                         symbolManager.setIconAllowOverlap(false);

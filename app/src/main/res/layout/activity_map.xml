@@ -74,22 +74,74 @@
         android:focusable="false"
         android:orientation="vertical"
         android:id="@+id/drawview"
+        android:background="@drawable/layout_bg"
         android:clickable="true">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="68dp">
+            android:layout_height="75dp">
+
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="225dp"
+            android:orientation="vertical"
+            android:focusable="false"
+            android:id="@+id/AjustesMapa">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="16sp"
-                android:text="Action">
+                android:text="@string/Texto_distancia"
+                android:layout_gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large">
             </TextView>
-        </RelativeLayout>
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:id="@+id/AjustesMapa">
-        </ListView>
+            <com.d.lib.tabview.TabView
+                android:id="@+id/kilometros"
+                android:layout_width="365dp"
+                android:layout_height="36dp"
+                app:tabv_colorMain="#4577B7"
+                app:tabv_colorSub="#ffffff"
+                app:tabv_duration="250"
+                app:tabv_padding="2px"
+                app:tabv_textSize="14dp"
+                android:layout_gravity="center"
+                app:tabv_title="@string/ajustes_distancia"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Texto_refresco"
+                android:layout_gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large">
+            </TextView>
+            <com.d.lib.tabview.TabView
+                android:id="@+id/frecuencia"
+                android:layout_width="365dp"
+                android:layout_height="36dp"
+                app:tabv_colorMain="#4577B7"
+                app:tabv_colorSub="#ffffff"
+                app:tabv_duration="250"
+                app:tabv_padding="2px"
+                android:layout_gravity="center"
+                app:tabv_textSize="14dp"
+                app:tabv_title="@string/ajustes_referesco"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Texto_num_puntos"
+                android:layout_gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large">
+            </TextView>
+            <com.d.lib.tabview.TabView
+                android:id="@+id/numpuntos"
+                android:layout_width="365dp"
+                android:layout_height="36dp"
+                app:tabv_colorMain="#4577B7"
+                app:tabv_colorSub="#ffffff"
+                app:tabv_duration="250"
+                app:tabv_padding="2px"
+                android:layout_gravity="center"
+                app:tabv_textSize="14dp"
+                app:tabv_title="@string/ajustes_num_puntos"/>
+        </LinearLayout>
     </LinearLayout>
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

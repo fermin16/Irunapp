@@ -16,6 +16,13 @@
     <string name="boton_flotante">Cerrar Menú</string>
     <string name="modo_mapa">Satélite/Estándar</string>
     <string name="boton_localizar">Ubícame</string>
+        <!-- Tabview Ajustes Mapa -->
+    <string name="Texto_distancia">Distancia de búsqueda:</string>
+    <string name="Texto_refresco">Frecuencia de búsqueda:</string>
+    <string name="Texto_num_puntos">Número de puntos:</string>
+    <string name="ajustes_distancia">200m;500m;1km</string>
+    <string name="ajustes_referesco">10s;30s;60s</string>
+    <string name="ajustes_num_puntos">10;30;50</string>
         <!-- Mensajes mapa -->
     <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
     <string name="gps_desactivado"> Los servicios de ubicación estan desactivados</string>
