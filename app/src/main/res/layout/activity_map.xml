@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Eliminar el shadow al elevar el panel  transparent fade color-->
 <com.sothree.slidinguppanel.SlidingUpPanelLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,31 +12,30 @@
     app:umanoScrollableView="@id/AjustesMapa"
     android:layout_gravity="bottom"
     android:gravity="bottom"
-    app:umanoPanelHeight="68sp"
-    app:umanoOverlay="false"
+    app:umanoPanelHeight="55sp"
+    app:umanoOverlay="true"
     app:umanoParallaxOffset="100dp"
+    app:umanoFadeColor="@android:color/transparent"
     app:umanoShadowHeight="4dp">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:mapbox="http://schemas.android.com/apk/res-auto">
+        android:layout_height="match_parent">
         <com.mapbox.mapboxsdk.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"
-            mapbox:layout_constraintBottom_toBottomOf="parent"
-            mapbox:layout_constraintEnd_toEndOf="parent"
-            mapbox:layout_constraintHorizontal_bias="0.0"
-            mapbox:layout_constraintStart_toStartOf="parent"
-            mapbox:layout_constraintTop_toTopOf="parent"
-            mapbox:mapbox_cameraTargetLat="42.8168700"
-            mapbox:mapbox_cameraTargetLng=" -1.6432300"
-            mapbox:mapbox_cameraTilt="0"
-            mapbox:mapbox_cameraZoom="12">
-
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:mapbox_cameraTargetLat="42.8168700"
+            app:mapbox_cameraTargetLng=" -1.6432300"
+            app:mapbox_cameraTilt="0"
+            app:mapbox_cameraZoom="12">
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -46,9 +46,10 @@
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginBottom="90dp"
                     android:visibility="visible"
                     app:menu_fab_label="@string/boton_flotante"
-                    tools:ignore="MissingConstraints"
                     tools:visibility="visible">
 
                     <com.github.clans.fab.FloatingActionButton
@@ -64,6 +65,13 @@
                         android:layout_height="match_parent"
                         android:src="@drawable/miubicacion"
                         app:fab_label="@string/boton_localizar" />
+
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/BuscaPuntos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/botonrefrescabusqueda"
+                        app:fab_label="@string/boton_busqueda" />
                 </com.github.clans.fab.FloatingActionMenu>
             </RelativeLayout>
         </com.mapbox.mapboxsdk.maps.MapView>
@@ -73,13 +81,22 @@
         android:layout_height="wrap_content"
         android:focusable="false"
         android:orientation="vertical"
-        android:id="@+id/drawview"
         android:background="@drawable/layout_bg"
+        android:id="@+id/drawview"
         android:clickable="true">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp">
-
+            android:layout_height="90dp"
+            android:layout_gravity="center">
+            <pl.droidsonroids.gif.GifImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="40dp"
+                android:id="@+id/swipe_gif"
+                android:src="@drawable/tenor"
+                android:gravity="center_horizontal"
+                android:paddingBottom="35dp"
+                />
         </RelativeLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -102,7 +119,7 @@
                 app:tabv_colorMain="#4577B7"
                 app:tabv_colorSub="#ffffff"
                 app:tabv_duration="250"
-                app:tabv_padding="2px"
+                app:tabv_padding="2dp"
                 app:tabv_textSize="14dp"
                 android:layout_gravity="center"
                 app:tabv_title="@string/ajustes_distancia"/>
@@ -120,7 +137,7 @@
                 app:tabv_colorMain="#4577B7"
                 app:tabv_colorSub="#ffffff"
                 app:tabv_duration="250"
-                app:tabv_padding="2px"
+                app:tabv_padding="2dp"
                 android:layout_gravity="center"
                 app:tabv_textSize="14dp"
                 app:tabv_title="@string/ajustes_referesco"/>
@@ -138,7 +155,7 @@
                 app:tabv_colorMain="#4577B7"
                 app:tabv_colorSub="#ffffff"
                 app:tabv_duration="250"
-                app:tabv_padding="2px"
+                app:tabv_padding="2dp"
                 android:layout_gravity="center"
                 app:tabv_textSize="14dp"
                 app:tabv_title="@string/ajustes_num_puntos"/>

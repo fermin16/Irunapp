@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,16 +15,15 @@ import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.d.lib.tabview.TabView;
 import com.example.myapplication.Modelos.Alert;
+import com.example.myapplication.Modelos.Preferencias;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -45,17 +43,16 @@ import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+
+import pl.droidsonroids.gif.GifImageView;
 
 
 public class Map extends AppCompatActivity {
@@ -63,14 +60,21 @@ public class Map extends AppCompatActivity {
     //Macros:
     private final int ACTIVAR_UBICACION = 0; //Codigo de la actividad que nos servira para saber si el usuario a activado o no la ubicacion
     private final double ZOOM_FIND = 15.0; //Zoom al pulsar el boton de localizacion
-    public static final int MAX_DISTANCIA = 3; //Distancia maxima en kilometros para compobar los puntos cercanos
-    private final int TIEMPO_REFRESCO = 15000; //Tiempo de refresco del hijo en milisegundos
-    private final int MAX_PUNTOS = 50; //Numero maximo de puntos cercanos que se le muestran al usuario
     private final int CAMERA_ANIMATION = 3000; //Duración de la animación de la camara (milisegundos)
     private static final String MAKI_ICON_CAFE = "cafe-15";
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
     private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
+    private final int OFFSET_FAB =-75; //OFFSET base de la animacion de subir y bajar el FAB
+    private final double TAB_1_DISTANCIA = 0.5;
+    private final double TAB_2_DISTANCIA = 1.0;
+    private final double TAB_3_DISTANCIA = 2.0;
+    private final int TAB_1_FRECUENCIA = 15000;
+    private final int TAB_2_FRECUENCIA = 30000;
+    private final int TAB_3_FRECUENCIA = 60000;
+    private final int TAB_1_PUNTOS = 10;
+    private final int TAB_2_PUNTOS = 30;
+    private final int TAB_3_PUNTOS = 50;
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -87,6 +91,7 @@ public class Map extends AppCompatActivity {
     private FloatingActionMenu BotonFlotante;
     private FloatingActionButton BotonMapa;
     private FloatingActionButton BotonLocalizacion;
+    private FloatingActionButton BotonBuscaPuntos;
 
     //Componentes para funcionalidades del mapa:
     private PermissionsManager permissionsManager;
@@ -103,6 +108,18 @@ public class Map extends AppCompatActivity {
     private boolean pause; //Variable que indica si el Activity esta pausado.
     private Thread hijo; //Variable que contiene a la intancia del hijo.
     private List<Symbol> lista_symbol; //Lista que almacenará los Simbolos añadidos al mapa
+
+    //Slide up menu y ajustes:
+    private SlidingUpPanelLayout panelDeslizante;
+    private double max_distancia; //Distancia maxima en kilometros para compobar los puntos cercanos
+    private int tiempo_refresco; //Tiempo de refresco del hijo en milisegundos
+    private int max_puntos; //Numero maximo de puntos cercanos que se le muestran al usuario
+    private Semaphore semaforo_ajustes; //Semaforo para justes del mapa
+    private TabView tab_distancia;
+    private TabView tab_frecuencia;
+    private TabView tab_puntos;
+    private GifImageView gif_ajustes;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,34 +150,83 @@ public class Map extends AppCompatActivity {
          };
 
         //Instanciamos el Boton flotante con el mnú y los botones de localización y cambio de estilo:
-        BotonFlotante = (FloatingActionMenu) findViewById(R.id.BotonFlotante);
+        BotonFlotante = findViewById(R.id.BotonFlotante);
         BotonFlotante.setClosedOnTouchOutside(true);
         BotonFlotante.getMenuIconView().setImageResource(R.drawable.botonmapaflotante);
         BotonFlotante.bringToFront();
 
-        BotonMapa = (FloatingActionButton) findViewById(R.id.BotonCambioMapa);
-        BotonMapa.setOnClickListener(new View.OnClickListener() {
+        BotonMapa =  findViewById(R.id.BotonCambioMapa);
+        BotonMapa.setOnClickListener(v -> {
+            if(!style){
+                set_style(SatelliteStyle);
+                style = true;
+            }
+            else {
+                set_style(BasicStyle);
+                style = false;
+            }
+        });
+
+        BotonLocalizacion =  findViewById(R.id.FindMe);
+        BotonLocalizacion.setOnClickListener(v -> findMe());
+
+        BotonBuscaPuntos = findViewById(R.id.BuscaPuntos);
+        BotonBuscaPuntos.setEnabled(false);
+        BotonBuscaPuntos.setOnClickListener(v -> {
+            despertar();
+            BotonBuscaPuntos.setEnabled(false);
+        });
+
+        gif_ajustes = findViewById(R.id.swipe_gif);
+        panelDeslizante = findViewById(R.id.PanelDeslizante);
+        panelDeslizante.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
-            public void onClick(View v) {
-                if(!style){
-                    set_style(SatelliteStyle);
-                    style = true;
+            public void onPanelSlide(View panel, float slideOffset) {
+                BotonFlotante.close(true);
+                BotonFlotante.animate().translationY(panelDeslizante.getCurrentParallaxOffset()+(OFFSET_FAB)).setDuration(0);
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if(newState == SlidingUpPanelLayout.PanelState.EXPANDED){
+                    gif_ajustes.setImageResource(R.drawable.giphy);
+                    gif_ajustes.setPadding(0,0,25,0);
                 }
-                else {
-                    set_style(BasicStyle);
-                    style = false;
+                else if(newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
+                    gif_ajustes.setImageResource(R.drawable.tenor);
+                    gif_ajustes.setPadding(0,0,95,95);
                 }
             }
         });
 
-        BotonLocalizacion = (FloatingActionButton) findViewById(R.id.FindMe);
-        BotonLocalizacion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                findMe();
-            }
+        //Inicializar variables para busqueda de puntos y ajustes:
+        //Obtener valores de ajustes almacenados
+        max_puntos = Preferencias.getPuntos(this);
+        System.out.println(max_puntos);
+        int selected_tab_distancia = Preferencias.getKilometros(this);
+        tiempo_refresco = Preferencias.getFrecuencia(this);
+
+        semaforo_ajustes = new Semaphore(1);
+        tab_distancia = findViewById(R.id.kilometros);
+        tab_distancia.setOnTabSelectedListener(index -> {
+            setAjustesMapa(index, tab_distancia.getId(),true);
         });
 
+        tab_frecuencia = findViewById(R.id.frecuencia);
+        tab_frecuencia.setOnTabSelectedListener(index -> {
+            setAjustesMapa(index, tab_frecuencia.getId(),true);
+        });
+
+        tab_puntos = findViewById(R.id.numpuntos);
+        tab_puntos.setOnTabSelectedListener(index -> {
+            setAjustesMapa(index, tab_puntos.getId(),true);
+        });
+        tab_distancia.selectTab(selected_tab_distancia,false);
+        setAjustesMapa(selected_tab_distancia,tab_distancia.getId(),false);
+        tab_frecuencia.selectTab(tiempo_refresco,false);
+        setAjustesMapa(tiempo_refresco,tab_frecuencia.getId(),false);
+        tab_puntos.selectTab(max_puntos,false);
+        setAjustesMapa(max_puntos, tab_puntos.getId(),false);
 
         //Inicializar los dos estilos de mapa:
         BasicStyle = new Style.Builder().fromUri(getString(R.string.map_style_basic));
@@ -319,44 +385,34 @@ public class Map extends AppCompatActivity {
             mapView.getMapAsync(mapboxMap -> {
                 Map.this.mapboxMap = mapboxMap;
                 //Iinicializar la variable que almacenara los añadidos del mapa
-                loadedStyle = new Style.OnStyleLoaded() {
-                    @Override
-                    public void onStyleLoaded(@NonNull Style style) {
-                        if(symbolManager!=null)
-                            symbolManager.deleteAll();
-                        // Set up a SymbolManager instance
-                        symbolManager = new SymbolManager(mapView, mapboxMap, style);
-                        // Add click listener and change the symbol to a cafe icon on click
-                        symbolManager.addClickListener(new OnSymbolClickListener() {
-                            @Override
-                            public void onAnnotationClick(final Symbol symbol) {
-                                Toast.makeText(Map.this,
-                                        "HOLA MUNDO", Toast.LENGTH_SHORT).show();
-                                System.out.println("HOLA1");
-                                simboloActivado = 1;
-                                selectMarker(symbol);
-                            }
-                        });
-                        if(mapListener !=null)
-                            mapboxMap.removeOnMapClickListener(mapListener);
-                        //Añadir Listener al mapa:
-                        mapboxMap.addOnMapClickListener(mapListener = new MapboxMap.OnMapClickListener() {
-                            @Override
-                            public boolean onMapClick(@NonNull LatLng point) {
-                                //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
-                                simboloActivado--;
-                                if((markerSelected != null) && simboloActivado!=0){
-                                    System.out.println("Hola2");
-                                    deselectMarker(markerSelected);
-                                }
-                                return false;
-                            }
-                        });
-                        symbolManager.setIconAllowOverlap(false);
-                        symbolManager.setTextAllowOverlap(true);
-                        markerSelected = null;
-                        enableLocationComponent(style);
-                    }
+                loadedStyle = style -> {
+                    if(symbolManager!=null)
+                        symbolManager.deleteAll();
+                    // Set up a SymbolManager instance
+                    symbolManager = new SymbolManager(mapView, mapboxMap, style);
+                    // Add click listener and change the symbol to a cafe icon on click
+                    symbolManager.addClickListener(new OnSymbolClickListener() {
+                        @Override
+                        public void onAnnotationClick(final Symbol symbol) {
+                            simboloActivado = 1;
+                            selectMarker(symbol);
+                        }
+                    });
+                    if(mapListener !=null)
+                        mapboxMap.removeOnMapClickListener(mapListener);
+                    //Añadir Listener al mapa:
+                    mapboxMap.addOnMapClickListener(mapListener = point -> {
+                        //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
+                        simboloActivado--;
+                        if((markerSelected != null) && simboloActivado!=0){
+                            deselectMarker(markerSelected);
+                        }
+                        return false;
+                    });
+                    symbolManager.setIconAllowOverlap(false);
+                    symbolManager.setTextAllowOverlap(true);
+                    markerSelected = null;
+                    enableLocationComponent(style);
                 };
                 mapboxMap.setStyle(newStyle,loadedStyle);
             });
@@ -369,51 +425,81 @@ public class Map extends AppCompatActivity {
     /* Este metodo se encarga de crear un hilo que cada x segundos realiza una query al servidor Parse
      * para obtener la información de los puntos cercanos a la ubicación del usuario. */
     public void buscaPuntos(){
-        Toast.makeText(getApplicationContext(),getString(R.string.obteniendoUbicacion),Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),getString(R.string.obteniendoAlertas)+"("+MAX_DISTANCIA+" km)",Toast.LENGTH_LONG).show();
-        Runnable hilo = new Runnable() {
-            @SuppressLint("MissingPermission")
-            public void run() {
-                Location myLocation;
-                do{
-                    try{
-                        //Esperar un tiempo y actualizar los puntos cercanos.
-                        Thread.sleep(TIEMPO_REFRESCO);
-                        //Si la actividad es pausada o pasa a segundo plano debemos pausar el hilo
-                        if(pause){
-                            synchronized (hijo){
-                                hijo.wait();
-                            }
+        String units;
+        Double aux;
+        if(max_distancia < 1) {
+            units = "m";
+            aux = max_distancia * 1000;
+        }else {
+            units = "km";
+            aux = max_distancia;
+        }
+        Toast.makeText(getApplicationContext(),getString(R.string.obteniendoPuntos)+" "+aux+" "+units+" "+getString(R.string.obteniendoPuntos2),Toast.LENGTH_LONG).show();
+        Runnable hilo = () -> {
+            Location myLocation;
+            do{
+                try{
+                    //Si la actividad es pausada o pasa a segundo plano debemos pausar el hilo
+                    if(pause){
+                        synchronized (hijo){
+                            hijo.wait();
                         }
-                        //Comprobar que la componente de localizacion esta activada
-                        if(locationComponent != null) {
-                            //Obtener la ultima ubicacion del usuario
-                            myLocation = locationComponent.getLastKnownLocation();
-                            /*Si la ubicacion no es nula, hacer una query que obtenga todos los punto a una distancia menor o igual
-                             * a MAX_DISTANCIA y mostrarlos en el mapa. Para ello obtener la localizacion actual del usuario */
-                            if(myLocation != null) {
-                                ParseGeoPoint userLocation = new ParseGeoPoint(myLocation.getLatitude(),myLocation.getLongitude());
-                                ParseQuery<ParseObject> query = ParseQuery.getQuery("Alert");
-                                query.whereWithinKilometers("localizacion", userLocation, MAX_DISTANCIA);
-                                query.setLimit(MAX_PUNTOS);
-                                query.findInBackground(new FindCallback<ParseObject>() {
-                                    @Override
-                                    public void done(List<ParseObject> queryresult, ParseException e) {
-                                        if(e == null) {
-                                            guardarAlertas(queryresult);
-                                        }
-                                    }
-                                });
-                            }
+                        String units2;
+                        Double aux2;
+                        if(max_distancia < 1) {
+                            units2 = "m";
+                            aux2 = max_distancia*1000;
                         }
-                    } catch (InterruptedException e) {
-                        Log.v("Hijo interrumpido","El hijo ha sido interrumpido");
+                        else{
+                                units2 = "km";
+                                aux2 = max_distancia;
+                            }
+                        manejador.postDelayed(new Runnable() {
+                            public void run() {
+                                Toast.makeText(Map.this, getString(R.string.obteniendoPuntos)+" "+aux2+" "+units2+" "+getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show();
+
+                            }
+                        }, 2000);
                     }
-                }while (!stop);
-            }
+                    //Comprobar que la componente de localizacion esta activada
+                    if (locationComponent != null) {
+                        //Obtener la ultima ubicacion del usuario
+                        myLocation = locationComponent.getLastKnownLocation();
+                        /*Si la ubicacion no es nula, hacer una query que obtenga todos los punto a una distancia menor o igual
+                         * a MAX_DISTANCIA y mostrarlos en el mapa. Para ello obtener la localizacion actual del usuario */
+                        if (myLocation != null) {
+                            queryPuntos(myLocation);
+                            //Esperar un tiempo y actualizar los puntos cercanos.
+                            Thread.sleep(tiempo_refresco);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Log.v("Hijo interrumpido","El hijo ha sido interrumpido");
+                }
+            }while (!stop);
         };
         hijo = new Thread(hilo);
         hijo.start();
+    }
+
+    /** Método que realiza la query a la BBDD para obtener los puntos cercanos **/
+    private void queryPuntos(Location myLocation ){
+        try {
+
+                    ParseGeoPoint userLocation = new ParseGeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Alert");
+                    semaforo_ajustes.acquire();
+                    query.whereWithinKilometers("localizacion", userLocation, max_distancia);
+                    query.setLimit(max_puntos);
+                    semaforo_ajustes.release();
+                    query.findInBackground((queryresult, e) -> {
+                        if (e == null) {
+                            guardarAlertas(queryresult);
+                        }
+                    });
+        }catch (InterruptedException e){
+            Log.v("Hijo interrumpido", "No se ha podido completar la query, hijo interrumpido");
+        }
     }
 
     /* Metodo que pasa los puntos que recoge el hilo hijo. requiere de acceso al semaforo por si el padre esta mostrando los puntos.
@@ -456,6 +542,22 @@ public class Map extends AppCompatActivity {
                                     .withDraggable(false)); //No permitir el movimiento del icono
                             lista_symbol.add(symbol);
                     }
+                }
+                //Si no se ha encontrado ningún punto cercano a la ubicación
+                else{
+                    new AlertDialog.Builder(this)
+                            .setMessage(R.string.puntos_no_localizados)
+                            .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
+                                if(hijo != null){
+                                    hijo.interrupt();
+                                }
+                            }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
+                                pause = true;
+                                hijo.interrupt();
+                                BotonBuscaPuntos.setEnabled(true);
+                                Toast.makeText(getApplicationContext(),R.string.busqueda_detenida,Toast.LENGTH_LONG).show();
+                            })
+                            .show();
                 }
                 if(markerSelected != null){
                     lista_symbol.add(markerSelected);
@@ -501,6 +603,64 @@ public class Map extends AppCompatActivity {
         }
     }
 
+    /** Metodo para configurar los ajustes del mapa mediante los tabView del menu desplegable,
+     * se recie el id del TaView y el index del mismo.
+      **/
+    private void setAjustesMapa(int index, int tabViewId, boolean show_toast){
+        try {
+            //Si el hijo no está muerto:
+            if(hijo != null && hijo.isAlive()){
+                pause = true;
+                hijo.interrupt();
+            }
+            semaforo_ajustes.acquire();
+            if(tabViewId == R.id.kilometros){
+                if(index == 0){
+                    max_distancia = TAB_1_DISTANCIA;
+                }
+                else if(index == 1){
+                    max_distancia = TAB_2_DISTANCIA;
+                }
+                else
+                    max_distancia = TAB_3_DISTANCIA;
+                Preferencias.guardaKilometros(getApplicationContext(),index);
+                if(show_toast)
+                    Toast.makeText(getApplicationContext(),getString(R.string.distancia_actualizada)+" "+Double.toString(max_distancia)+" km",Toast.LENGTH_LONG).show();
+            }
+            else if(tabViewId == R.id.frecuencia){
+                if(index == 0){
+                    tiempo_refresco = TAB_1_FRECUENCIA;
+                }
+                else if(index == 1){
+                    tiempo_refresco = TAB_2_FRECUENCIA;
+                }
+                else
+                    tiempo_refresco = TAB_3_FRECUENCIA;
+                Preferencias.guardaFrecuencia(getApplicationContext(),index);
+                if(show_toast)
+                    Toast.makeText(this,getString(R.string.frecuencia_actualizada)+" "+tiempo_refresco/1000+" segundos",Toast.LENGTH_SHORT).show();
+            }
+            else{
+                if(index == 0){
+                    max_puntos = TAB_1_PUNTOS;
+                }
+                else if(index == 1){
+                    max_puntos = TAB_2_PUNTOS;
+                }
+                else
+                    max_puntos = TAB_3_PUNTOS;
+                Preferencias.guardaPuntos(getApplicationContext(),index);
+                if(show_toast)
+                    Toast.makeText(this,getString(R.string.puntos_actualizados)+" "+max_puntos+" puntos",Toast.LENGTH_SHORT).show();
+            }
+            semaforo_ajustes.release();
+            if(pause)
+                despertar();
+        } catch (InterruptedException e) {
+            Log.v("Error al modificar ajustes","No se pudieron modificar los ajustes del mapa");
+        }
+    }
+
     /* Metodo que se encarga de despertar al hijo*/
     public void despertar(){
         pause = false;
@@ -537,12 +697,15 @@ public class Map extends AppCompatActivity {
     @Override
     protected  void onRestart() {
         super.onRestart();
+        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
         despertar();
     }
 
     @Override
     public void onPause() {
         pause = true; //Pausar el hilo hijo
+        if(mGpsSwitchStateReceiver != null)
+            unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         super.onPause();
         mapView.onPause();
     }
@@ -550,6 +713,8 @@ public class Map extends AppCompatActivity {
     @Override
     public void onStop() {
         pause = true; //Pausar el hilo hijo
+        if(mGpsSwitchStateReceiver != null)
+            unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         super.onStop();
         mapView.onStop();
     }

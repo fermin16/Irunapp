@@ -16,13 +16,18 @@
     <string name="boton_flotante">Cerrar Menú</string>
     <string name="modo_mapa">Satélite/Estándar</string>
     <string name="boton_localizar">Ubícame</string>
+    <string name="boton_busqueda">Buscar puntos</string>
         <!-- Tabview Ajustes Mapa -->
-    <string name="Texto_distancia">Distancia de búsqueda:</string>
-    <string name="Texto_refresco">Frecuencia de búsqueda:</string>
-    <string name="Texto_num_puntos">Número de puntos:</string>
-    <string name="ajustes_distancia">200m;500m;1km</string>
-    <string name="ajustes_referesco">10s;30s;60s</string>
-    <string name="ajustes_num_puntos">10;30;50</string>
+    <string name="Texto_distancia">Distancia:</string>
+    <string name="Texto_refresco">Frecuencia:</string>
+    <string name="Texto_num_puntos">Resultados:</string>
+    <string name="ajustes_distancia">500 m;1 km;2 km</string>
+    <string name="ajustes_referesco">15 s;30 s;60 s</string>
+    <string name="ajustes_num_puntos">10 puntos;30 puntos;50 puntos</string>
+    <string name="distancia_actualizada"> La distancia ha cambiado a </string>
+    <string name="frecuencia_actualizada"> La frecuencia de busqueda ha cambiado a </string>
+    <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
+
         <!-- Mensajes mapa -->
     <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
     <string name="gps_desactivado"> Los servicios de ubicación estan desactivados</string>
@@ -32,5 +37,10 @@
     <string name="cargando_mapa">Cargando mapa, por favor espere...</string>
     <string name="serviciosDesactivados">Sin servicios de ubicación/red no se podrán obtener las ubicaciones cercanas</string>
     <string name="obteniendoUbicacion">Obteniendo su ubicación...</string>
-    <string name="obteniendoAlertas">Obteniendo lugares cercanos a su ubicación por favor espere...</string>
+    <string name="obteniendoPuntos">Obteniendo lugares cercanos a </string>
+    <string name="obteniendoPuntos2"> de su ubicación, por favor espere...</string>
+    <string name="volver_buscar">Volver a buscar</string>
+    <string name="cancelar_busqueda">Cancelar</string>
+    <string name="puntos_no_localizados">No se han localizado puntos a su alrededor ¿Desea buscar de nuevo?</string>
+    <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
 </resources>
