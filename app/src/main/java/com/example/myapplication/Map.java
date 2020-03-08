@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.d.lib.tabview.TabView;
 import com.example.myapplication.Modelos.Alert;
@@ -232,9 +233,6 @@ public class Map extends AppCompatActivity {
         BasicStyle = new Style.Builder().fromUri(getString(R.string.map_style_basic));
         SatelliteStyle = new Style.Builder().fromUri(getString(R.string.map_style_road));
 
-        //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
-        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
-
         //Crear un BroadCastReciever para saber cuando un usuario activa o desactiva los servicios de ubicacion:
         mGpsSwitchStateReceiver = new BroadcastReceiver() {
             @Override
@@ -264,6 +262,8 @@ public class Map extends AppCompatActivity {
             }
         };
         set_style(BasicStyle);
+        //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
+        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
     }
 
     /* Metodo que se encarga de activar el elemento de localizacion, para ello pide permisos al usuario
@@ -460,7 +460,10 @@ public class Map extends AppCompatActivity {
 
                             }
                         }, 2000);
+                        if(BotonBuscaPuntos.isEnabled())
+                            BotonBuscaPuntos.setEnabled(false);
                     }
+                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa0");
                     //Comprobar que la componente de localizacion esta activada
                     if (locationComponent != null) {
                         //Obtener la ultima ubicacion del usuario
@@ -492,8 +495,10 @@ public class Map extends AppCompatActivity {
                     query.whereWithinKilometers("localizacion", userLocation, max_distancia);
                     query.setLimit(max_puntos);
                     semaforo_ajustes.release();
+                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa1");
                     query.findInBackground((queryresult, e) -> {
                         if (e == null) {
+                            System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa2");
                             guardarAlertas(queryresult);
                         }
                     });
@@ -515,12 +520,24 @@ public class Map extends AppCompatActivity {
     * en la aplicación.*/
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
+                System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa3");
                 //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
                 if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
+                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa4");
                     symbolManager.delete(lista_symbol);
+                    if(markerSelected != null){
+                        symbolManager.create(new SymbolOptions()
+                                .withLatLng(markerSelected.getLatLng())
+                                .withIconImage(markerSelected.getIconImage())
+                                .withIconSize(TAMANO_MAX_ICONO)
+                                .withDraggable(markerSelected.isDraggable())); //No permitir el movimiento del icono
+                    }
+                    lista_symbol.clear();
+                    sinPuntos();
                 }
                 //Caso en el que ninguna lista es vacia y hay que añadir elementos
                 else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
+                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa5");
                     //Eliminar los puntos actuales
                     symbolManager.delete(lista_symbol);
                     //Limpiar la lista de puntos y volver a añadirlos:
@@ -545,25 +562,30 @@ public class Map extends AppCompatActivity {
                 }
                 //Si no se ha encontrado ningún punto cercano a la ubicación
                 else{
-                    new AlertDialog.Builder(this)
-                            .setMessage(R.string.puntos_no_localizados)
-                            .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
-                                if(hijo != null){
-                                    hijo.interrupt();
-                                }
-                            }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
-                                pause = true;
-                                hijo.interrupt();
-                                BotonBuscaPuntos.setEnabled(true);
-                                Toast.makeText(getApplicationContext(),R.string.busqueda_detenida,Toast.LENGTH_LONG).show();
-                            })
-                            .show();
+                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa6");
+                    sinPuntos();
                 }
                 if(markerSelected != null){
+                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa7");
                     lista_symbol.add(markerSelected);
                 }
                 loading_style.release();
             }
+    }
+
+    private  void sinPuntos(){
+        pause = true;
+        hijo.interrupt();
+        BotonBuscaPuntos.setEnabled(true);
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.puntos_no_localizados)
+                .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
+                    if(hijo != null){
+                        despertar();
+                    }
+                }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
+            Toast.makeText(getApplicationContext(),R.string.busqueda_detenida,Toast.LENGTH_LONG).show();
+        }).show();
     }
 
     /** Metodo que anima la camara y la lleva hasta el lugar indicado mediante las coordenadas de un objeto Symbol **/
@@ -691,7 +713,6 @@ public class Map extends AppCompatActivity {
         super.onResume();
         mapView.onResume();
         despertar();
-        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
     }
 
     @Override
@@ -704,8 +725,6 @@ public class Map extends AppCompatActivity {
     @Override
     public void onPause() {
         pause = true; //Pausar el hilo hijo
-        if(mGpsSwitchStateReceiver != null)
-            unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         super.onPause();
         mapView.onPause();
     }
@@ -714,7 +733,7 @@ public class Map extends AppCompatActivity {
     public void onStop() {
         pause = true; //Pausar el hilo hijo
         if(mGpsSwitchStateReceiver != null)
-            unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         super.onStop();
         mapView.onStop();
     }
@@ -732,7 +751,8 @@ public class Map extends AppCompatActivity {
             if(hijo.getState() == Thread.State.TIMED_WAITING) //Si el hijo está durmiendo:
                 hijo.interrupt(); //Interrumpir el hilo
         }
-        unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+        if(mGpsSwitchStateReceiver != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         //Eliminar el animador.
         if (markerAnimator != null) {
             markerAnimator.cancel();
