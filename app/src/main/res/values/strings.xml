@@ -29,7 +29,8 @@
     <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
 
         <!-- Mensajes mapa -->
-    <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
+    <string name="activarPermisosAjustes">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
+    <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades</string>
     <string name="gps_desactivado"> Los servicios de ubicación estan desactivados</string>
     <string name="net_desactivada"> Los servicios de red estan desactivados</string>
     <string name="activar_gps"> Activar </string>

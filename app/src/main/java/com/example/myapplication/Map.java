@@ -1,12 +1,14 @@
 package com.example.myapplication;
 
 
+import android.Manifest;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -14,13 +16,23 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
 import com.example.myapplication.Modelos.Alert;
@@ -30,6 +42,7 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -44,6 +57,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -51,6 +65,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import pl.droidsonroids.gif.GifImageView;
@@ -261,18 +276,35 @@ public class Map extends AppCompatActivity {
                 }
             }
         };
-        set_style(BasicStyle);
         //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
         registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+        set_style(BasicStyle);
     }
 
     /* Metodo que se encarga de activar el elemento de localizacion, para ello pide permisos al usuario
      * (en caso de no haberlos pedido antes) y si el usuario acepta podra utilizar el mapa en caso
      * contrario se terminara el activity.*/
-    @SuppressWarnings( {"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
+         permissionsManager = new PermissionsManager(new PermissionsListener() {
+            @Override
+            public void onExplanationNeeded(List<String> permissionsToExplain) {
+                Toast.makeText(getApplicationContext(),getString(R.string.activarPermisosAjustes),Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onPermissionResult(boolean granted) {
+                if (granted) {
+                    enableLocationComponent(loadedMapStyle);
+                } else {
+                    if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION))
+                        Toast.makeText(getApplicationContext(),getString(R.string.activarPermisos),Toast.LENGTH_LONG).show();
+                    else
+                        onExplanationNeeded(null);
+                }
+            }
+        });
         //Comprobar si se han concedido los permisos de ubicacion:
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+        if (permissionsManager.areLocationPermissionsGranted(this)) {
             if(checkLocationServices()) {//Comprobar si estan activados los servicios de red y ubicacion.
                 //Obtener una instancia del componente de localizacion
                  locationComponent = mapboxMap.getLocationComponent();
@@ -291,13 +323,8 @@ public class Map extends AppCompatActivity {
                 }
             }
         }
-        else if(shouldShowRequestPermissionRationale(LOCATION_SERVICE)){ //Si no se han concedido permisos y el usuario no ha marcado la opcion no volver a preguntar, solicitarlos
-            permissionsManager = new PermissionsManager((PermissionsListener) this);
+        else{ //Si no se han concedido permisos y el usuario no ha marcado la opcion no volver a preguntar, solicitarlos
             permissionsManager.requestLocationPermissions(this);
-        }
-        else{ //Si el usuario marcó la opción no volver a solicitar permisos: (Requiere API 23 o mayor):
-            finish();
-            Toast.makeText(this,getString(R.string.activarPermisos),Toast.LENGTH_LONG).show();
         }
     }
 
@@ -357,15 +384,19 @@ public class Map extends AppCompatActivity {
         if(checkLocationServices()) {
             if(loading_style.tryAcquire()) {
                 try {
-                    //Hacer el indicador visible
-                    locationComponent.setLocationComponentEnabled(true);
+                    if(locationComponent !=null) {
+                        //Hacer el indicador visible
+                        locationComponent.setLocationComponentEnabled(true);
 
-                    //Colocar el modo de la camara en Tracking
-                    locationComponent.setCameraMode(CameraMode.TRACKING);
+                        //Colocar el modo de la camara en Tracking
+                        locationComponent.setCameraMode(CameraMode.TRACKING);
 
-                    //Hacer zoom a la ubicacion del usuario
-                    locationComponent.zoomWhileTracking(ZOOM_FIND);
-
+                        //Hacer zoom a la ubicacion del usuario
+                        locationComponent.zoomWhileTracking(ZOOM_FIND);
+                    }
+                    else{
+                        enableLocationComponent(mapboxMap.getStyle());
+                    }
                     //Devolver el permiso del semaforo
                     loading_style.release();
                 } catch (SecurityException e) {
@@ -461,9 +492,8 @@ public class Map extends AppCompatActivity {
                             }
                         }, 2000);
                         if(BotonBuscaPuntos.isEnabled())
-                            BotonBuscaPuntos.setEnabled(false);
+                            runOnUiThread(() -> BotonBuscaPuntos.setEnabled(false));
                     }
-                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa0");
                     //Comprobar que la componente de localizacion esta activada
                     if (locationComponent != null) {
                         //Obtener la ultima ubicacion del usuario
@@ -495,10 +525,8 @@ public class Map extends AppCompatActivity {
                     query.whereWithinKilometers("localizacion", userLocation, max_distancia);
                     query.setLimit(max_puntos);
                     semaforo_ajustes.release();
-                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa1");
                     query.findInBackground((queryresult, e) -> {
                         if (e == null) {
-                            System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa2");
                             guardarAlertas(queryresult);
                         }
                     });
@@ -520,10 +548,8 @@ public class Map extends AppCompatActivity {
     * en la aplicación.*/
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
-                System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa3");
                 //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
                 if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
-                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa4");
                     symbolManager.delete(lista_symbol);
                     if(markerSelected != null){
                         symbolManager.create(new SymbolOptions()
@@ -537,7 +563,6 @@ public class Map extends AppCompatActivity {
                 }
                 //Caso en el que ninguna lista es vacia y hay que añadir elementos
                 else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
-                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa5");
                     //Eliminar los puntos actuales
                     symbolManager.delete(lista_symbol);
                     //Limpiar la lista de puntos y volver a añadirlos:
@@ -558,15 +583,14 @@ public class Map extends AppCompatActivity {
                                     .withIconSize(icon_size)
                                     .withDraggable(false)); //No permitir el movimiento del icono
                             lista_symbol.add(symbol);
+                            initRecyclerView();
                     }
                 }
                 //Si no se ha encontrado ningún punto cercano a la ubicación
                 else{
-                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa6");
                     sinPuntos();
                 }
                 if(markerSelected != null){
-                    System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaa7");
                     lista_symbol.add(markerSelected);
                 }
                 loading_style.release();
@@ -766,4 +790,129 @@ public class Map extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }
-}
+
+
+    /*** Parte para las infoWindows que se mostraran en el mapa **/
+
+    private void initRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.rv_on_top_of_map);
+        LocationRecyclerViewAdapter locationAdapter =
+                new LocationRecyclerViewAdapter(createRecyclerViewLocations(), mapboxMap);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
+                LinearLayoutManager.HORIZONTAL, true));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(locationAdapter);
+        SnapHelper snapHelper = new LinearSnapHelper();
+        recyclerView.setOnFlingListener(null);
+        snapHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private List<SingleRecyclerViewLocation> createRecyclerViewLocations() {
+        ArrayList<SingleRecyclerViewLocation> locationList = new ArrayList<>();
+        for (Symbol simbol: lista_symbol) {
+            SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
+            singleLocation.setName("Hola mundo");
+            singleLocation.setBedInfo("Esto es una prueba");
+            singleLocation.setLocationCoordinates(simbol.getLatLng());
+            locationList.add(singleLocation);
+        }
+        return locationList;
+    }
+
+    class SingleRecyclerViewLocation {
+
+            private String name;
+            private String bedInfo;
+            private LatLng locationCoordinates;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getBedInfo() {
+                return bedInfo;
+            }
+
+            public void setBedInfo(String bedInfo) {
+                this.bedInfo = bedInfo;
+            }
+
+            public LatLng getLocationCoordinates() {
+                return locationCoordinates;
+            }
+
+            public void setLocationCoordinates(LatLng locationCoordinates) {
+                this.locationCoordinates = locationCoordinates;
+            }
+        }
+
+        static class LocationRecyclerViewAdapter extends
+                RecyclerView.Adapter<LocationRecyclerViewAdapter.MyViewHolder> {
+
+            private List<SingleRecyclerViewLocation> locationList;
+            private MapboxMap map;
+
+            public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap) {
+                this.locationList = locationList;
+                this.map = mapBoxMap;
+            }
+
+            @Override
+            public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.rv_on_top_of_map_card, parent, false);
+                return new MyViewHolder(itemView);
+            }
+
+            @Override
+            public void onBindViewHolder(MyViewHolder holder, int position) {
+                SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
+                holder.name.setText(singleRecyclerViewLocation.getName());
+                holder.numOfBeds.setText(singleRecyclerViewLocation.getBedInfo());
+                holder.setClickListener((view, position1) -> {
+                    LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
+                    CameraPosition newCameraPosition = new CameraPosition.Builder()
+                            .target(selectedLocationLatLng)
+                            .build();
+                    map.easeCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
+                });
+            }
+
+            @Override
+            public int getItemCount() {
+                return locationList.size();
+            }
+
+            static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+                TextView name;
+                TextView numOfBeds;
+                CardView singleCard;
+                ItemClickListener clickListener;
+
+                MyViewHolder(View view) {
+                    super(view);
+                    name = view.findViewById(R.id.location_title_tv);
+                    numOfBeds = view.findViewById(R.id.location_num_of_beds_tv);
+                    singleCard = view.findViewById(R.id.single_location_cardview);
+                    singleCard.setOnClickListener(this);
+                }
+
+                public void setClickListener(ItemClickListener itemClickListener) {
+                    this.clickListener = itemClickListener;
+                }
+
+                @Override
+                public void onClick(View view) {
+                    clickListener.onClick(view, getLayoutPosition());
+                }
+            }
+        }
+
+        public interface ItemClickListener {
+            void onClick(View view, int position);
+        }
+    }
