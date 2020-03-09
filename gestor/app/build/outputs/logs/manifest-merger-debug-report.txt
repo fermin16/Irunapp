@@ -1,0 +1,154 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+MERGED from [com.android.support:appcompat-v7:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\33260765d5a983e60eb8576031a066ee\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support.constraint:constraint-layout:1.1.3] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\72b7d59b0c22038ede4cf65f54294d57\AndroidManifest.xml:2:1-11:12
+MERGED from [com.android.support:support-fragment:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\38450b9dcc4fcbd5651ddf3f3d29c8e7\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:animated-vector-drawable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\efa293dc0960e7882d103f444daeb110\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-ui:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\8ecad47f81c496d50072009b92871c6b\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-utils:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\cb5c9f186c6c2d99a4bf741f1158e99a\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-vector-drawable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b5f253064b1f0ffa259a00e751be4d32\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:loader:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\56a56e492b7a467b9642813d1956edfc\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:viewpager:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ee81c0432b548fd014b2db9dbc1217e5\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:coordinatorlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b48641a17523a4df04fb1c7b97b6713d\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:drawerlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\669667c03a315967193ef1386961a44c\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:slidingpanelayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ef5607ce0f14ec425e9a6df7e7147743\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:customview:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ab8768834286651c2226c0136c05745d\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:swiperefreshlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\f55f476f6bedfbfc900426938e27eafc\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:asynclayoutinflater:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\102b94ec7dc78b5df7dddd8d2b054f5e\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-compat:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\88193bc5a24c5197b29d61c734398bc9\AndroidManifest.xml:17:1-24:12
+MERGED from [com.android.support:versionedparcelable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7f648faf688f067256f03cb966a43698\AndroidManifest.xml:17:1-25:12
+MERGED from [com.android.support:cursoradapter:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\485d4633100e39509217ccceb74c6ed3\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:runtime:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\6187f9cbf8d8cfc19d870a241be89e21\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:documentfile:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\e6a9cb324df6de3af1ab03a211b265f4\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:localbroadcastmanager:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7c61d0cfc38aa404da8f3d2b02e6045d\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:print:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\09f17d53b060a3e67b5d569820eb49d5\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:viewmodel:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\e91190921dad540b95571db3749e1ea1\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:livedata:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\587851743e3370c73f611131e1a941d5\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:livedata-core:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b3c5bdafa81aeceaaa26330ed474e5ea\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.core:runtime:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7ef3c779dd2969653eb1ee3492f6574c\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:interpolator:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\317968715808e5a728cbe6d51aa4cb7a\AndroidManifest.xml:17:1-22:12
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+	package
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:3:5-33
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+	android:versionCode
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:1-21:12
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:2:11-69
+application
+ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:5:5-19:19
+MERGED from [com.android.support.constraint:constraint-layout:1.1.3] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\72b7d59b0c22038ede4cf65f54294d57\AndroidManifest.xml:9:5-20
+MERGED from [com.android.support.constraint:constraint-layout:1.1.3] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\72b7d59b0c22038ede4cf65f54294d57\AndroidManifest.xml:9:5-20
+MERGED from [com.android.support:support-compat:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\88193bc5a24c5197b29d61c734398bc9\AndroidManifest.xml:22:5-94
+MERGED from [com.android.support:support-compat:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\88193bc5a24c5197b29d61c734398bc9\AndroidManifest.xml:22:5-94
+MERGED from [com.android.support:versionedparcelable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7f648faf688f067256f03cb966a43698\AndroidManifest.xml:22:5-23:19
+MERGED from [com.android.support:versionedparcelable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7f648faf688f067256f03cb966a43698\AndroidManifest.xml:22:5-23:19
+	android:appComponentFactory
+		ADDED from [com.android.support:support-compat:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\88193bc5a24c5197b29d61c734398bc9\AndroidManifest.xml:22:18-91
+	android:supportsRtl
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:10:9-35
+	android:label
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:8:9-41
+	android:roundIcon
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:9:9-54
+	android:icon
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:7:9-43
+	android:allowBackup
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:6:9-35
+	android:theme
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:11:9-40
+activity#com.example.gestor.MainActivity
+ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:12:9-18:20
+	android:name
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:12:19-47
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:13:13-17:29
+action#android.intent.action.MAIN
+ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:14:17-69
+	android:name
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:14:25-66
+category#android.intent.category.LAUNCHER
+ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:16:17-77
+	android:name
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml:16:27-74
+uses-sdk
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+MERGED from [com.android.support:appcompat-v7:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\33260765d5a983e60eb8576031a066ee\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:appcompat-v7:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\33260765d5a983e60eb8576031a066ee\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support.constraint:constraint-layout:1.1.3] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\72b7d59b0c22038ede4cf65f54294d57\AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support.constraint:constraint-layout:1.1.3] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\72b7d59b0c22038ede4cf65f54294d57\AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support:support-fragment:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\38450b9dcc4fcbd5651ddf3f3d29c8e7\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\38450b9dcc4fcbd5651ddf3f3d29c8e7\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\efa293dc0960e7882d103f444daeb110\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\efa293dc0960e7882d103f444daeb110\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\8ecad47f81c496d50072009b92871c6b\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\8ecad47f81c496d50072009b92871c6b\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\cb5c9f186c6c2d99a4bf741f1158e99a\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\cb5c9f186c6c2d99a4bf741f1158e99a\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b5f253064b1f0ffa259a00e751be4d32\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b5f253064b1f0ffa259a00e751be4d32\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:loader:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\56a56e492b7a467b9642813d1956edfc\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:loader:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\56a56e492b7a467b9642813d1956edfc\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:viewpager:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ee81c0432b548fd014b2db9dbc1217e5\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:viewpager:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ee81c0432b548fd014b2db9dbc1217e5\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:coordinatorlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b48641a17523a4df04fb1c7b97b6713d\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:coordinatorlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b48641a17523a4df04fb1c7b97b6713d\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:drawerlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\669667c03a315967193ef1386961a44c\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:drawerlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\669667c03a315967193ef1386961a44c\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:slidingpanelayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ef5607ce0f14ec425e9a6df7e7147743\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:slidingpanelayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ef5607ce0f14ec425e9a6df7e7147743\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:customview:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ab8768834286651c2226c0136c05745d\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:customview:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\ab8768834286651c2226c0136c05745d\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:swiperefreshlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\f55f476f6bedfbfc900426938e27eafc\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:swiperefreshlayout:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\f55f476f6bedfbfc900426938e27eafc\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:asynclayoutinflater:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\102b94ec7dc78b5df7dddd8d2b054f5e\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:asynclayoutinflater:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\102b94ec7dc78b5df7dddd8d2b054f5e\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\88193bc5a24c5197b29d61c734398bc9\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\88193bc5a24c5197b29d61c734398bc9\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:versionedparcelable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7f648faf688f067256f03cb966a43698\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:versionedparcelable:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7f648faf688f067256f03cb966a43698\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:cursoradapter:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\485d4633100e39509217ccceb74c6ed3\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:cursoradapter:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\485d4633100e39509217ccceb74c6ed3\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\6187f9cbf8d8cfc19d870a241be89e21\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\6187f9cbf8d8cfc19d870a241be89e21\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:documentfile:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\e6a9cb324df6de3af1ab03a211b265f4\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:documentfile:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\e6a9cb324df6de3af1ab03a211b265f4\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:localbroadcastmanager:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7c61d0cfc38aa404da8f3d2b02e6045d\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:localbroadcastmanager:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7c61d0cfc38aa404da8f3d2b02e6045d\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:print:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\09f17d53b060a3e67b5d569820eb49d5\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:print:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\09f17d53b060a3e67b5d569820eb49d5\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\e91190921dad540b95571db3749e1ea1\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\e91190921dad540b95571db3749e1ea1\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\587851743e3370c73f611131e1a941d5\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\587851743e3370c73f611131e1a941d5\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b3c5bdafa81aeceaaa26330ed474e5ea\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\b3c5bdafa81aeceaaa26330ed474e5ea\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7ef3c779dd2969653eb1ee3492f6574c\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.1] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\7ef3c779dd2969653eb1ee3492f6574c\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:interpolator:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\317968715808e5a728cbe6d51aa4cb7a\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:interpolator:28.0.0] C:\Users\mintxo laptop pro\.gradle\caches\transforms-2\files-2.1\317968715808e5a728cbe6d51aa4cb7a\AndroidManifest.xml:20:5-44
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\mintxo laptop pro\Desktop\Irunapp\gestor\app\src\main\AndroidManifest.xml
