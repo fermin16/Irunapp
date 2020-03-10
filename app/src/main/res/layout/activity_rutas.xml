@@ -43,7 +43,7 @@
         app:srcCompat="@drawable/degradado_tarjeta" />
 
     <TextView
-        android:id="@+id/horario_lugar"
+        android:id="@+id/descripcion"
         android:layout_width="wrap_content"
         android:layout_height="65dp"
         android:layout_alignParentStart="true"

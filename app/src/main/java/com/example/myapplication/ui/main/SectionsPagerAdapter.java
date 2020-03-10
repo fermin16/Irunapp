@@ -37,9 +37,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
             /*case 1:
                 return PestanaMapa.getPestana();
-
+            */
             case 2:
-                return PestanaRutas.getPestana();*/
+                return PestanaRutas.getPestana();
 
             default:
                 return PlaceholderFragment.newInstance(position + 1);
