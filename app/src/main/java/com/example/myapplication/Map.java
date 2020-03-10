@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -19,11 +19,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -42,7 +42,6 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -53,11 +52,9 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -65,7 +62,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import pl.droidsonroids.gif.GifImageView;
@@ -81,7 +77,8 @@ public class Map extends AppCompatActivity {
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
     private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
-    private final int OFFSET_FAB =-75; //OFFSET base de la animacion de subir y bajar el FAB
+    private final double OFFSET_FAB = 1.3; //OFFSET base de la animacion de subir y bajar el FAB
+    private final double OFFSET_RECYCLEVIEW = 1.5; //OFFSET base de la animacion de subit y bajar la recycleview
     private final double TAB_1_DISTANCIA = 0.5;
     private final double TAB_2_DISTANCIA = 1.0;
     private final double TAB_3_DISTANCIA = 2.0;
@@ -135,6 +132,9 @@ public class Map extends AppCompatActivity {
     private TabView tab_frecuencia;
     private TabView tab_puntos;
     private GifImageView gif_ajustes;
+
+    //RecycleView y componentes:
+    private RecyclerView recyclerView;
 
 
     @Override
@@ -199,18 +199,21 @@ public class Map extends AppCompatActivity {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 BotonFlotante.close(true);
-                BotonFlotante.animate().translationY(panelDeslizante.getCurrentParallaxOffset()+(OFFSET_FAB)).setDuration(0);
+                BotonFlotante.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*OFFSET_FAB)).setDuration(0);
+                if(recyclerView != null){
+                    recyclerView.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*(OFFSET_RECYCLEVIEW))).setDuration(0);
+                }
             }
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if(newState == SlidingUpPanelLayout.PanelState.EXPANDED){
                     gif_ajustes.setImageResource(R.drawable.giphy);
-                    gif_ajustes.setPadding(0,0,25,0);
+                    gif_ajustes.setPadding(0,0,20,0);
                 }
                 else if(newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
                     gif_ajustes.setImageResource(R.drawable.tenor);
-                    gif_ajustes.setPadding(0,0,95,95);
+                    gif_ajustes.setPadding(0,0,100,95);
                 }
             }
         });
@@ -422,12 +425,9 @@ public class Map extends AppCompatActivity {
                     // Set up a SymbolManager instance
                     symbolManager = new SymbolManager(mapView, mapboxMap, style);
                     // Add click listener and change the symbol to a cafe icon on click
-                    symbolManager.addClickListener(new OnSymbolClickListener() {
-                        @Override
-                        public void onAnnotationClick(final Symbol symbol) {
-                            simboloActivado = 1;
-                            selectMarker(symbol);
-                        }
+                    symbolManager.addClickListener(symbol -> {
+                        simboloActivado = 1;
+                        selectMarker(symbol);
                     });
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
@@ -625,7 +625,7 @@ public class Map extends AppCompatActivity {
 
     /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
     * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
-    private void selectMarker(final Symbol symbol) {
+    public void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker(markerSelected);
             animateCamera(symbol);
@@ -703,7 +703,7 @@ public class Map extends AppCompatActivity {
             if(pause)
                 despertar();
         } catch (InterruptedException e) {
-            Log.v("Error al modificar ajustes","No se pudieron modificar los ajustes del mapa");
+            Log.v("Error en ajustes","No se pudieron modificar los ajustes del mapa");
         }
     }
 
@@ -795,7 +795,7 @@ public class Map extends AppCompatActivity {
     /*** Parte para las infoWindows que se mostraran en el mapa **/
 
     private void initRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.rv_on_top_of_map);
+        recyclerView = findViewById(R.id.rv_on_top_of_map);
         LocationRecyclerViewAdapter locationAdapter =
                 new LocationRecyclerViewAdapter(createRecyclerViewLocations(), mapboxMap);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
@@ -811,8 +811,8 @@ public class Map extends AppCompatActivity {
         ArrayList<SingleRecyclerViewLocation> locationList = new ArrayList<>();
         for (Symbol simbol: lista_symbol) {
             SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
-            singleLocation.setName("Hola mundo");
-            singleLocation.setBedInfo("Esto es una prueba");
+            singleLocation.setNombreLugar("Hola mundo");
+            singleLocation.setDescripcionLugar("Esto es una prueba");
             singleLocation.setLocationCoordinates(simbol.getLatLng());
             locationList.add(singleLocation);
         }
@@ -821,24 +821,32 @@ public class Map extends AppCompatActivity {
 
     class SingleRecyclerViewLocation {
 
-            private String name;
-            private String bedInfo;
+            private String lugar;
+            private String descripcionLugar;
+            private Bitmap imagen;
             private LatLng locationCoordinates;
 
-            public String getName() {
-                return name;
+            public String getNombreLugar() {
+                return lugar;
             }
 
-            public void setName(String name) {
-                this.name = name;
+            public void setNombreLugar(String name) {
+                this.lugar = name;
             }
 
-            public String getBedInfo() {
-                return bedInfo;
+            public String getDescripcionLugar() {
+                return descripcionLugar;
             }
 
-            public void setBedInfo(String bedInfo) {
-                this.bedInfo = bedInfo;
+            public void setDescripcionLugar(String descripcionLugar) {
+                this.descripcionLugar = descripcionLugar;
+            }
+
+            public Bitmap getImagen(){
+                return imagen;
+            }
+            public void setImagen(Bitmap imagenBitmap){
+                imagen = imagenBitmap;
             }
 
             public LatLng getLocationCoordinates() {
@@ -850,6 +858,7 @@ public class Map extends AppCompatActivity {
             }
         }
 
+        /*** Clase que se encarga de actualizar la vista es decir el contenido de las tarjetas **/
         static class LocationRecyclerViewAdapter extends
                 RecyclerView.Adapter<LocationRecyclerViewAdapter.MyViewHolder> {
 
@@ -864,15 +873,15 @@ public class Map extends AppCompatActivity {
             @Override
             public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View itemView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.rv_on_top_of_map_card, parent, false);
+                        .inflate(R.layout.cardview_puntos, parent, false);
                 return new MyViewHolder(itemView);
             }
 
             @Override
             public void onBindViewHolder(MyViewHolder holder, int position) {
                 SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
-                holder.name.setText(singleRecyclerViewLocation.getName());
-                holder.numOfBeds.setText(singleRecyclerViewLocation.getBedInfo());
+                holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
+                holder.descripcionLugar_textview.setText(singleRecyclerViewLocation.getDescripcionLugar());
                 holder.setClickListener((view, position1) -> {
                     LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
                     CameraPosition newCameraPosition = new CameraPosition.Builder()
@@ -888,17 +897,17 @@ public class Map extends AppCompatActivity {
             }
 
             static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-                TextView name;
-                TextView numOfBeds;
-                CardView singleCard;
+                TextView lugar_textview;
+                TextView descripcionLugar_textview;
+                CardView cardview;
                 ItemClickListener clickListener;
 
                 MyViewHolder(View view) {
                     super(view);
-                    name = view.findViewById(R.id.location_title_tv);
-                    numOfBeds = view.findViewById(R.id.location_num_of_beds_tv);
-                    singleCard = view.findViewById(R.id.single_location_cardview);
-                    singleCard.setOnClickListener(this);
+                    lugar_textview = view.findViewById(R.id.lugar_textview);
+                    descripcionLugar_textview = view.findViewById(R.id.descripcionLugar_textview);
+                    cardview = view.findViewById(R.id.cardviewLugar);
+                    cardview.setOnClickListener(this);
                 }
 
                 public void setClickListener(ItemClickListener itemClickListener) {
@@ -908,6 +917,7 @@ public class Map extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     clickListener.onClick(view, getLayoutPosition());
+                    //Animar camara y agrandar marker
                 }
             }
         }

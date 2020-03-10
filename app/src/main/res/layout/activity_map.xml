@@ -12,7 +12,7 @@
     app:umanoScrollableView="@id/AjustesMapa"
     android:layout_gravity="bottom"
     android:gravity="bottom"
-    app:umanoPanelHeight="55sp"
+    app:umanoPanelHeight="55dp"
     app:umanoOverlay="true"
     app:umanoParallaxOffset="100dp"
     app:umanoFadeColor="@android:color/transparent"
@@ -42,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginBottom="32dp" />
+                android:layout_marginBottom="60dp" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
