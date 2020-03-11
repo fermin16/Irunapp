@@ -9,21 +9,27 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -71,8 +77,8 @@ public class Map extends AppCompatActivity {
 
     //Macros:
     private final int ACTIVAR_UBICACION = 0; //Codigo de la actividad que nos servira para saber si el usuario a activado o no la ubicacion
-    private final double ZOOM_FIND = 15.0; //Zoom al pulsar el boton de localizacion
-    private final int CAMERA_ANIMATION = 3000; //Duración de la animación de la camara (milisegundos)
+    private static final double ZOOM_FIND = 15.0; //Zoom al pulsar el boton de localizacion
+    private static final int CAMERA_ANIMATION = 3000; //Duración de la animación de la camara (milisegundos)
     private static final String MAKI_ICON_CAFE = "cafe-15";
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
@@ -282,6 +288,7 @@ public class Map extends AppCompatActivity {
         //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
         registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
         set_style(BasicStyle);
+        initRecyclerView(null);
     }
 
     /* Metodo que se encarga de activar el elemento de localizacion, para ello pide permisos al usuario
@@ -583,7 +590,7 @@ public class Map extends AppCompatActivity {
                                     .withIconSize(icon_size)
                                     .withDraggable(false)); //No permitir el movimiento del icono
                             lista_symbol.add(symbol);
-                            initRecyclerView();
+                            updateAdapter(listaPuntos);
                     }
                 }
                 //Si no se ha encontrado ningún punto cercano a la ubicación
@@ -794,10 +801,10 @@ public class Map extends AppCompatActivity {
 
     /*** Parte para las infoWindows que se mostraran en el mapa **/
 
-    private void initRecyclerView() {
+    private void initRecyclerView(List<ParseObject> listaParse) {
         recyclerView = findViewById(R.id.rv_on_top_of_map);
         LocationRecyclerViewAdapter locationAdapter =
-                new LocationRecyclerViewAdapter(createRecyclerViewLocations(), mapboxMap);
+                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.HORIZONTAL, true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -807,23 +814,33 @@ public class Map extends AppCompatActivity {
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
-    private List<SingleRecyclerViewLocation> createRecyclerViewLocations() {
+    private List<SingleRecyclerViewLocation> createRecyclerViewLocations(List<ParseObject> listaParse) {
         ArrayList<SingleRecyclerViewLocation> locationList = new ArrayList<>();
-        for (Symbol simbol: lista_symbol) {
-            SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
-            singleLocation.setNombreLugar("Hola mundo");
-            singleLocation.setDescripcionLugar("Esto es una prueba");
-            singleLocation.setLocationCoordinates(simbol.getLatLng());
-            locationList.add(singleLocation);
+        if(listaParse != null) {
+            for (ParseObject object : listaParse) {
+                SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
+                singleLocation.setNombreLugar(((Alert) object).getTitulo());
+                singleLocation.setDescripcionLugar(((Alert) object).getDescripcion());
+                singleLocation.setLocationCoordinates(new LatLng(((Alert) object).getLocalizacion().getLatitude(), ((Alert) object).getLocalizacion().getLongitude()));
+                singleLocation.setImagen(((Alert) object).getFoto());
+                locationList.add(singleLocation);
+            }
         }
         return locationList;
+    }
+
+    private void updateAdapter(List<ParseObject> listaParse){
+        LocationRecyclerViewAdapter locationAdapter =
+                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
+        recyclerView.setAdapter(locationAdapter);
+
     }
 
     class SingleRecyclerViewLocation {
 
             private String lugar;
             private String descripcionLugar;
-            private Bitmap imagen;
+            private byte[] imagen;
             private LatLng locationCoordinates;
 
             public String getNombreLugar() {
@@ -842,10 +859,10 @@ public class Map extends AppCompatActivity {
                 this.descripcionLugar = descripcionLugar;
             }
 
-            public Bitmap getImagen(){
+            public byte[] getImagen(){
                 return imagen;
             }
-            public void setImagen(Bitmap imagenBitmap){
+            public void setImagen(byte[] imagenBitmap){
                 imagen = imagenBitmap;
             }
 
@@ -882,13 +899,19 @@ public class Map extends AppCompatActivity {
                 SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
                 holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
                 holder.descripcionLugar_textview.setText(singleRecyclerViewLocation.getDescripcionLugar());
+                byte[] imagen = singleRecyclerViewLocation.getImagen();
+                holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
                 holder.setClickListener((view, position1) -> {
                     LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
                     CameraPosition newCameraPosition = new CameraPosition.Builder()
                             .target(selectedLocationLatLng)
+                            .zoom(ZOOM_FIND)
                             .build();
-                    map.easeCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
+                    map.animateCamera(CameraUpdateFactory
+                            .newCameraPosition(newCameraPosition), CAMERA_ANIMATION);
+
                 });
+
             }
 
             @Override
@@ -900,12 +923,30 @@ public class Map extends AppCompatActivity {
                 TextView lugar_textview;
                 TextView descripcionLugar_textview;
                 CardView cardview;
+                ImageView imagen;
+                Button botonVermas;
+                Button botonIr;
                 ItemClickListener clickListener;
 
                 MyViewHolder(View view) {
                     super(view);
                     lugar_textview = view.findViewById(R.id.lugar_textview);
                     descripcionLugar_textview = view.findViewById(R.id.descripcionLugar_textview);
+                    imagen = view.findViewById(R.id.imagen);
+                    botonVermas = view.findViewById(R.id.boton_verMas);
+                    botonVermas.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    });
+                    botonIr = view.findViewById(R.id.boton_IR);
+                    botonIr.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    });
                     cardview = view.findViewById(R.id.cardviewLugar);
                     cardview.setOnClickListener(this);
                 }
@@ -917,7 +958,6 @@ public class Map extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     clickListener.onClick(view, getLayoutPosition());
-                    //Animar camara y agrandar marker
                 }
             }
         }

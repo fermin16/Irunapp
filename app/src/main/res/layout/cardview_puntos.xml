@@ -14,11 +14,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="90dp"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
                 android:scaleType="centerCrop"
                 android:id="@+id/imagen"
                 android:contentDescription="TODO" />
+            <View android:id="@+id/tile_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -41,6 +45,10 @@
                     android:textColor="#555"
                     android:textSize="15sp"/>
             </LinearLayout>
+            <View android:id="@+id/tile_divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -49,10 +57,9 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/boton_verMas"
                     android:text="VER MÁS"
-                    android:layout_marginLeft="57dp"
+                    android:layout_marginLeft="55dp"
                     app:icon="@drawable/vermas"
                     style="@style/Widget.MaterialComponents.Button.Icon" />
-
                 <Button
                     android:id="@+id/boton_IR"
                     android:layout_width="wrap_content"
