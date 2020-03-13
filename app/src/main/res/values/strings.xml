@@ -11,4 +11,6 @@
     <string name="rutas">Rutas</string>
     <string name="ver_mas">Ver más</string>
     <string name="como_llegar">Como llegar</string>
+    <string name="escribe_nombre_lugar">Escribe el nombre del lugar</string>
+    <string name="crear_ruta">Crear ruta</string>
 </resources>

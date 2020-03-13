@@ -4,18 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.ItemLista;
-import com.example.myapplication.ListaLugares;
+import com.example.myapplication.Lugar;
+import com.example.myapplication.ListaLugaresAdapter;
 import com.example.myapplication.R;
 
 import java.util.ArrayList;
@@ -25,7 +21,6 @@ import java.util.List;
 public class PestanaLugares extends Fragment {
 
     private static PestanaLugares pestana = null;
-
 
     public static PestanaLugares getPestana() {
         if (pestana == null) {
@@ -44,17 +39,18 @@ public class PestanaLugares extends Fragment {
         View root = inflater.inflate(R.layout.activity_lista_lugares, container, false);
 
         RecyclerView recyclerView = root.findViewById(R.id.lista_lugares);
-        List<ItemLista> listaLugares = new ArrayList<>();
-        // Añadir los lugares a la lista de la siguiente manera:
-        //listaLugares.add(new ItemLista(imagenPrincipal, nombreLugar, horarioLugar));
-        listaLugares.add(new ItemLista(0, "Lugar 0", "Abre a las 17:00"));
-        listaLugares.add(new ItemLista(0, "Lugar 1", "Cerrado"));
-        listaLugares.add(new ItemLista(0, "Lugar 2", "Abierto todo el día"));
+        List<Lugar> listaLugares = new ArrayList<>();
 
-        ListaLugares adapterListaLugares = new ListaLugares(getActivity(), listaLugares);
+        // TODO Añadir los lugares a la lista de la siguiente manera:
+        //listaLugares.add(new ItemLista(imagenPrincipal, nombreLugar, horarioLugar));
+        listaLugares.add(new Lugar(0, "Lugar 0", "Abre a las 17:00"));
+        listaLugares.add(new Lugar(0, "Lugar 1", "Cerrado"));
+        listaLugares.add(new Lugar(0, "Lugar 2", "Abierto todo el día"));
+
+        ListaLugaresAdapter listaLugaresAdapter = new ListaLugaresAdapter(getActivity(), listaLugares, true);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
-        recyclerView.setAdapter(adapterListaLugares);
+        recyclerView.setAdapter(listaLugaresAdapter);
 
         return root;
     }
