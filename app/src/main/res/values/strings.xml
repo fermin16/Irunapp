@@ -13,4 +13,10 @@
     <string name="como_llegar">Como llegar</string>
     <string name="escribe_nombre_lugar">Escribe el nombre del lugar</string>
     <string name="crear_ruta">Crear ruta</string>
+    <string name="ver_mapa">Ver en mapa</string>
+    <string name="direccion">Dirección</string>
+    <string name="horario">Horario</string>
+    <string name="precio">Precio</string>
+    <string name="contacto">Contacto</string>
+    <string name="pagina_web">Página web</string>
 </resources>

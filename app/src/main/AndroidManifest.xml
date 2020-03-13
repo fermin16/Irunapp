@@ -13,9 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".CrearRuta">
-
-        </activity>
         <activity
             android:name=".ActivityInicio"
             android:label="@string/title_activity_main2"
@@ -25,7 +22,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".ActivityInfo"></activity>
+        <activity android:name=".ui.main.CrearRuta"></activity>
         <meta-data
             android:name="com.parse.SERVER_URL"
             android:value="@string/back4app_server_url" />

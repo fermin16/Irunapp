@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.ui.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -8,6 +8,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+
+import com.example.myapplication.ListaLugaresAdapter;
+import com.example.myapplication.Lugar;
+import com.example.myapplication.LugarAutoCompleteAdapter;
+import com.example.myapplication.R;
 
 import java.util.ArrayList;
 

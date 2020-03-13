@@ -1,14 +1,18 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.ui.main.CrearRuta;
 
 import java.util.List;
 
@@ -30,7 +34,7 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View v;
         if (this.tarjetaGrande) {
-            v = inflater.inflate(R.layout.activity_tarjeta, parent, false);
+            v = inflater.inflate(R.layout.tarjeta_lugar, parent, false);
         }
         else {
             v = inflater.inflate(R.layout.tarjeta_pequena, parent, false);
@@ -40,11 +44,25 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull myViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final myViewHolder holder, int position) {
         holder.imagenPrincipal.setImageResource(mData.get(position).getImagenPrincipal());
         holder.nombreLugar.setText(mData.get(position).getNombreLugar());
         if (tarjetaGrande) {
             holder.horario.setText(mData.get(position).getHorario());
+            holder.botonVerMas.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO cargar los datos en activity_info
+                    // TODO mostrar activity_info
+                }
+            });
+            holder.botonComoLlegar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO cargar la ruta en el mapa para saber como llegar al lugar
+                    // TODO cambiar a la pestaña de mapa
+                }
+            });
         }
     }
 
@@ -57,7 +75,7 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
 
         ImageView imagenPrincipal;
         TextView nombreLugar, horario;
-
+        Button botonVerMas, botonComoLlegar;
 
         public myViewHolder(View itemView){
             super(itemView);
@@ -65,9 +83,10 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
             imagenPrincipal = itemView.findViewById(R.id.imagen_principal);
             nombreLugar = itemView.findViewById(R.id.nombre_lugar);
             if (tarjetaGrande) {
+                botonVerMas = itemView.findViewById(R.id.boton_vm);
+                botonComoLlegar = itemView.findViewById(R.id.boton_cm);
                 horario = itemView.findViewById(R.id.horario_lugar);
             }
-
         }
     }
 
