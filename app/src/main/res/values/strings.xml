@@ -19,4 +19,7 @@
     <string name="precio">Precio</string>
     <string name="contacto">Contacto</string>
     <string name="pagina_web">Página web</string>
+    <string name="eliminar">ELIMINAR</string>
+    <string name="lugar_eliminado">Lugar eliminado de la ruta</string>
+    <string name="deshacer">Deshacer</string>
 </resources>

@@ -1,22 +1,21 @@
 package com.example.myapplication;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.ui.main.CrearRuta;
-
 import java.util.List;
 
-public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapter.myViewHolder> {
+public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapter.MyViewHolder> {
 
     Context mContext;
     List<Lugar> mData;
@@ -28,23 +27,29 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
         this.tarjetaGrande = tarjetaGrande;
     }
 
+    public void restoreItem(Lugar item, int position) {
+        mData.add(position, item);
+        // notify item added by position
+        notifyItemInserted(position);
+    }
+
     @NonNull
     @Override
-    public myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View v;
         if (this.tarjetaGrande) {
             v = inflater.inflate(R.layout.tarjeta_lugar, parent, false);
         }
         else {
-            v = inflater.inflate(R.layout.tarjeta_pequena, parent, false);
+            v = inflater.inflate(R.layout.tarjeta_lugar_pequena, parent, false);
         }
 
-        return new myViewHolder(v);
+        return new MyViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final myViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
         holder.imagenPrincipal.setImageResource(mData.get(position).getImagenPrincipal());
         holder.nombreLugar.setText(mData.get(position).getNombreLugar());
         if (tarjetaGrande) {
@@ -71,13 +76,15 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
         return mData.size();
     }
 
-    public class myViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imagenPrincipal;
         TextView nombreLugar, horario;
         Button botonVerMas, botonComoLlegar;
+        public RelativeLayout viewFondo;
+        public LinearLayout viewFrente;
 
-        public myViewHolder(View itemView){
+        public MyViewHolder(View itemView){
             super(itemView);
 
             imagenPrincipal = itemView.findViewById(R.id.imagen_principal);
@@ -87,8 +94,11 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
                 botonComoLlegar = itemView.findViewById(R.id.boton_cm);
                 horario = itemView.findViewById(R.id.horario_lugar);
             }
+            else {
+                viewFrente = itemView.findViewById(R.id.item);
+                viewFondo = itemView.findViewById(R.id.fondo);
+            }
         }
     }
-
 }
 

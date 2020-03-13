@@ -1,24 +1,33 @@
 package com.example.myapplication.ui.main;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toast;
 
 import com.example.myapplication.ListaLugaresAdapter;
+import com.example.myapplication.ListaRutasAdapter;
 import com.example.myapplication.Lugar;
 import com.example.myapplication.LugarAutoCompleteAdapter;
 import com.example.myapplication.R;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
 public class CrearRuta extends AppCompatActivity {
 
-    //private static final String[] LUGARES = new String[] {"Lugar 1", "Otro lugar", "Y otro lugar más"};
+    public ArrayList<Lugar> ruta;
+    private ListaLugaresAdapter listaLugaresAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +47,11 @@ public class CrearRuta extends AppCompatActivity {
 
         // Establecer el adapter para la lista de lugares de la ruta
         RecyclerView recyclerView = findViewById(R.id.lista_lugares);
-        final ArrayList<Lugar> ruta = new ArrayList<>();
-        final ListaLugaresAdapter listaLugaresAdapter = new ListaLugaresAdapter(this, ruta, false);
+        ruta = new ArrayList<>();
+        listaLugaresAdapter = new ListaLugaresAdapter(this, ruta, false);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
         recyclerView.setAdapter(listaLugaresAdapter);
 
         buscadorLugares.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -59,4 +69,64 @@ public class CrearRuta extends AppCompatActivity {
             }
         });
     }
+
+    ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
+            // Eliminar el item seleccionado
+            final RecyclerView recyclerView = findViewById(R.id.lista_lugares);
+
+            // Obtener el ítem eliminado
+            final Lugar deletedItem = ruta.get(viewHolder.getAdapterPosition());
+            final int deletedIndex = viewHolder.getAdapterPosition();
+
+            // Eliminarlo de la lista
+            ruta.remove(viewHolder.getAdapterPosition());
+            listaLugaresAdapter.notifyDataSetChanged();
+
+            // Mostrar el mensaje de deshacer en caso de que se haya eliminado accidentalmente
+            Snackbar snackbar = Snackbar.make(recyclerView, getResources().getString(R.string.lugar_eliminado), Snackbar.LENGTH_LONG);
+            snackbar.setAction(getResources().getString(R.string.deshacer), new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    // Volver a añadir el item a la lista
+                    listaLugaresAdapter.restoreItem(deletedItem, deletedIndex);
+                }
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+
+        }
+
+        @Override
+        public void onChildDrawOver(Canvas c, RecyclerView recyclerView,
+                                    RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
+            final View foregroundView = ((ListaLugaresAdapter.MyViewHolder)viewHolder).viewFrente;
+            getDefaultUIUtil().onDrawOver(c, recyclerView, foregroundView, dX, dY,
+                    actionState, isCurrentlyActive);
+        }
+
+        @Override
+        public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+            final View foregroundView = ((ListaLugaresAdapter.MyViewHolder)viewHolder).viewFrente;
+            getDefaultUIUtil().clearView(foregroundView);
+        }
+
+        @Override
+        public void onChildDraw(Canvas c, RecyclerView recyclerView,
+                                RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                int actionState, boolean isCurrentlyActive) {
+            final View foregroundView = ((ListaLugaresAdapter.MyViewHolder)viewHolder).viewFrente;
+
+            getDefaultUIUtil().onDraw(c, recyclerView, foregroundView, dX, dY,
+                    actionState, isCurrentlyActive);
+        }
+    };
 }

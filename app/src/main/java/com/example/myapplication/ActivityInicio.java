@@ -34,7 +34,6 @@ public class ActivityInicio extends AppCompatActivity {
     }
 
     @Override
-    // Muestra el menú
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();

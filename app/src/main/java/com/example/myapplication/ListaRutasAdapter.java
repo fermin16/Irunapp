@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.myViewHolder> {
+public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.MyViewHolder> {
 
     Context mContext;
     List<Ruta> mData;
@@ -25,14 +25,14 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.my
 
     @NonNull
     @Override
-    public myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View v = inflater.inflate(R.layout.tarjeta_ruta, parent, false);
-        return new myViewHolder(v);
+        return new MyViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull myViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         holder.imagenPrincipal.setImageResource(mData.get(position).getImagenPrincipal());
         holder.nombreRuta.setText(mData.get(position).getNombreRuta());
         holder.descripcion.setText(mData.get(position).getDescripcion());
@@ -51,13 +51,13 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.my
         return mData.size();
     }
 
-    public class myViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imagenPrincipal;
         TextView nombreRuta, descripcion;
         Button botonVerMapa;
 
-        public myViewHolder(View itemView){
+        public MyViewHolder(View itemView){
             super(itemView);
             imagenPrincipal = itemView.findViewById(R.id.imagen_principal);
             nombreRuta = itemView.findViewById(R.id.nombre_ruta);
