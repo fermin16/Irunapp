@@ -15,11 +15,13 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
+import com.example.myapplication.EmptyRecyclerView;
 import com.example.myapplication.ListaLugaresAdapter;
 import com.example.myapplication.ListaRutasAdapter;
 import com.example.myapplication.Lugar;
 import com.example.myapplication.LugarAutoCompleteAdapter;
 import com.example.myapplication.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ public class CrearRuta extends AppCompatActivity {
         recyclerView.setLayoutManager(manager);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
         recyclerView.setAdapter(listaLugaresAdapter);
+        ((EmptyRecyclerView)recyclerView).setEmptyView(findViewById(R.id.lista_vacia));
 
         buscadorLugares.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -66,6 +69,15 @@ public class CrearRuta extends AppCompatActivity {
                 // un nuevo elemento en la lista
                 buscadorLugares.setText("");
                 listaLugaresAdapter.notifyDataSetChanged();
+            }
+        });
+
+        FloatingActionButton botonCrearRuta = findViewById(R.id.boton_crear_ruta);
+        botonCrearRuta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO crear la ruta
+                finish();    // Cerrar la actividad
             }
         });
     }

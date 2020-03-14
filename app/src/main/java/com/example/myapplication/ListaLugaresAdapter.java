@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,6 +61,8 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
                 public void onClick(View view) {
                     // TODO cargar los datos en activity_info
                     // TODO mostrar activity_info
+                    Intent intent = new Intent(view.getContext(), ActivityInfo.class);
+                    view.getContext().startActivity(intent);
                 }
             });
             holder.botonComoLlegar.setOnClickListener(new View.OnClickListener() {

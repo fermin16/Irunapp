@@ -22,4 +22,7 @@
     <string name="eliminar">ELIMINAR</string>
     <string name="lugar_eliminado">Lugar eliminado de la ruta</string>
     <string name="deshacer">Deshacer</string>
+    <string name="nombre_ruta">Nombre de la ruta</string>
+    <string name="titulo_ruta_vacia">No hay lugares en tu ruta</string>
+    <string name="instrucciones_ruta_vacia">Usa el buscador de arriba para añadir lugares a la ruta.</string>
 </resources>

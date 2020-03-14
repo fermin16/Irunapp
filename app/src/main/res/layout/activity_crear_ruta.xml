@@ -19,24 +19,66 @@
     <LinearLayout
         android:id="@+id/lugares_ruta"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
+        android:padding="8dp"
         tools:context=".ui.main.CrearRuta">
+
+        <EditText
+            android:id="@+id/nombre_ruta"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:hint="@string/nombre_ruta"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"></EditText>
 
         <AutoCompleteTextView
             android:id="@+id/buscador_lugares"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:background="@drawable/estilo_barra_busqueda"
             android:hint="@string/escribe_nombre_lugar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="35dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <LinearLayout
+            android:id="@+id/lista_vacia"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imagen_ruta_vacia"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:srcCompat="@drawable/ic_playlist_add_black_24dp" />
+
+            <TextView
+                android:id="@+id/titulo_ruta_vacia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/titulo_ruta_vacia"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+            <TextView
+                android:id="@+id/instrucciones_ruta_vacia"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="@string/instrucciones_ruta_vacia"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <com.example.myapplication.EmptyRecyclerView
             android:id="@+id/lista_lugares"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp" >
+
+        </com.example.myapplication.EmptyRecyclerView>
 
     </LinearLayout>
 </RelativeLayout>

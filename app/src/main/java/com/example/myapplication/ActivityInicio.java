@@ -43,7 +43,7 @@ public class ActivityInicio extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // TODO menú
+        // TODO gestionar los clicks en los items del menú
         Toast.makeText(this, "Ítem seleccionado: " + item.toString(), Toast.LENGTH_SHORT).show();
         return true;
     }
