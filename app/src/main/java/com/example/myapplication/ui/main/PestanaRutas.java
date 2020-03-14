@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -61,7 +62,8 @@ public class PestanaRutas extends Fragment {
         listaRutas.add(new Ruta(0, "Lugar 2", "Abierto todo el día"));
 
         ListaRutasAdapter adapterListaRutasAdapter = new ListaRutasAdapter(getActivity(), listaRutas);
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity()); //IMPORTANTE
+        GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.numero_columnas));
+
         recyclerView.setLayoutManager(manager); //IMPORTANTE
         recyclerView.setAdapter(adapterListaRutasAdapter);
 

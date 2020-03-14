@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,7 +50,8 @@ public class PestanaLugares extends Fragment {
         listaLugares.add(new Lugar(0, "Lugar 2", "Abierto todo el día"));
 
         ListaLugaresAdapter listaLugaresAdapter = new ListaLugaresAdapter(getActivity(), listaLugares, true);
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.numero_columnas));
+
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(listaLugaresAdapter);
 
