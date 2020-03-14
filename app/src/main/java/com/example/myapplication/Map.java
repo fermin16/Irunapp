@@ -2,25 +2,24 @@ package com.example.myapplication;
 
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -29,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -94,6 +92,7 @@ public class Map extends AppCompatActivity {
     private final int TAB_1_PUNTOS = 10;
     private final int TAB_2_PUNTOS = 30;
     private final int TAB_3_PUNTOS = 50;
+    private final int ANIMACION_TARJETAS = 500; //Tiempo animación tarjetas en milisegundos
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -111,6 +110,7 @@ public class Map extends AppCompatActivity {
     private FloatingActionButton BotonMapa;
     private FloatingActionButton BotonLocalizacion;
     private FloatingActionButton BotonBuscaPuntos;
+    private FloatingActionButton BotonTarjetas;
 
     //Componentes para funcionalidades del mapa:
     private PermissionsManager permissionsManager;
@@ -121,6 +121,7 @@ public class Map extends AppCompatActivity {
     private Symbol markerSelected; //Variable que indica si un marcador esta o no seleccionado.
     private int simboloActivado; //Valor entero que indique que un marker acaba de ser seleccionado por el listener de symbolmanager y no debe ser deseleccionado
     private ValueAnimator markerAnimator; //Animador para cuando se selecciona un marker del mapa
+    private boolean noMarker; //Variable booleana que indica si el marker seleccionado estaba o no en la ultima query
 
     //Componentes del hilo hijo:
     private boolean stop; //Variable que comprueba si el Activity está detenido.
@@ -141,8 +142,10 @@ public class Map extends AppCompatActivity {
 
     //RecycleView y componentes:
     private RecyclerView recyclerView;
+    private LinearLayoutManager recyclerLayoutManager;
+    private int elementoActualRecyclerView;
 
-
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,8 +161,10 @@ public class Map extends AppCompatActivity {
         //Inicializar marcador seleccionado a null:
         markerSelected = null;
 
-        //Inicizalizar la lista de puntos:
+        //Inicizalizar la lista de puntos y variable:
         lista_symbol = new ArrayList<>();
+        noMarker = false;
+        markerSelected = null;
 
         //Inicializar el handler del main thread:
          manejador = new Handler(getApplicationContext().getMainLooper()){
@@ -199,6 +204,19 @@ public class Map extends AppCompatActivity {
             BotonBuscaPuntos.setEnabled(false);
         });
 
+        BotonTarjetas = findViewById(R.id.BotonTarjetas);
+        BotonTarjetas.setEnabled(false);
+        BotonTarjetas.setOnClickListener(v -> {
+            if(BotonTarjetas.getColorNormal() == getColor(R.color.botonTarjetasNormal)) {
+                BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
+                BotonTarjetas.setEnabled(false);
+                ocultarTarjetas();
+            }else{
+                BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasNormal));
+                mostrarTarjetas();
+            }
+        });
+
         gif_ajustes = findViewById(R.id.swipe_gif);
         panelDeslizante = findViewById(R.id.PanelDeslizante);
         panelDeslizante.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
@@ -206,6 +224,7 @@ public class Map extends AppCompatActivity {
             public void onPanelSlide(View panel, float slideOffset) {
                 BotonFlotante.close(true);
                 BotonFlotante.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*OFFSET_FAB)).setDuration(0);
+                BotonTarjetas.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*OFFSET_FAB)).setDuration(0);
                 if(recyclerView != null){
                     recyclerView.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*(OFFSET_RECYCLEVIEW))).setDuration(0);
                 }
@@ -435,6 +454,7 @@ public class Map extends AppCompatActivity {
                     symbolManager.addClickListener(symbol -> {
                         simboloActivado = 1;
                         selectMarker(symbol);
+                        recyclerView.smoothScrollToPosition(lista_symbol.indexOf(markerSelected));
                     });
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
@@ -443,7 +463,7 @@ public class Map extends AppCompatActivity {
                         //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
                         simboloActivado--;
                         if((markerSelected != null) && simboloActivado!=0){
-                            deselectMarker(markerSelected);
+                            deselectMarker();
                         }
                         return false;
                     });
@@ -565,11 +585,16 @@ public class Map extends AppCompatActivity {
                                 .withIconSize(TAMANO_MAX_ICONO)
                                 .withDraggable(markerSelected.isDraggable())); //No permitir el movimiento del icono
                     }
+                    else
+                        BotonTarjetas.setEnabled(false);
                     lista_symbol.clear();
                     sinPuntos();
                 }
                 //Caso en el que ninguna lista es vacia y hay que añadir elementos
                 else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
+                    //Considerar que el marker seleccionado no esta en la lista de la query
+                    noMarker=true;
+                    BotonTarjetas.setEnabled(true);
                     //Eliminar los puntos actuales
                     symbolManager.delete(lista_symbol);
                     //Limpiar la lista de puntos y volver a añadirlos:
@@ -578,28 +603,31 @@ public class Map extends AppCompatActivity {
                     //Añadir nuevos puntos
                     for (ParseObject alerta : listaPuntos) {
                         ParseGeoPoint loc = ((Alert) alerta).getLocalizacion();
+                        //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
                         if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
                             icon_size = TAMANO_MAX_ICONO;
+                            noMarker=false;
                         }
                         else
                             icon_size = TAMANO_MIN_ICONO;
                         // Add symbol at specified lat/lon
-                            Symbol symbol = symbolManager.create(new SymbolOptions()
+                        Symbol symbol = symbolManager.create(new SymbolOptions()
                                     .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
                                     .withIconImage(MAKI_ICON_CAFE)
                                     .withIconSize(icon_size)
                                     .withDraggable(false)); //No permitir el movimiento del icono
+                        if(icon_size == TAMANO_MIN_ICONO)
                             lista_symbol.add(symbol);
-                            updateAdapter(listaPuntos);
+                        else
+                            lista_symbol.add(0,symbol);
                     }
                 }
                 //Si no se ha encontrado ningún punto cercano a la ubicación
                 else{
                     sinPuntos();
                 }
-                if(markerSelected != null){
-                    lista_symbol.add(markerSelected);
-                }
+                // Actualizar el adapter del recyclerView:
+                updateAdapter(listaPuntos);
                 loading_style.release();
             }
     }
@@ -608,6 +636,7 @@ public class Map extends AppCompatActivity {
         pause = true;
         hijo.interrupt();
         BotonBuscaPuntos.setEnabled(true);
+        noMarker = true;
         new AlertDialog.Builder(this)
                 .setMessage(R.string.puntos_no_localizados)
                 .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
@@ -634,7 +663,7 @@ public class Map extends AppCompatActivity {
     * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
     public void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
-            deselectMarker(markerSelected);
+            deselectMarker();
             animateCamera(symbol);
             markerAnimator = new ValueAnimator();
             markerAnimator.setObjectValues(TAMANO_MAX_ICONO, TAMANO_MIN_ICONO);
@@ -648,8 +677,13 @@ public class Map extends AppCompatActivity {
 
     /* Metodo que permite deseleccionar un marcador del mapa haciendolo más pequeño mediante una animación.
     * Comprobar que hay un marcador seleccionado.*/
-    private void deselectMarker(final Symbol symbol) {
+    private void deselectMarker() {
         if (markerSelected != null){
+            if(noMarker) {
+                lista_symbol.remove(markerSelected);
+                if(lista_symbol.isEmpty())
+                    BotonTarjetas.setEnabled(false);
+            }
             markerSelected = null;
             symbolManager.deleteAll();
             symbolManager.update(lista_symbol);
@@ -723,6 +757,42 @@ public class Map extends AppCompatActivity {
             }
         }
     }
+
+    public void mostrarTarjetas(){
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        recyclerView.setAlpha(0f);
+        recyclerView.setVisibility(View.VISIBLE);
+
+        float transicion = 0f;
+        if(panelDeslizante.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+            transicion = (float) (panelDeslizante.getCurrentParallaxOffset()*(OFFSET_RECYCLEVIEW));
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        recyclerView.animate()
+                .alpha(1f)
+                .translationY(transicion)
+                .setDuration(ANIMACION_TARJETAS)
+                .setListener(null);
+    }
+
+    private void ocultarTarjetas(){
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        recyclerView.animate()
+                .alpha(0f)
+                .translationY(recyclerView.getWidth())
+                .setDuration(ANIMACION_TARJETAS)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        recyclerView.setVisibility(View.GONE);
+                        BotonTarjetas.setEnabled(true);
+                    }
+                });
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -805,22 +875,35 @@ public class Map extends AppCompatActivity {
         recyclerView = findViewById(R.id.rv_on_top_of_map);
         LocationRecyclerViewAdapter locationAdapter =
                 new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),
-                LinearLayoutManager.HORIZONTAL, true));
+        recyclerLayoutManager = new LinearLayoutManager(getApplicationContext(),
+                LinearLayoutManager.HORIZONTAL, true);
+        recyclerView.setLayoutManager(recyclerLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(locationAdapter);
         SnapHelper snapHelper = new LinearSnapHelper();
         recyclerView.setOnFlingListener(null);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
+
+                if(elementoVisible != elementoActualRecyclerView) {
+                    selectMarker(lista_symbol.get(elementoVisible));
+                    elementoActualRecyclerView = elementoVisible;
+                }
+            }
+        });
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
     private List<SingleRecyclerViewLocation> createRecyclerViewLocations(List<ParseObject> listaParse) {
         ArrayList<SingleRecyclerViewLocation> locationList = new ArrayList<>();
-        if(listaParse != null) {
+        if(listaParse != null && !listaParse.isEmpty()) {
             for (ParseObject object : listaParse) {
                 SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
                 singleLocation.setNombreLugar(((Alert) object).getTitulo());
-                singleLocation.setDescripcionLugar(((Alert) object).getDescripcion());
                 singleLocation.setLocationCoordinates(new LatLng(((Alert) object).getLocalizacion().getLatitude(), ((Alert) object).getLocalizacion().getLongitude()));
                 singleLocation.setImagen(((Alert) object).getFoto());
                 locationList.add(singleLocation);
@@ -832,14 +915,13 @@ public class Map extends AppCompatActivity {
     private void updateAdapter(List<ParseObject> listaParse){
         LocationRecyclerViewAdapter locationAdapter =
                 new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
-        recyclerView.setAdapter(locationAdapter);
+        recyclerView.setAdapter(locationAdapter); recyclerView.swap
 
     }
 
     class SingleRecyclerViewLocation {
 
             private String lugar;
-            private String descripcionLugar;
             private byte[] imagen;
             private LatLng locationCoordinates;
 
@@ -849,14 +931,6 @@ public class Map extends AppCompatActivity {
 
             public void setNombreLugar(String name) {
                 this.lugar = name;
-            }
-
-            public String getDescripcionLugar() {
-                return descripcionLugar;
-            }
-
-            public void setDescripcionLugar(String descripcionLugar) {
-                this.descripcionLugar = descripcionLugar;
             }
 
             public byte[] getImagen(){
@@ -883,6 +957,7 @@ public class Map extends AppCompatActivity {
             private MapboxMap map;
 
             public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap) {
+                super();
                 this.locationList = locationList;
                 this.map = mapBoxMap;
             }
@@ -898,7 +973,6 @@ public class Map extends AppCompatActivity {
             public void onBindViewHolder(MyViewHolder holder, int position) {
                 SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
                 holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
-                holder.descripcionLugar_textview.setText(singleRecyclerViewLocation.getDescripcionLugar());
                 byte[] imagen = singleRecyclerViewLocation.getImagen();
                 holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
                 holder.setClickListener((view, position1) -> {
@@ -911,7 +985,6 @@ public class Map extends AppCompatActivity {
                             .newCameraPosition(newCameraPosition), CAMERA_ANIMATION);
 
                 });
-
             }
 
             @Override
@@ -921,7 +994,6 @@ public class Map extends AppCompatActivity {
 
             static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
                 TextView lugar_textview;
-                TextView descripcionLugar_textview;
                 CardView cardview;
                 ImageView imagen;
                 Button botonVermas;
@@ -931,22 +1003,16 @@ public class Map extends AppCompatActivity {
                 MyViewHolder(View view) {
                     super(view);
                     lugar_textview = view.findViewById(R.id.lugar_textview);
-                    descripcionLugar_textview = view.findViewById(R.id.descripcionLugar_textview);
                     imagen = view.findViewById(R.id.imagen);
                     botonVermas = view.findViewById(R.id.boton_verMas);
-                    botonVermas.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                    botonVermas.setOnClickListener(v -> {
 
-                        }
                     });
                     botonIr = view.findViewById(R.id.boton_IR);
-                    botonIr.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                    botonIr.setOnClickListener(v -> {
 
-                        }
                     });
+
                     cardview = view.findViewById(R.id.cardviewLugar);
                     cardview.setOnClickListener(this);
                 }

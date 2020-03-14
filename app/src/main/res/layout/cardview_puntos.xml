@@ -6,19 +6,22 @@
     <com.google.android.material.card.MaterialCardView
         style="@style/Widget.MaterialComponents.CardView"
         android:id="@+id/cardviewLugar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:scaleType="centerCrop"
-                android:id="@+id/imagen"
-                android:contentDescription="TODO" />
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="300dp"
+                    android:layout_height="100dp"
+                    android:scaleType="centerCrop"
+                    android:id="@+id/imagen"/>
+            </RelativeLayout>
             <View android:id="@+id/tile_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -33,17 +36,10 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"
-                    android:text="HOLA mundo"
+                    android:text=""
                     android:id="@+id/lugar_textview"
                     android:textColor="#000"
                     android:textSize="20sp" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="HOLAAAA"
-                    android:id="@+id/descripcionLugar_textview"
-                    android:textColor="#555"
-                    android:textSize="15sp"/>
             </LinearLayout>
             <View android:id="@+id/tile_divider2"
                 android:layout_width="match_parent"
@@ -56,17 +52,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/boton_verMas"
-                    android:text="VER MÁS"
-                    android:layout_marginLeft="55dp"
+                    android:text="@string/ver_mas"
+                    android:layout_marginStart="27dp"
                     app:icon="@drawable/vermas"
                     style="@style/Widget.MaterialComponents.Button.Icon" />
                 <Button
                     android:id="@+id/boton_IR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="25dp"
+                    android:layout_marginStart="25dp"
                     app:icon="@drawable/iconoir"
-                    android:text="IR"
+                    android:text="@string/ir"
                     android:theme="@style/Widget.MaterialComponents.Button.Icon" />
             </LinearLayout>
         </LinearLayout>

@@ -17,6 +17,7 @@
     <string name="modo_mapa">Satélite/Estándar</string>
     <string name="boton_localizar">Ubícame</string>
     <string name="boton_busqueda">Buscar puntos</string>
+
         <!-- Tabview Ajustes Mapa -->
     <string name="Texto_distancia">Distancia:</string>
     <string name="Texto_refresco">Frecuencia:</string>
@@ -27,6 +28,9 @@
     <string name="distancia_actualizada"> La distancia ha cambiado a </string>
     <string name="frecuencia_actualizada"> La frecuencia de busqueda ha cambiado a </string>
     <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
+        <!--RecyclerView-->
+    <string name="ver_mas">VER MÁS</string>
+    <string name="ir">IR</string>
 
         <!-- Mensajes mapa -->
     <string name="activarPermisosAjustes">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
