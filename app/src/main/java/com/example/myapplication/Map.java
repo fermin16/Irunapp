@@ -153,6 +153,7 @@ public class Map extends AppCompatActivity {
     private LinearLayoutManager recyclerLayoutManager;
     private int elementoActualRecyclerView;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -450,6 +451,7 @@ public class Map extends AppCompatActivity {
     }
 
     /** Este método permite cambiar de estilo de mapa evitando posibles riesgos a la hora de obtener la ubicación o de hacer un cambio rápido de estilos**/
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void set_style(final Style.Builder newStyle){
         try {
             loading_style.acquire();
@@ -682,6 +684,7 @@ public class Map extends AppCompatActivity {
 
     /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
     * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker();
@@ -704,9 +707,9 @@ public class Map extends AppCompatActivity {
         if (markerSelected != null){
             int index = lista_symbol.indexOf(markerSelected);
             lista_symbol.remove(markerSelected);
+            cardSelected = null;
             if(noMarker){
                 if(lista_symbol.isEmpty()) {
-                    cardSelected = null;
                     updateAdapter(new ArrayList<>());
                     BotonTarjetas.setEnabled(false);
                 }
@@ -902,6 +905,7 @@ public class Map extends AppCompatActivity {
 
     /*** Parte para las infoWindows que se mostraran en el mapa **/
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void initRecyclerView(List<ParseObject> listaParse) {
         recyclerView = findViewById(R.id.rv_on_top_of_map);
         LocationRecyclerViewAdapter locationAdapter =
@@ -913,19 +917,21 @@ public class Map extends AppCompatActivity {
         recyclerView.setAdapter(locationAdapter);
         SnapHelper snapHelper = new LinearSnapHelper();
         recyclerView.setOnFlingListener(null);
-//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//
-//                int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
-//
-//                if(elementoVisible != elementoActualRecyclerView) {
-//                    selectMarker(lista_symbol.get(elementoVisible));
-//                    elementoActualRecyclerView = elementoVisible;
-//                }
-//            }
-//        });
+        RecyclerView.OnScrollListener listenerScroll = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+
+                if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
+
+                    if (elementoVisible != elementoActualRecyclerView) {
+                        selectMarker(lista_symbol.get(elementoVisible));
+                        elementoActualRecyclerView = elementoVisible;
+                    }
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(listenerScroll);
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
@@ -954,6 +960,7 @@ public class Map extends AppCompatActivity {
                 lista_symbol.add(0,markerSelected);
                 listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
                 listaParse.add(0,cardSelected);
+                elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
             }
             LocationRecyclerViewAdapter locationAdapter =
                     new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
