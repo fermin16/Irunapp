@@ -574,16 +574,18 @@ public class Map extends AppCompatActivity {
     * El padre es el que muestra puesto que invocar metodos de mapbox en un hilo worker, lleva a errores y cuelgues
     * en la aplicación.*/
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
+            symbolManager.delete(lista_symbol);
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
                 //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
                 if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
-                    symbolManager.delete(lista_symbol);
                     if(markerSelected != null){
-                        symbolManager.create(new SymbolOptions()
+                        markerSelected = symbolManager.create(new SymbolOptions()
                                 .withLatLng(markerSelected.getLatLng())
                                 .withIconImage(markerSelected.getIconImage())
                                 .withIconSize(TAMANO_MAX_ICONO)
                                 .withDraggable(markerSelected.isDraggable())); //No permitir el movimiento del icono
+                         lista_symbol.clear();
+                         lista_symbol.add(0,markerSelected);
                     }
                     else
                         BotonTarjetas.setEnabled(false);
@@ -595,8 +597,6 @@ public class Map extends AppCompatActivity {
                     //Considerar que el marker seleccionado no esta en la lista de la query
                     noMarker=true;
                     BotonTarjetas.setEnabled(true);
-                    //Eliminar los puntos actuales
-                    symbolManager.delete(lista_symbol);
                     //Limpiar la lista de puntos y volver a añadirlos:
                     lista_symbol.clear();
                     float icon_size;
@@ -618,8 +618,10 @@ public class Map extends AppCompatActivity {
                                     .withDraggable(false)); //No permitir el movimiento del icono
                         if(icon_size == TAMANO_MIN_ICONO)
                             lista_symbol.add(symbol);
-                        else
-                            lista_symbol.add(0,symbol);
+                        else {
+                            lista_symbol.add(0, symbol);
+                            markerSelected = symbol;
+                        }
                     }
                 }
                 //Si no se ha encontrado ningún punto cercano a la ubicación
@@ -664,6 +666,7 @@ public class Map extends AppCompatActivity {
     public void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker();
+            noMarker = false; //Lo ponemos a false evitando asi que si es la primera query y no teniamos un punto seleccionado al deseleccionar no se borre el punto.s
             animateCamera(symbol);
             markerAnimator = new ValueAnimator();
             markerAnimator.setObjectValues(TAMANO_MAX_ICONO, TAMANO_MIN_ICONO);
@@ -679,10 +682,15 @@ public class Map extends AppCompatActivity {
     * Comprobar que hay un marcador seleccionado.*/
     private void deselectMarker() {
         if (markerSelected != null){
-            if(noMarker) {
-                lista_symbol.remove(markerSelected);
+            int index = lista_symbol.indexOf(markerSelected);
+            lista_symbol.remove(markerSelected);
+            if(noMarker){
                 if(lista_symbol.isEmpty())
                     BotonTarjetas.setEnabled(false);
+            }
+            else{
+                markerSelected.setIconSize(TAMANO_MIN_ICONO);
+                lista_symbol.add(index,markerSelected);
             }
             markerSelected = null;
             symbolManager.deleteAll();
@@ -915,7 +923,7 @@ public class Map extends AppCompatActivity {
     private void updateAdapter(List<ParseObject> listaParse){
         LocationRecyclerViewAdapter locationAdapter =
                 new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
-        recyclerView.setAdapter(locationAdapter); recyclerView.swap
+        recyclerView.setAdapter(locationAdapter);
 
     }
 
