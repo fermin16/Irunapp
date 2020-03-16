@@ -51,6 +51,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -76,13 +77,29 @@ import pl.droidsonroids.gif.GifImageView;
 public class Map extends AppCompatActivity {
 
     //Macros:
+    //Macros relacionadas con el mapa y la camara:
     private final int ACTIVAR_UBICACION = 0; //Codigo de la actividad que nos servira para saber si el usuario a activado o no la ubicacion
     private static final double ZOOM_FIND = 15.0; //Zoom al pulsar el boton de localizacion
+    private final double ZOOM_MIN = 12.0;
     private static final int CAMERA_ANIMATION = 3000; //Duración de la animación de la camara (milisegundos)
+    private static final LatLng BOUND_CORNER_NW = new LatLng(42.830833, -1.608611);
+    private static final LatLng BOUND_CORNER_NE = new LatLng(42.8525, -1.6925);
+    private static final LatLng BOUND_CORNER_SE = new LatLng(42.789167, -1.536111);
+    private static final LatLng BOUND_CORNER_SO = new LatLng(42.786667, -1.690833);
+    private static final LatLngBounds RESTRICTED_BOUNDS_AREA = new LatLngBounds.Builder()
+            .include(BOUND_CORNER_NW)
+            .include(BOUND_CORNER_NE)
+            .include(BOUND_CORNER_SE)
+            .include(BOUND_CORNER_SO)
+            .build();
+
+    //Macros para iconos (marker del mapa):
     private static final String MAKI_ICON_CAFE = "cafe-15";
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
     private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
+
+    //Macros de panel deslizante:
     private final double OFFSET_FAB = 1.3; //OFFSET base de la animacion de subir y bajar el FAB
     private final double OFFSET_RECYCLEVIEW = 1.5; //OFFSET base de la animacion de subit y bajar la recycleview
     private final double TAB_1_DISTANCIA = 0.5;
@@ -486,6 +503,9 @@ public class Map extends AppCompatActivity {
                     enableLocationComponent(style);
                 };
                 mapboxMap.setStyle(newStyle,loadedStyle);
+                //Limitar el mapa y la vista:
+                mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
+                mapboxMap.setMinZoomPreference(ZOOM_MIN);
             });
             loading_style.release();
         } catch (InterruptedException e) {
