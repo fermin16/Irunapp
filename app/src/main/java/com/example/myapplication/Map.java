@@ -93,6 +93,10 @@ public class Map extends AppCompatActivity {
             .include(BOUND_CORNER_SO)
             .build();
 
+    //Macros para mensajes del handler
+    private static final int MSG_CLICK_CARD = 1;
+    private static final int MSG_QUERY = 2;
+
     //Macros para iconos (marker del mapa):
     private static final String MAKI_ICON_CAFE = "cafe-15";
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
@@ -136,7 +140,7 @@ public class Map extends AppCompatActivity {
     private LocationComponent locationComponent; //Variable para obtener la localizacion actual
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
-    private Handler manejador; //Handler que maneja los mensajes del hilo hijo.
+    private static Handler manejador; //Handler que maneja los mensajes del hilo hijo.
 
     //Componentes marcadores:
     private Symbol markerSelected; //Variable que indica si un marcador esta o no seleccionado.
@@ -200,8 +204,23 @@ public class Map extends AppCompatActivity {
              @Override
              public void handleMessage(Message msg) {
                     super.handleMessage(msg);
-                    ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
-                    mostrarPuntos(lista_puntos);
+                 if(msg.what == MSG_CLICK_CARD) {
+                     LatLng cardclick = (LatLng) msg.obj;
+                     int i = 0;
+                     boolean salir = false;
+                     while (i < lista_symbol.size() && !salir){
+                         Symbol simbolo = lista_symbol.get(i);
+                         if(simbolo.getLatLng().getLatitude() == cardclick.getLatitude() && simbolo.getLatLng().getLongitude() == cardclick.getLongitude()) {
+                             salir = true;
+                             selectMarker(simbolo);
+                         }
+                         i++;
+                     }
+                 }
+                 else if(msg.what == MSG_QUERY) {
+                        ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
+                        mostrarPuntos(lista_puntos);
+                 }
              }
          };
 
@@ -600,6 +619,7 @@ public class Map extends AppCompatActivity {
     private void guardarAlertas(List<ParseObject> queryresult){
             Message msg = new Message();
             msg.obj = queryresult;
+            msg.what = MSG_QUERY;
             manejador.sendMessage(msg);
     }
 
@@ -972,10 +992,8 @@ public class Map extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateAdapter(ArrayList<ParseObject> listaParse){
         if(!listas_iguales(listaParse)) {
-            System.out.println("HOLA77777777");
             //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
             if(cardSelected != null){
-                System.out.println("HOLA8888888");
                 lista_symbol.remove(markerSelected); //En este caso previamente se ha guardado el marcador asi que podemos usar un remove normal
                 lista_symbol.add(0,markerSelected);
                 listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
@@ -1068,13 +1086,10 @@ public class Map extends AppCompatActivity {
                 holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
                 holder.setClickListener((view, position1) -> {
                     LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
-                    CameraPosition newCameraPosition = new CameraPosition.Builder()
-                            .target(selectedLocationLatLng)
-                            .zoom(ZOOM_FIND)
-                            .build();
-                    map.animateCamera(CameraUpdateFactory
-                            .newCameraPosition(newCameraPosition), CAMERA_ANIMATION);
-
+                    Message msg = new Message();
+                    msg.obj = selectedLocationLatLng;
+                    msg.what = MSG_CLICK_CARD;
+                    manejador.sendMessage(msg);
                 });
             }
 
