@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -118,10 +120,16 @@ public class Map extends AppCompatActivity {
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
     private Handler manejador; //Handler que maneja los mensajes del hilo hijo.
+
+    //Componentes marcadores:
     private Symbol markerSelected; //Variable que indica si un marcador esta o no seleccionado.
     private int simboloActivado; //Valor entero que indique que un marker acaba de ser seleccionado por el listener de symbolmanager y no debe ser deseleccionado
     private ValueAnimator markerAnimator; //Animador para cuando se selecciona un marker del mapa
     private boolean noMarker; //Variable booleana que indica si el marker seleccionado estaba o no en la ultima query
+
+    //Componentes cardView:
+    private ArrayList<ParseObject> prevQuery; //Array list que almacena la query anterior
+    private ParseObject cardSelected; //Guarda la card seleccionada en el mapa.
 
     //Componentes del hilo hijo:
     private boolean stop; //Variable que comprueba si el Activity está detenido.
@@ -161,13 +169,16 @@ public class Map extends AppCompatActivity {
         //Inicializar marcador seleccionado a null:
         markerSelected = null;
 
+        //Iniciar lista de ParseObject y el card seleccionado:
+        prevQuery = new ArrayList<>();
+
         //Inicizalizar la lista de puntos y variable:
         lista_symbol = new ArrayList<>();
         noMarker = false;
-        markerSelected = null;
 
         //Inicializar el handler del main thread:
          manejador = new Handler(getApplicationContext().getMainLooper()){
+             @RequiresApi(api = Build.VERSION_CODES.N)
              @Override
              public void handleMessage(Message msg) {
                     super.handleMessage(msg);
@@ -454,7 +465,7 @@ public class Map extends AppCompatActivity {
                     symbolManager.addClickListener(symbol -> {
                         simboloActivado = 1;
                         selectMarker(symbol);
-                        recyclerView.smoothScrollToPosition(lista_symbol.indexOf(markerSelected));
+                        selectCard();
                     });
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
@@ -573,6 +584,7 @@ public class Map extends AppCompatActivity {
     /*Metodo que utilizará el hilo main para obetener los puntos que ha leido el hijo y mostrarlos en el mapa.
     * El padre es el que muestra puesto que invocar metodos de mapbox en un hilo worker, lleva a errores y cuelgues
     * en la aplicación.*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
             symbolManager.delete(lista_symbol);
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
@@ -616,12 +628,9 @@ public class Map extends AppCompatActivity {
                                     .withIconImage(MAKI_ICON_CAFE)
                                     .withIconSize(icon_size)
                                     .withDraggable(false)); //No permitir el movimiento del icono
-                        if(icon_size == TAMANO_MIN_ICONO)
-                            lista_symbol.add(symbol);
-                        else {
-                            lista_symbol.add(0, symbol);
+                        if(icon_size == TAMANO_MAX_ICONO)
                             markerSelected = symbol;
-                        }
+                        lista_symbol.add(symbol);
                     }
                 }
                 //Si no se ha encontrado ningún punto cercano a la ubicación
@@ -634,20 +643,22 @@ public class Map extends AppCompatActivity {
             }
     }
 
-    private  void sinPuntos(){
+    private  void sinPuntos() {
         pause = true;
         hijo.interrupt();
         BotonBuscaPuntos.setEnabled(true);
         noMarker = true;
-        new AlertDialog.Builder(this)
-                .setMessage(R.string.puntos_no_localizados)
-                .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
-                    if(hijo != null){
-                        despertar();
-                    }
-                }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
-            Toast.makeText(getApplicationContext(),R.string.busqueda_detenida,Toast.LENGTH_LONG).show();
-        }).show();
+        if (alertDialog != null)
+            alertDialog.dismiss();
+        alertDialog = new AlertDialog.Builder(this)
+                    .setMessage(R.string.puntos_no_localizados)
+                    .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
+                        if (hijo != null) {
+                            despertar();
+                        }
+                    }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
+                Toast.makeText(getApplicationContext(), R.string.busqueda_detenida, Toast.LENGTH_LONG).show();
+            }).show();
     }
 
     /** Metodo que anima la camara y la lleva hasta el lugar indicado mediante las coordenadas de un objeto Symbol **/
@@ -659,6 +670,14 @@ public class Map extends AppCompatActivity {
 
         mapboxMap.animateCamera(CameraUpdateFactory
                 .newCameraPosition(position), CAMERA_ANIMATION);
+    }
+
+    /**Metodo que permite seleccionar un cardview del mapa de acuerdo con el simbolo seleccionado
+     * en definitiva guarda el card asociado al simbolo seleccionado y hace el efecto de scroll. **/
+    private void selectCard(){
+        int index = lista_symbol.indexOf(markerSelected);
+        cardSelected = prevQuery.get(index);
+        recyclerView.smoothScrollToPosition(index);
     }
 
     /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
@@ -680,13 +699,17 @@ public class Map extends AppCompatActivity {
 
     /* Metodo que permite deseleccionar un marcador del mapa haciendolo más pequeño mediante una animación.
     * Comprobar que hay un marcador seleccionado.*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void deselectMarker() {
         if (markerSelected != null){
             int index = lista_symbol.indexOf(markerSelected);
             lista_symbol.remove(markerSelected);
             if(noMarker){
-                if(lista_symbol.isEmpty())
+                if(lista_symbol.isEmpty()) {
+                    cardSelected = null;
+                    updateAdapter(new ArrayList<>());
                     BotonTarjetas.setEnabled(false);
+                }
             }
             else{
                 markerSelected.setIconSize(TAMANO_MIN_ICONO);
@@ -890,19 +913,19 @@ public class Map extends AppCompatActivity {
         recyclerView.setAdapter(locationAdapter);
         SnapHelper snapHelper = new LinearSnapHelper();
         recyclerView.setOnFlingListener(null);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
-
-                if(elementoVisible != elementoActualRecyclerView) {
-                    selectMarker(lista_symbol.get(elementoVisible));
-                    elementoActualRecyclerView = elementoVisible;
-                }
-            }
-        });
+//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//
+//                int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
+//
+//                if(elementoVisible != elementoActualRecyclerView) {
+//                    selectMarker(lista_symbol.get(elementoVisible));
+//                    elementoActualRecyclerView = elementoVisible;
+//                }
+//            }
+//        });
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
@@ -920,11 +943,44 @@ public class Map extends AppCompatActivity {
         return locationList;
     }
 
-    private void updateAdapter(List<ParseObject> listaParse){
-        LocationRecyclerViewAdapter locationAdapter =
-                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
-        recyclerView.setAdapter(locationAdapter);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void updateAdapter(ArrayList<ParseObject> listaParse){
+        if(!listas_iguales(listaParse)) {
+            System.out.println("HOLA77777777");
+            //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
+            if(cardSelected != null){
+                System.out.println("HOLA8888888");
+                lista_symbol.remove(markerSelected); //En este caso previamente se ha guardado el marcador asi que podemos usar un remove normal
+                lista_symbol.add(0,markerSelected);
+                listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
+                listaParse.add(0,cardSelected);
+            }
+            LocationRecyclerViewAdapter locationAdapter =
+                    new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
+            recyclerView.setAdapter(locationAdapter);
+        }
+        prevQuery = listaParse;
+    }
 
+    /** Metodo que chequea que la query actual y la anterior sean iguales, comprueba tamaño y objeto a objeto.
+     * No se utiliza equals ya que entre una query y otra el id de los objetos devueltos por la query es distinto.
+     * @param listaParse
+     * @return
+     */
+    private boolean listas_iguales(ArrayList<ParseObject> listaParse){
+        boolean res = true;
+
+        if(listaParse.size() == prevQuery.size()){
+            int i = 0;
+            while(res && i < listaParse.size()){
+                if(!listaParse.get(i).hasSameId(prevQuery.get(i)))
+                    res = false;
+                i++;
+            }
+        }
+        else
+            res = false;
+        return  res;
     }
 
     class SingleRecyclerViewLocation {
