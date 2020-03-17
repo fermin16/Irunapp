@@ -51,9 +51,21 @@
     <string name="title_activity_amplia_card">ampliaCard</string>
 
     <!-- Strings Activity Info -->
+    <!--Layout-->
     <string name="direccion">Dirección</string>
     <string name="horario">Horario</string>
     <string name="precio">Precio</string>
     <string name="contacto">Contacto</string>
     <string name="pagina_web">Página web</string>
+    <!-- Componentes del Bundle -->
+    <string name="bundle_direccion">direccion_bundle</string>
+    <string name="bundle_horario">horario_bundle</string>
+    <string name="bundle_precio">precio_bundle</string>
+    <string name="bundle_contacto">contacto_bundle</string>
+    <string name="bundle_web">web_bundle</string>
+    <string name="bundle_titulo">titulo_bundle</string>
+    <string name="bundle_descripcion">descripcion_bundle</string>
+    <string name="bundle_imagen">imagen_bundle</string>
+    <!--Mensajes-->
+    <string name="punto_no_recibido">No se ha recibido la información asociada al punto, intentelo de nuevo más tarde.</string>
 </resources>

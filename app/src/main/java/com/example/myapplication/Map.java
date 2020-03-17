@@ -119,6 +119,10 @@ public class Map extends AppCompatActivity {
     private final int TAB_3_PUNTOS = 50;
     private final int ANIMACION_TARJETAS = 500; //Tiempo animación tarjetas en milisegundos
 
+    //Macros de subactivities:
+    private static final int SUBACTIVITY_INFO = 1; //Campo para llamar a la actividad de crear alerta.
+    public static final String PUNTO = "punto";
+
     //Mapa y estilos del mapa:
     private MapView mapView;
     private Style.Builder BasicStyle;
@@ -207,7 +211,11 @@ public class Map extends AppCompatActivity {
              @Override
              public void handleMessage(Message msg) {
                     super.handleMessage(msg);
-                 if(msg.what == MSG_CLICK_CARD) {
+                 if(msg.what == MSG_QUERY) {
+                        ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
+                        mostrarPuntos(lista_puntos);
+                 }
+                 else{
                      LatLng cardclick = (LatLng) msg.obj;
                      int i = 0;
                      boolean salir = false;
@@ -220,26 +228,32 @@ public class Map extends AppCompatActivity {
                          }
                          i++;
                      }
-                 }
-                 else if(msg.what == MSG_QUERY) {
-                        ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
-                        mostrarPuntos(lista_puntos);
-                 }
-                 else if(msg.what == MSG_AMPLIA_CARD){
-                     // Ordinary Intent for launching a new activity
-                     Intent intent = new Intent(getApplicationContext(), ampliaCard.class);
-                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                     //Si era un click sobre el boton mostrar mas
+                     if(msg.what == MSG_AMPLIA_CARD) {
+                         // Ordinary Intent for launching a new activity
+                         Intent intent = new Intent(getApplicationContext(), activityInfo.class);
+                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                     // Get the transition name from the string
-                     String transitionName = getString(R.string.id_transicion_card);
+                         Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
+                         bundle.putString(String.valueOf(R.string.bundle_direccion),((Alert)cardSelected).getDireccion()); //Guardar direccion
+                         bundle.putString(String.valueOf(R.string.bundle_titulo),((Alert)cardSelected).getTitulo()); //Guardar nombre
+                         bundle.putString(String.valueOf(R.string.bundle_descripcion),((Alert)cardSelected).getDescripcion()); //Guardar descripcion
+                         bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Alert)cardSelected).getFoto());
+                         intent.putExtras(bundle);
 
-                     // Define the view that the animation will start from
-                     View viewStart = findViewById(R.id.cardviewLugar);
+                         // Get the transition name from the string
+                         String transitionName = getString(R.string.id_transicion_card);
 
-                     ActivityOptionsCompat options =
-                             ActivityOptionsCompat.makeSceneTransitionAnimation(Map.this, viewStart, transitionName);
-                     //Start the Intent
-                     startActivity(intent, options.toBundle());
+                         // Define the view that the animation will start from
+                         View viewStart = findViewById(R.id.cardviewLugar);
+
+                         ActivityOptionsCompat options =
+                                 ActivityOptionsCompat.makeSceneTransitionAnimation(Map.this, viewStart, transitionName);
+                         //Pausar al hijo:
+                         dormir();
+                         //Start the Intent
+                         startActivity(intent, options.toBundle());
+                     }
                  }
              }
          };
@@ -351,7 +365,7 @@ public class Map extends AppCompatActivity {
                 if (intent.getAction().matches("android.location.PROVIDERS_CHANGED")){ //Si han cambiado los proveedores de servicio o de locaizacion
                     //Comprobar los servicios de red y ubicacion:
                     if(!checkLocationServices()) {
-                        pause = true; //Poner el hijo en pausa
+                        dormir(); //Poner el hijo en pausa
                         Toast.makeText(context,getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
                     }
                     else{ //Si se han activado
@@ -376,6 +390,20 @@ public class Map extends AppCompatActivity {
         contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
         set_style(BasicStyle);
         initRecyclerView(null);
+    }
+
+    /* Metodo para chequear los resultados de las subactiviades:*/
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case ACTIVAR_UBICACION: //Comprobar si el usuario ha activado o no los activity_ajustes de ubicacion.
+                findMe();
+                break;
+            case SUBACTIVITY_INFO:
+                despertar();
+                break;
+        }
     }
 
     /* Metodo que se encarga de activar el elemento de localizacion, para ello pide permisos al usuario
@@ -706,8 +734,7 @@ public class Map extends AppCompatActivity {
     }
 
     private  void sinPuntos() {
-        pause = true;
-        hijo.interrupt();
+        dormir();
         BotonBuscaPuntos.setEnabled(true);
         noMarker = true;
         if (alertDialog != null)
@@ -812,8 +839,7 @@ public class Map extends AppCompatActivity {
         try {
             //Si el hijo no está muerto:
             if(hijo != null && hijo.isAlive()){
-                pause = true;
-                hijo.interrupt();
+                dormir();
             }
             semaforo_ajustes.acquire();
             if(tabViewId == R.id.kilometros){
@@ -866,10 +892,18 @@ public class Map extends AppCompatActivity {
     /* Metodo que se encarga de despertar al hijo*/
     public void despertar(){
         pause = false;
-        if(hijo != null) {
+        if(hijo != null && hijo.isAlive()) {
             synchronized (hijo) {
                 hijo.notifyAll(); //Notificar al hijo que puede continuar su ejecucion
             }
+        }
+    }
+
+    /** Metodo para dormir o pausar al hijo **/
+    public void dormir(){
+        if(hijo != null && hijo.isAlive()) {
+            pause = true;
+            hijo.interrupt();
         }
     }
 
@@ -941,14 +975,14 @@ public class Map extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        pause = true; //Pausar el hilo hijo
+        dormir(); //Pausar el hilo hijo
         super.onPause();
         mapView.onPause();
     }
 
     @Override
     public void onStop() {
-        pause = true; //Pausar el hilo hijo
+        dormir(); //Pausar el hilo hijo
         if(mGpsSwitchStateReceiver != null) {
            contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         }
@@ -1000,22 +1034,24 @@ public class Map extends AppCompatActivity {
         recyclerView.setAdapter(locationAdapter);
         SnapHelper snapHelper = new LinearSnapHelper();
         recyclerView.setOnFlingListener(null);
-        RecyclerView.OnScrollListener listenerScroll = new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
 
-                if(newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
-
-                    if (elementoVisible != elementoActualRecyclerView) {
-                        selectMarker(lista_symbol.get(elementoVisible));
-                        selectCard();
-                        elementoActualRecyclerView = elementoVisible;
-                    }
-                }
-            }
-        };
-        recyclerView.addOnScrollListener(listenerScroll);
+        //Seleccionar card en scroll (Desactivado por el momento):
+//        RecyclerView.OnScrollListener listenerScroll = new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+//
+//                if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
+//
+//                    if (elementoVisible != elementoActualRecyclerView) {
+//                        selectMarker(lista_symbol.get(elementoVisible));
+//                        selectCard();
+//                        elementoActualRecyclerView = elementoVisible;
+//                    }
+//                }
+//            }
+//        };
+//        recyclerView.addOnScrollListener(listenerScroll);
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
@@ -1135,6 +1171,7 @@ public class Map extends AppCompatActivity {
                     msg.what = MSG_CLICK_CARD;
                     manejador.sendMessage(msg);
                 });
+                holder.coordenadas = singleRecyclerViewLocation.getLocationCoordinates();
             }
 
             @Override
@@ -1148,6 +1185,7 @@ public class Map extends AppCompatActivity {
                 ImageView imagen;
                 Button botonVermas;
                 Button botonIr;
+                LatLng coordenadas;
                 ItemClickListener clickListener;
 
                 MyViewHolder(View view) {
@@ -1157,6 +1195,7 @@ public class Map extends AppCompatActivity {
                     botonVermas = view.findViewById(R.id.boton_verMas);
                     botonVermas.setOnClickListener(v -> {
                         Message msg = new Message();
+                        msg.obj = coordenadas;
                         msg.what = MSG_AMPLIA_CARD;
                         manejador.sendMessage(msg);
                     });

@@ -8,8 +8,7 @@
         android:id="@+id/cardviewLugar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:transitionName="@string/id_transicion_card">
+        android:layout_margin="16dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,7 +20,8 @@
                     android:layout_width="300dp"
                     android:layout_height="100dp"
                     android:scaleType="centerCrop"
-                    android:id="@+id/imagen"/>
+                    android:id="@+id/imagen"
+                    android:transitionName="@string/id_transicion_card"/>
             </RelativeLayout>
             <View android:id="@+id/tile_divider"
                 android:layout_width="match_parent"

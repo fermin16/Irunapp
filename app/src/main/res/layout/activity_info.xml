@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ActivityInicio">
+    android:background="@color/mapboxYellowFaint"
+    android:transitionName="id_transicion_card">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -21,31 +22,45 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:transitionName="@string/id_transicion_card">
 
             <ImageView
                 android:id="@+id/imagen_principal"
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
                 app:srcCompat="@drawable/degradado_tarjeta" />
+            <View android:id="@+id/imagen_divider_info"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
 
             <TextView
                 android:id="@+id/nombre_lugar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="nombre_lugar"
                 android:textColor="#000000"
                 android:textSize="50sp"
                 android:textStyle="bold" />
+
+            <View android:id="@+id/tile_divider_info"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
 
             <TextView
                 android:id="@+id/descripcion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="descripcion"
                 android:textSize="20sp" />
+
+            <View android:id="@+id/descripcion_divider_info"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -72,14 +87,22 @@
                             android:text="@string/direccion"
                             android:textSize="20sp"
                             android:textStyle="bold" />
+
                     </LinearLayout>
+                    <View android:id="@+id/direccion_divider_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                     <TextView
-                        android:paddingLeft="24dp"
                         android:id="@+id/direccion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="dirección"
+                        android:paddingLeft="24dp"
                         android:textSize="15sp" />
+                    <View android:id="@+id/direccion_divider_info_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -103,13 +126,20 @@
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+                    <View android:id="@+id/horario_divider_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                     <TextView
                         android:paddingLeft="24dp"
                         android:id="@+id/horario"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="horario"
                         android:textSize="15sp" />
+                    <View android:id="@+id/horario_divider_info_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -133,13 +163,20 @@
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+                    <View android:id="@+id/precio_divider_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                     <TextView
-                        android:paddingLeft="24dp"
                         android:id="@+id/precio"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="precio"
+                        android:paddingLeft="24dp"
                         android:textSize="15sp" />
+                    <View android:id="@+id/precio_divider_info_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -163,13 +200,20 @@
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+                    <View android:id="@+id/contacto_divider_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                     <TextView
-                        android:paddingLeft="24dp"
                         android:id="@+id/contacto"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="contacto"
+                        android:paddingLeft="24dp"
                         android:textSize="15sp" />
+                    <View android:id="@+id/contacto_divider_info2"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -193,13 +237,20 @@
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+                    <View android:id="@+id/web_divider_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                     <TextView
-                        android:paddingLeft="24dp"
                         android:id="@+id/web"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="web"
+                        android:paddingLeft="24dp"
                         android:textSize="15sp" />
+                    <View android:id="@+id/web_divider_info_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/dividerVertical" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

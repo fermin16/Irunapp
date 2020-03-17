@@ -14,10 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".ampliaCard"
-            android:label="@string/title_activity_amplia_card"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".activityInfo"></activity>
         <activity android:name=".Map">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
