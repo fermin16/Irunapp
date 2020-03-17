@@ -5,7 +5,6 @@
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
     <string name="back4app_app_id">Qzk8sGh31MvniNznswsCSecB3xRkbvR09xs8BFgr</string>
     <string name="back4app_client_key">Ixwjr0fMKaKHVOwwAayYIreukIpprB1tYXBnG9NJ</string>
-    <string name="boton">Boton</string>
 
     <!-- Strings del  Mapa -->
     <!--Tokens mapa -->
@@ -50,12 +49,11 @@
     <string name="puntos_no_localizados">No se han localizado puntos a su alrededor ¿Desea buscar de nuevo?</string>
     <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
     <string name="title_activity_amplia_card">ampliaCard</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- Strings Activity Info -->
+    <string name="direccion">Dirección</string>
+    <string name="horario">Horario</string>
+    <string name="precio">Precio</string>
+    <string name="contacto">Contacto</string>
+    <string name="pagina_web">Página web</string>
 </resources>

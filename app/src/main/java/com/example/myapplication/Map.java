@@ -314,7 +314,6 @@ public class Map extends AppCompatActivity {
         //Inicializar variables para busqueda de puntos y ajustes:
         //Obtener valores de ajustes almacenados
         max_puntos = Preferencias.getPuntos(this);
-        System.out.println(max_puntos);
         int selected_tab_distancia = Preferencias.getKilometros(this);
         tiempo_refresco = Preferencias.getFrecuencia(this);
 
@@ -653,16 +652,7 @@ public class Map extends AppCompatActivity {
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
                 //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
                 if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
-                    if(markerSelected != null){
-                        markerSelected = symbolManager.create(new SymbolOptions()
-                                .withLatLng(markerSelected.getLatLng())
-                                .withIconImage(markerSelected.getIconImage())
-                                .withIconSize(TAMANO_MAX_ICONO)
-                                .withDraggable(markerSelected.isDraggable())); //No permitir el movimiento del icono
-                         lista_symbol.clear();
-                         lista_symbol.add(0,markerSelected);
-                    }
-                    else
+                    if(markerSelected == null)
                         BotonTarjetas.setEnabled(false);
                     lista_symbol.clear();
                     sinPuntos();
@@ -699,6 +689,15 @@ public class Map extends AppCompatActivity {
                 //Si no se ha encontrado ningún punto cercano a la ubicación
                 else{
                     sinPuntos();
+                }
+                //Comprobar si habia marker seleccionado y no se ha recuperado en la query
+                if(markerSelected != null && !lista_symbol.contains(markerSelected)){
+                    markerSelected = symbolManager.create(new SymbolOptions()
+                            .withLatLng(markerSelected.getLatLng())
+                            .withIconImage(markerSelected.getIconImage())
+                            .withIconSize(TAMANO_MAX_ICONO)
+                            .withDraggable(markerSelected.isDraggable()));
+                    lista_symbol.add(0,markerSelected);
                 }
                 // Actualizar el adapter del recyclerView:
                 updateAdapter(listaPuntos);
@@ -738,9 +737,11 @@ public class Map extends AppCompatActivity {
     /**Metodo que permite seleccionar un cardview del mapa de acuerdo con el simbolo seleccionado
      * en definitiva guarda el card asociado al simbolo seleccionado y hace el efecto de scroll. **/
     private void selectCard(){
-        int index = lista_symbol.indexOf(markerSelected);
-        cardSelected = prevQuery.get(index);
-        recyclerView.smoothScrollToPosition(index);
+        if(markerSelected != null) {
+            int index = lista_symbol.indexOf(markerSelected);
+            cardSelected = prevQuery.get(index);
+            recyclerView.smoothScrollToPosition(index);
+        }
     }
 
     /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
@@ -768,9 +769,10 @@ public class Map extends AppCompatActivity {
         if (markerSelected != null){
             int index = lista_symbol.indexOf(markerSelected);
             lista_symbol.remove(markerSelected);
-            cardSelected = null;
             if(noMarker){
+                //Solo estaba disponible el punto seleccionado:
                 if(lista_symbol.isEmpty()) {
+                    cardSelected = null;
                     BotonTarjetas.setEnabled(false);
                     BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
                     recyclerView.animate()
@@ -784,14 +786,17 @@ public class Map extends AppCompatActivity {
                                 }
                             });
                 }
+                //Habia más puntos ademas del seleccionado pero en la ultima query no se recupero (ya no esta en alcance)
+                else{
+                    ArrayList<ParseObject> query_elimnaTarjeta = new ArrayList<>(prevQuery);
+                    query_elimnaTarjeta.removeIf(obj -> obj.hasSameId(cardSelected));
+                    cardSelected = null;
+                    updateAdapter(query_elimnaTarjeta);
+                }
             }
             else{
-                markerAnimator = new ValueAnimator();
-                markerAnimator.setObjectValues(TAMANO_MIN_ICONO, TAMANO_MAX_ICONO);
-                markerAnimator.setDuration(ANIMACION_ICONO);
-                markerAnimator.addUpdateListener(animator -> markerSelected.setIconSize((float) markerAnimator.getAnimatedValue()));
-                markerAnimator.start();
-                symbolManager.update(markerSelected);;
+                cardSelected = null;
+                markerSelected.setIconSize(TAMANO_MIN_ICONO);
                 lista_symbol.add(index,markerSelected);
             }
             markerSelected = null;
