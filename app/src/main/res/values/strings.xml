@@ -8,17 +8,17 @@
     <string name="boton">Boton</string>
 
     <!-- Strings del  Mapa -->
-        <!--Tokens mapa -->
+    <!--Tokens mapa -->
     <string name="map_token">pk.eyJ1IjoiaXJ1bmFwcCIsImEiOiJjazcyMDRkbGowNGVhM2Vud2xmcHhraXVrIn0.DzS0V3QRI35Ds9qXhhuBNg</string>
     <string name="map_style_basic">mapbox://styles/irunapp/ck720snyp0s0f1io8add5kxrj</string>
     <string name="map_style_road">mapbox://styles/irunapp/ck720osjv0www1ipg3lrjfbrn</string>
-        <!--Boton Flotante del mapa -->
+    <!--Boton Flotante del mapa -->
     <string name="boton_flotante">Cerrar Menú</string>
     <string name="modo_mapa">Satélite/Estándar</string>
     <string name="boton_localizar">Ubícame</string>
     <string name="boton_busqueda">Buscar puntos</string>
 
-        <!-- Tabview Ajustes Mapa -->
+    <!-- Tabview Ajustes Mapa -->
     <string name="Texto_distancia">Distancia:</string>
     <string name="Texto_refresco">Frecuencia:</string>
     <string name="Texto_num_puntos">Resultados:</string>
@@ -28,11 +28,12 @@
     <string name="distancia_actualizada"> La distancia ha cambiado a </string>
     <string name="frecuencia_actualizada"> La frecuencia de busqueda ha cambiado a </string>
     <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
-        <!--RecyclerView-->
+    <!--RecyclerView-->
     <string name="ver_mas">VER MÁS</string>
     <string name="ir">IR</string>
+    <string name="id_transicion_card">cardViewTransicion</string>
 
-        <!-- Mensajes mapa -->
+    <!-- Mensajes mapa -->
     <string name="activarPermisosAjustes">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
     <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades</string>
     <string name="gps_desactivado"> Los servicios de ubicación estan desactivados</string>
@@ -48,4 +49,13 @@
     <string name="cancelar_busqueda">Cancelar</string>
     <string name="puntos_no_localizados">No se han localizado puntos a su alrededor ¿Desea buscar de nuevo?</string>
     <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
+    <string name="title_activity_amplia_card">ampliaCard</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>

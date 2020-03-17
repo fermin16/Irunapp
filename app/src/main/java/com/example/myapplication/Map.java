@@ -33,6 +33,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -96,6 +97,7 @@ public class Map extends AppCompatActivity {
     //Macros para mensajes del handler
     private static final int MSG_CLICK_CARD = 1;
     private static final int MSG_QUERY = 2;
+    private static final int MSG_AMPLIA_CARD = 3;
 
     //Macros para iconos (marker del mapa):
     private static final String MAKI_ICON_CAFE = "cafe-15";
@@ -140,6 +142,7 @@ public class Map extends AppCompatActivity {
     private LocationComponent locationComponent; //Variable para obtener la localizacion actual
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
+    private Context contextoBroadcast;
     private static Handler manejador; //Handler que maneja los mensajes del hilo hijo.
 
     //Componentes marcadores:
@@ -213,6 +216,7 @@ public class Map extends AppCompatActivity {
                          if(simbolo.getLatLng().getLatitude() == cardclick.getLatitude() && simbolo.getLatLng().getLongitude() == cardclick.getLongitude()) {
                              salir = true;
                              selectMarker(simbolo);
+                             selectCard();
                          }
                          i++;
                      }
@@ -220,6 +224,22 @@ public class Map extends AppCompatActivity {
                  else if(msg.what == MSG_QUERY) {
                         ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
                         mostrarPuntos(lista_puntos);
+                 }
+                 else if(msg.what == MSG_AMPLIA_CARD){
+                     // Ordinary Intent for launching a new activity
+                     Intent intent = new Intent(getApplicationContext(), ampliaCard.class);
+                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                     // Get the transition name from the string
+                     String transitionName = getString(R.string.id_transicion_card);
+
+                     // Define the view that the animation will start from
+                     View viewStart = findViewById(R.id.cardviewLugar);
+
+                     ActivityOptionsCompat options =
+                             ActivityOptionsCompat.makeSceneTransitionAnimation(Map.this, viewStart, transitionName);
+                     //Start the Intent
+                     startActivity(intent, options.toBundle());
                  }
              }
          };
@@ -256,11 +276,11 @@ public class Map extends AppCompatActivity {
         BotonTarjetas.setEnabled(false);
         BotonTarjetas.setOnClickListener(v -> {
             if(BotonTarjetas.getColorNormal() == getColor(R.color.botonTarjetasNormal)) {
-                BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
-                BotonTarjetas.setEnabled(false);
+                runOnUiThread(() ->BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado)));
+                runOnUiThread(() ->BotonTarjetas.setEnabled(false));
                 ocultarTarjetas();
             }else{
-                BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasNormal));
+                runOnUiThread(() ->BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasNormal)));
                 mostrarTarjetas();
             }
         });
@@ -352,8 +372,9 @@ public class Map extends AppCompatActivity {
                 }
             }
         };
+        contextoBroadcast = getApplicationContext();
         //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
-        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+        contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
         set_style(BasicStyle);
         initRecyclerView(null);
     }
@@ -516,7 +537,7 @@ public class Map extends AppCompatActivity {
                         }
                         return false;
                     });
-                    symbolManager.setIconAllowOverlap(false);
+                    symbolManager.setIconAllowOverlap(true);
                     symbolManager.setTextAllowOverlap(true);
                     markerSelected = null;
                     enableLocationComponent(style);
@@ -750,12 +771,27 @@ public class Map extends AppCompatActivity {
             cardSelected = null;
             if(noMarker){
                 if(lista_symbol.isEmpty()) {
-                    updateAdapter(new ArrayList<>());
                     BotonTarjetas.setEnabled(false);
+                    BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
+                    recyclerView.animate()
+                            .alpha(0f)
+                            .setDuration(ANIMACION_TARJETAS)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    recyclerView.setVisibility(View.GONE);
+                                    updateAdapter(new ArrayList<>());
+                                }
+                            });
                 }
             }
             else{
-                markerSelected.setIconSize(TAMANO_MIN_ICONO);
+                markerAnimator = new ValueAnimator();
+                markerAnimator.setObjectValues(TAMANO_MIN_ICONO, TAMANO_MAX_ICONO);
+                markerAnimator.setDuration(ANIMACION_ICONO);
+                markerAnimator.addUpdateListener(animator -> markerSelected.setIconSize((float) markerAnimator.getAnimatedValue()));
+                markerAnimator.start();
+                symbolManager.update(markerSelected);;
                 lista_symbol.add(index,markerSelected);
             }
             markerSelected = null;
@@ -893,7 +929,8 @@ public class Map extends AppCompatActivity {
     @Override
     protected  void onRestart() {
         super.onRestart();
-        registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
+        if(mGpsSwitchStateReceiver != null)
+            contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
         despertar();
     }
 
@@ -907,8 +944,9 @@ public class Map extends AppCompatActivity {
     @Override
     public void onStop() {
         pause = true; //Pausar el hilo hijo
-        if(mGpsSwitchStateReceiver != null)
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+        if(mGpsSwitchStateReceiver != null) {
+           contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+        }
         super.onStop();
         mapView.onStop();
     }
@@ -927,7 +965,7 @@ public class Map extends AppCompatActivity {
                 hijo.interrupt(); //Interrumpir el hilo
         }
         if(mGpsSwitchStateReceiver != null)
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+            contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
         //Eliminar el animador.
         if (markerAnimator != null) {
             markerAnimator.cancel();
@@ -966,6 +1004,7 @@ public class Map extends AppCompatActivity {
 
                     if (elementoVisible != elementoActualRecyclerView) {
                         selectMarker(lista_symbol.get(elementoVisible));
+                        selectCard();
                         elementoActualRecyclerView = elementoVisible;
                     }
                 }
@@ -1112,7 +1151,9 @@ public class Map extends AppCompatActivity {
                     imagen = view.findViewById(R.id.imagen);
                     botonVermas = view.findViewById(R.id.boton_verMas);
                     botonVermas.setOnClickListener(v -> {
-
+                        Message msg = new Message();
+                        msg.what = MSG_AMPLIA_CARD;
+                        manejador.sendMessage(msg);
                     });
                     botonIr = view.findViewById(R.id.boton_IR);
                     botonIr.setOnClickListener(v -> {
