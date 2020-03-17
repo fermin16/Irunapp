@@ -26,7 +26,7 @@
             <ImageView
                 android:id="@+id/imagen_principal"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="@dimen/alto_tarjeta_grande"
                 app:srcCompat="@drawable/degradado_tarjeta" />
 
             <TextView

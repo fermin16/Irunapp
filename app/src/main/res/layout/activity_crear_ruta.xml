@@ -28,27 +28,41 @@
             android:padding="8dp"
             tools:context=".ui.main.CrearRuta">
 
-            <EditText
-                android:id="@+id/nombre_ruta"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:hint="@string/nombre_ruta"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
-
-            <ImageView
-                android:id="@+id/imageView"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                app:srcCompat="@drawable/degradado_tarjeta" />
+                android:layout_height="match_parent">
 
-            <EditText
-                android:id="@+id/descripcion_ruta"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:hint="@string/descripcion_ruta"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                <ImageView
+                    android:id="@+id/imagen_ruta"
+                    android:layout_width="@dimen/tamano_imagen_crear_ruta"
+                    android:layout_height="@dimen/tamano_imagen_crear_ruta"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_image_black_24dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/nombre_ruta"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:hint="@string/nombre_ruta"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textSize="@dimen/tamano_texto_crear_ruta" />
+
+                    <EditText
+                        android:id="@+id/descripcion_ruta"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:hint="@string/descripcion_ruta"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+                </LinearLayout>
+
+            </LinearLayout>
 
             <AutoCompleteTextView
                 android:id="@+id/buscador_lugares"
@@ -84,7 +98,7 @@
 
                 <TextView
                     android:id="@+id/instrucciones_ruta_vacia"
-                    android:layout_width="200dp"
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content"
                     android:text="@string/instrucciones_ruta_vacia"
                     android:textAlignment="center" />
