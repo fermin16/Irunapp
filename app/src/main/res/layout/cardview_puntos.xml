@@ -21,7 +21,7 @@
                     android:layout_height="100dp"
                     android:scaleType="centerCrop"
                     android:id="@+id/imagen"
-                    android:transitionName="@string/id_transicion_card"/>
+                    android:transitionName="@string/id_transicion_imagen"/>
             </RelativeLayout>
             <View android:id="@+id/tile_divider"
                 android:layout_width="match_parent"
@@ -40,7 +40,8 @@
                     android:text=""
                     android:id="@+id/lugar_textview"
                     android:textColor="#000"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:transitionName="@string/id_transicion_nombre"/>
             </LinearLayout>
             <View android:id="@+id/tile_divider2"
                 android:layout_width="match_parent"
@@ -56,15 +57,17 @@
                     android:text="@string/ver_mas"
                     android:layout_marginStart="27dp"
                     app:icon="@drawable/vermas"
-                    style="@style/Widget.MaterialComponents.Button.Icon" />
+                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_mas"/>
                 <Button
                     android:id="@+id/boton_IR"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
                     app:icon="@drawable/iconoir"
-                    android:text="@string/ir"
-                    android:theme="@style/Widget.MaterialComponents.Button.Icon" />
+                    android:text="@string/RUTA"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_ruta"/>
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

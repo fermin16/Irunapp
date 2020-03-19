@@ -34,7 +34,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityOptionsCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.util.Pair;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSnapHelper;
@@ -234,6 +234,19 @@ public class Map extends AppCompatActivity {
                          Intent intent = new Intent(getApplicationContext(), activityInfo.class);
                          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+                         //Animaciones para la transicion:
+                         // Ibtener la vistas de los objetos para la animacion:
+                         View cardview = findViewById(R.id.cardviewLugar);
+
+                         Pair<View, String> imagen = Pair.create(cardview.findViewById(R.id.imagen), getString(R.string.id_transicion_imagen));
+                         Pair<View, String> nombre = Pair.create(cardview.findViewById(R.id.lugar_textview), getString(R.string.id_transicion_nombre));
+                         Pair<View, String> boton_mas = Pair.create(cardview.findViewById(R.id.boton_verMas), getString(R.string.id_transicion_boton_mas));
+                         Pair<View, String> boton_ruta = Pair.create(cardview.findViewById(R.id.boton_IR), getString(R.string.id_transicion_boton_ruta));
+
+                         ActivityOptionsCompat options =
+                                 ActivityOptionsCompat.makeSceneTransitionAnimation(Map.this, imagen,nombre,boton_mas,boton_ruta);
+
+                         //Información de la tarjeta seleccionada
                          Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
                          bundle.putString(String.valueOf(R.string.bundle_direccion),((Alert)cardSelected).getDireccion()); //Guardar direccion
                          bundle.putString(String.valueOf(R.string.bundle_titulo),((Alert)cardSelected).getTitulo()); //Guardar nombre
@@ -241,14 +254,8 @@ public class Map extends AppCompatActivity {
                          bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Alert)cardSelected).getFoto());
                          intent.putExtras(bundle);
 
-                         // Get the transition name from the string
-                         String transitionName = getString(R.string.id_transicion_card);
 
-                         // Define the view that the animation will start from
-                         View viewStart = findViewById(R.id.cardviewLugar);
 
-                         ActivityOptionsCompat options =
-                                 ActivityOptionsCompat.makeSceneTransitionAnimation(Map.this, viewStart, transitionName);
                          //Pausar al hijo:
                          dormir();
                          //Start the Intent

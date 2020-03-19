@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.parse-community.Parse-SDK-Android:parse:1.23.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2f37414fa484ff694191d7c066cfeaa8/jetified-parse-1.23.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2f37414fa484ff694191d7c066cfeaa8/jetified-parse-1.23.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/04876f6d53c11c868d2969765f17f3d4/jetified-parse-1.23.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/04876f6d53c11c868d2969765f17f3d4/jetified-parse-1.23.1/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.parse-community.Parse-SDK-Android/parse/1.23.1/df3de7d91782a9d1f49cb8ccb59ed00fe36ee35e/parse-1.23.1-javadoc.jar!/" />

@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/mapboxYellowFaint"
-    android:transitionName="id_transicion_card">
+    android:background="@color/mapboxYellowFaint">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -23,13 +22,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:transitionName="@string/id_transicion_card">
+            android:transitionName="@string/id_transicion_imagen">
 
             <ImageView
                 android:id="@+id/imagen_principal"
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                app:srcCompat="@drawable/degradado_tarjeta" />
+                app:srcCompat="@drawable/degradado_tarjeta"
+                android:transitionName="id_transicion_card"/>
             <View android:id="@+id/imagen_divider_info"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -42,7 +42,8 @@
                 android:padding="8dp"
                 android:textColor="#000000"
                 android:textSize="50sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:transitionName="@string/id_transicion_nombre"/>
 
             <View android:id="@+id/tile_divider_info"
                 android:layout_width="match_parent"
@@ -252,6 +253,28 @@
                         android:layout_height="1dp"
                         android:background="?android:attr/dividerVertical" />
                 </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/boton_verMenos"
+                    android:text="@string/ver_menos"
+                    android:layout_marginStart="50dp"
+                    app:icon="@drawable/ver_menos_boton"
+                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_mas"/>
+                <Button
+                    android:id="@+id/boton_ruta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
+                    app:icon="@drawable/iconoir"
+                    android:text="@string/RUTA"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_ruta"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

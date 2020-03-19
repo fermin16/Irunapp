@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +24,8 @@ public class activityInfo extends AppCompatActivity {
     private TextView contacto;
     private TextView web;
     private ImageView imagen;
+    private Button boton_menos;
+    private Button boton_ruta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +54,14 @@ public class activityInfo extends AppCompatActivity {
                 imagen = findViewById(R.id.imagen_principal);
                 byte[] imagen_bytes = bundle.getByteArray(String.valueOf(R.string.bundle_imagen));
                 imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen_bytes, 0, imagen_bytes.length));
+
+                boton_menos = findViewById(R.id.boton_verMenos);
+                boton_menos.setOnClickListener(v -> super.onBackPressed());
+
+                boton_ruta =  findViewById(R.id.boton_ruta);
+                boton_ruta.setOnClickListener(v -> {
+
+                });
             }
             else {
                 Toast.makeText(this,R.string.punto_no_recibido, Toast.LENGTH_LONG).show();

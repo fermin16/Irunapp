@@ -30,7 +30,10 @@
     <!--RecyclerView-->
     <string name="ver_mas">VER MÁS</string>
     <string name="ir">IR</string>
-    <string name="id_transicion_card">cardViewTransicion</string>
+    <string name="id_transicion_imagen">TransicionImagen</string>
+    <string name="id_transicion_nombre">TransicionNombre</string>
+    <string name="id_transicion_boton_mas">TransicionBotonMas</string>
+    <string name="id_transicion_boton_ruta">TransicionBotonRuta</string>
 
     <!-- Mensajes mapa -->
     <string name="activarPermisosAjustes">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
@@ -57,6 +60,8 @@
     <string name="precio">Precio</string>
     <string name="contacto">Contacto</string>
     <string name="pagina_web">Página web</string>
+    <string name="ver_menos">VER MENOS</string>
+    <string name="RUTA">RUTA</string>
     <!-- Componentes del Bundle -->
     <string name="bundle_direccion">direccion_bundle</string>
     <string name="bundle_horario">horario_bundle</string>
