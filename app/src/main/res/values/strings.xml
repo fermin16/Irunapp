@@ -56,6 +56,9 @@
     <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
     <string name="title_activity_amplia_card">ampliaCard</string>
     <string name="error_ruta"> No se ha podido generar la ruta, no se ha encontrado su localización</string>
+    <string name="iniciar_ruta">¿Desea iniciar la ruta al lugar al lugar seleccionado?</string>
+    <string name="iniciar">Iniciar</string>
+    <string name="cancelar_navegavecion">Cancelar</string>
 
     <!-- Strings Activity Info -->
     <!--Layout-->

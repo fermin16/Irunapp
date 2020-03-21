@@ -164,7 +164,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private FloatingActionButton BotonMapa;
     private FloatingActionButton BotonLocalizacion;
     private FloatingActionButton BotonBuscaPuntos;
-    private FloatingActionButton BotonTarjetas;
+
 
     //Componentes para funcionalidades del mapa:
     private PermissionsManager permissionsManager;
@@ -183,6 +183,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     //Componentes cardView:
     private ArrayList<ParseObject> prevQuery; //Array list que almacena la query anterior
     private ParseObject cardSelected; //Guarda la card seleccionada en el mapa.
+    private FloatingActionButton BotonTarjetas;
 
     //Componentes del hilo hijo:
     private boolean stop; //Variable que comprueba si el Activity está detenido.
@@ -210,6 +211,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private DirectionsRoute currentRoute;
     private NavigationMapRoute navigationMapRoute;
     private ProgressBar routeLoading;
+    private FloatingActionButton BotonNavegacion;
     public static String modoRuta;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -262,7 +264,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                      }
                      //Si era un click sobre el boton mostrar mas
                      if(msg.what == MSG_AMPLIA_CARD) {
-                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()),false);
                          if(BotonFlotante.isOpened())
                             BotonFlotante.close(true);
                          // Ordinary Intent for launching a new activity
@@ -298,7 +299,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                      }
                      else if(msg.what == MSG_RUTA){
                         vibrate();
-                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()),true);
+                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
                      }
                  }
              }
@@ -345,6 +346,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
+        BotonNavegacion = findViewById(R.id.BotonNavegacion);
+        BotonNavegacion.setEnabled(false);
+        BotonNavegacion.setOnClickListener(v ->{
+            startNavigation(mapView);
+        });
+
         gif_ajustes = findViewById(R.id.swipe_gif);
         panelDeslizante = findViewById(R.id.PanelDeslizante);
         panelDeslizante.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
@@ -353,6 +360,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 BotonFlotante.close(true);
                 BotonFlotante.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*OFFSET_FAB)).setDuration(0);
                 BotonTarjetas.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*OFFSET_FAB)).setDuration(0);
+                BotonNavegacion.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*OFFSET_FAB)).setDuration(0);
                 if(recyclerView != null){
                     recyclerView.animate().translationY((float) (panelDeslizante.getCurrentParallaxOffset()*(OFFSET_RECYCLEVIEW))).setDuration(0);
                 }
@@ -600,7 +608,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         simboloActivado = 1;
                         selectMarker(symbol);
                         selectCard();
-                        getroute(Point.fromLngLat(symbol.getLatLng().getLongitude(),symbol.getLatLng().getLatitude()), false);
                     });
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
@@ -830,6 +837,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     public void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker();
+            updateNavigationRoute();
             noMarker = false; //Lo ponemos a false evitando asi que si es la primera query y no teniamos un punto seleccionado al deseleccionar no se borre el punto.s
             animateCamera(symbol);
             markerAnimator = new ValueAnimator();
@@ -1047,6 +1055,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         }
         finally {
             super.onStop();
+            navigationMapRoute.onStop();
             mapView.onStop();
         }
     }
@@ -1127,7 +1136,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-    private void getroute(Point puntoDestino,boolean iniciaRuta) {
+    private void getroute(Point puntoDestino) {
         if (locationComponent !=null) {
             Location localizacionActual = locationComponent.getLastKnownLocation();
             if (localizacionActual != null) {
@@ -1148,9 +1157,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                                     updateNavigationRoute();
                                     navigationMapRoute.addRoute(currentRoute);
                                     routeLoading.setVisibility(View.INVISIBLE);
-                                    if(iniciaRuta)
-                                        startNavigation(mapView);
-
+                                    if(alertDialog != null)
+                                        alertDialog.dismiss();
+                                    alertDialog = new AlertDialog.Builder(Map.this)
+                                            .setMessage(R.string.iniciar_ruta )
+                                            .setPositiveButton(R.string.iniciar, (paramDialogInterface, paramInt) -> startNavigation(mapView)).setNegativeButton(R.string.cancelar_navegavecion,null).show();
+                                    BotonNavegacion.setEnabled(true);
                                 }
                             }
 
@@ -1169,6 +1181,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         if(navigationMapRoute != null){
             navigationMapRoute.updateRouteArrowVisibilityTo(false);
             navigationMapRoute.updateRouteVisibilityTo(false);
+            if(BotonNavegacion.isEnabled())
+                BotonNavegacion.setEnabled(false);
         }
         else{
             navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);

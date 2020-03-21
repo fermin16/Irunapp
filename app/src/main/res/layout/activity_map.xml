@@ -60,6 +60,17 @@
                     android:layout_alignParentBottom="true"
                     android:layout_marginEnd="1dp"
                     android:layout_marginBottom="90dp"
+                    android:id="@+id/BotonNavegacion"
+                    android:src="@drawable/boton_flotante_ruta"
+                    app:fab_colorNormal="@color/BotonRuta"
+                    />
+                <com.github.clans.fab.FloatingActionButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginBottom="155dp"
                     android:id="@+id/BotonTarjetas"
                     android:src="@drawable/iconotarjetas"
                     app:fab_colorNormal="@color/botonTarjetasNormal"
@@ -73,7 +84,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
                     android:layout_marginEnd="1dp"
-                    android:layout_marginBottom="155dp"
+                    android:layout_marginBottom="220dp"
                     android:visibility="visible"
                     app:menu_fab_label="@string/boton_flotante"
                     tools:visibility="visible">
@@ -130,13 +141,24 @@
             android:orientation="vertical"
             android:focusable="false"
             android:id="@+id/AjustesMapa">
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/Texto_distancia"
-                android:layout_gravity="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large">
-            </TextView>
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/imagen_distancia_deslizante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:src="@drawable/icono_distancia_deslizante" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Texto_distancia"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large">
+                </TextView>
+            </LinearLayout>
             <com.d.lib.tabview.TabView
                 android:id="@+id/kilometros"
                 android:layout_width="365dp"
@@ -148,13 +170,24 @@
                 app:tabv_textSize="14dp"
                 android:layout_gravity="center"
                 app:tabv_title="@string/ajustes_distancia"/>
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/Texto_refresco"
-                android:layout_gravity="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large">
-            </TextView>
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/imagen_refresco_deslizante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:src="@drawable/icono_refresco_deslizante" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Texto_refresco"
+                    android:layout_gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large">
+                </TextView>
+            </LinearLayout>
             <com.d.lib.tabview.TabView
                 android:id="@+id/frecuencia"
                 android:layout_width="365dp"
@@ -166,13 +199,24 @@
                 android:layout_gravity="center"
                 app:tabv_textSize="14dp"
                 app:tabv_title="@string/ajustes_referesco"/>
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/Texto_num_puntos"
-                android:layout_gravity="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large">
-            </TextView>
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/imagen_resultados_deslizante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:src="@drawable/icono_puntos_deslizante" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Texto_num_puntos"
+                    android:layout_gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large">
+                </TextView>
+            </LinearLayout>
             <com.d.lib.tabview.TabView
                 android:id="@+id/numpuntos"
                 android:layout_width="365dp"

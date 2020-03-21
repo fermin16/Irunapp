@@ -10,4 +10,5 @@
     <color name="botonTarjetasDesactivado">#FF8F00</color>
     <color name="botonTarjetasRipple">#E9FF00</color>
     <color name="Boton_cerrar_tarjeta">#000000</color>
+    <color name="BotonRuta">#00EDF8</color>
 </resources>
