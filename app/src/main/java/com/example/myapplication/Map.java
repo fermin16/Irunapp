@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
@@ -18,13 +19,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +37,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
@@ -46,8 +54,13 @@ import com.example.myapplication.Modelos.Alert;
 import com.example.myapplication.Modelos.Preferencias;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -59,10 +72,15 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -73,9 +91,12 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import pl.droidsonroids.gif.GifImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
-public class Map extends AppCompatActivity {
+public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     //Macros:
     //Macros relacionadas con el mapa y la camara:
@@ -98,6 +119,7 @@ public class Map extends AppCompatActivity {
     private static final int MSG_CLICK_CARD = 1;
     private static final int MSG_QUERY = 2;
     private static final int MSG_AMPLIA_CARD = 3;
+    private static final int MSG_RUTA = 4;
 
     //Macros para iconos (marker del mapa):
     private static final String MAKI_ICON_CAFE = "cafe-15";
@@ -122,6 +144,9 @@ public class Map extends AppCompatActivity {
     //Macros de subactivities:
     private static final int SUBACTIVITY_INFO = 1; //Campo para llamar a la actividad de crear alerta.
     public static final String PUNTO = "punto";
+
+    //Macros para Ruta:
+    private static final int DURACION_VIBRACION = 100;
 
     //Mapa y estilos del mapa:
     private MapView mapView;
@@ -181,6 +206,12 @@ public class Map extends AppCompatActivity {
     private LinearLayoutManager recyclerLayoutManager;
     private int elementoActualRecyclerView;
 
+    //Elementos para navegacion:
+    private DirectionsRoute currentRoute;
+    private NavigationMapRoute navigationMapRoute;
+    private ProgressBar routeLoading;
+    public static String modoRuta;
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
     @Override
@@ -191,6 +222,7 @@ public class Map extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
 
+        routeLoading = findViewById(R.id.routeLoadingProgressBar);
 
         //Inicializar los semaforos
         loading_style = new Semaphore(1);
@@ -230,6 +262,9 @@ public class Map extends AppCompatActivity {
                      }
                      //Si era un click sobre el boton mostrar mas
                      if(msg.what == MSG_AMPLIA_CARD) {
+                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()),false);
+                         if(BotonFlotante.isOpened())
+                            BotonFlotante.close(true);
                          // Ordinary Intent for launching a new activity
                          Intent intent = new Intent(getApplicationContext(), activityInfo.class);
                          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -260,6 +295,10 @@ public class Map extends AppCompatActivity {
                          dormir();
                          //Start the Intent
                          startActivity(intent, options.toBundle());
+                     }
+                     else if(msg.what == MSG_RUTA){
+                        vibrate();
+                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()),true);
                      }
                  }
              }
@@ -353,6 +392,7 @@ public class Map extends AppCompatActivity {
         tab_puntos.setOnTabSelectedListener(index -> {
             setAjustesMapa(index, tab_puntos.getId(),true);
         });
+
         tab_distancia.selectTab(selected_tab_distancia,false);
         setAjustesMapa(selected_tab_distancia,tab_distancia.getId(),false);
         tab_frecuencia.selectTab(tiempo_refresco,false);
@@ -397,6 +437,7 @@ public class Map extends AppCompatActivity {
         contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
         set_style(BasicStyle);
         initRecyclerView(null);
+
     }
 
     /* Metodo para chequear los resultados de las subactiviades:*/
@@ -559,6 +600,7 @@ public class Map extends AppCompatActivity {
                         simboloActivado = 1;
                         selectMarker(symbol);
                         selectCard();
+                        getroute(Point.fromLngLat(symbol.getLatLng().getLongitude(),symbol.getLatLng().getLatitude()), false);
                     });
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
@@ -568,6 +610,7 @@ public class Map extends AppCompatActivity {
                         simboloActivado--;
                         if((markerSelected != null) && simboloActivado!=0){
                             deselectMarker();
+                            updateNavigationRoute();
                         }
                         return false;
                     });
@@ -575,11 +618,14 @@ public class Map extends AppCompatActivity {
                     symbolManager.setTextAllowOverlap(true);
                     markerSelected = null;
                     enableLocationComponent(style);
+//                    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
                 };
                 mapboxMap.setStyle(newStyle,loadedStyle);
                 //Limitar el mapa y la vista:
                 mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
                 mapboxMap.setMinZoomPreference(ZOOM_MIN);
+                //Inicilizar componente para navegacion:
+
             });
             loading_style.release();
         } catch (InterruptedException e) {
@@ -955,6 +1001,7 @@ public class Map extends AppCompatActivity {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+
     @Override
     public void onStart() {
         try {
@@ -987,14 +1034,21 @@ public class Map extends AppCompatActivity {
         mapView.onPause();
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public void onStop() {
         dormir(); //Pausar el hilo hijo
-        if(mGpsSwitchStateReceiver != null) {
-           contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+        try {
+            if(mGpsSwitchStateReceiver != null) {
+                contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+            }
+        } catch(IllegalArgumentException e) {
+            Log.v("Problema BroadcastReceiver","El BroadcastReciever ya se había eliminado");
         }
-        super.onStop();
-        mapView.onStop();
+        finally {
+            super.onStop();
+            mapView.onStop();
+        }
     }
 
     @Override
@@ -1003,6 +1057,7 @@ public class Map extends AppCompatActivity {
         mapView.onLowMemory();
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     protected void onDestroy() {
         stop = true;
@@ -1010,14 +1065,21 @@ public class Map extends AppCompatActivity {
             if(hijo.getState() == Thread.State.TIMED_WAITING) //Si el hijo está durmiendo:
                 hijo.interrupt(); //Interrumpir el hilo
         }
-        if(mGpsSwitchStateReceiver != null)
-            contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
-        //Eliminar el animador.
-        if (markerAnimator != null) {
-            markerAnimator.cancel();
+        try {
+            if(mGpsSwitchStateReceiver != null) {
+                contextoBroadcast.unregisterReceiver(mGpsSwitchStateReceiver); //Eliminar el broadcastReciever
+            }
+        } catch(IllegalArgumentException e) {
+            Log.v("Problema BroadcastReceiver","El BroadcastReciever ya se había eliminado");
         }
-        super.onDestroy();
-        mapView.onDestroy();
+        finally{
+            //Eliminar el animador.
+            if (markerAnimator != null) {
+                markerAnimator.cancel();
+            }
+            super.onDestroy();
+            mapView.onDestroy();
+        }
     }
 
     @Override
@@ -1026,14 +1088,107 @@ public class Map extends AppCompatActivity {
         mapView.onSaveInstanceState(outState);
     }
 
+    /****
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     * Parte para la navegacion del mapa **/
+    @Override
+    public void onMapReady(@NonNull MapboxMap mapboxMap) {
 
-    /*** Parte para las infoWindows que se mostraran en el mapa **/
+    }
+
+    @SuppressLint("MissingPermission")
+    private void vibrate() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator == null) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(DURACION_VIBRACION, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrator.vibrate(DURACION_VIBRACION);
+        }
+    }
+
+    private void startNavigation(View v){
+        boolean simularRuta = true;
+        if(currentRoute !=null) {
+            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                    .directionsRoute(currentRoute)
+                    .shouldSimulateRoute(simularRuta)
+                    .waynameChipEnabled(true)
+                    .build();
+            dormir();
+            NavigationLauncher.startNavigation(Map.this, options);
+        }
+    }
+
+    private void getroute(Point puntoDestino,boolean iniciaRuta) {
+        if (locationComponent !=null) {
+            Location localizacionActual = locationComponent.getLastKnownLocation();
+            if (localizacionActual != null) {
+                routeLoading.setVisibility(View.VISIBLE);
+                Point PuntoOrigen = Point.fromLngLat(localizacionActual.getLongitude(), localizacionActual.getLatitude());
+                NavigationRoute.builder(this).
+                        accessToken(getString(R.string.map_token))
+                        .origin(PuntoOrigen)
+                        .destination(puntoDestino)
+                        .profile(modoRuta)
+                        .alternatives(true)
+                        .build()
+                        .getRoute(new Callback<DirectionsResponse>() {
+                            @Override
+                            public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                                if(response.body() != null && response.body().routes().size() >= 1){
+                                    currentRoute = response.body().routes().get(0);
+                                    updateNavigationRoute();
+                                    navigationMapRoute.addRoute(currentRoute);
+                                    routeLoading.setVisibility(View.INVISIBLE);
+                                    if(iniciaRuta)
+                                        startNavigation(mapView);
+
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                                Snackbar.make(mapView, R.string.error_ruta, Snackbar.LENGTH_SHORT).show();
+                            }
+                        });
+                return;
+            }
+        }
+        Snackbar.make(mapView, R.string.error_ruta, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void updateNavigationRoute() {
+        if(navigationMapRoute != null){
+            navigationMapRoute.updateRouteArrowVisibilityTo(false);
+            navigationMapRoute.updateRouteVisibilityTo(false);
+        }
+        else{
+            navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
+        }
+    }
+
+    /****
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     **********************************************************
+     * Parte para las infoWindows que se mostraran en el mapa **/
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void initRecyclerView(List<ParseObject> listaParse) {
         recyclerView = findViewById(R.id.rv_on_top_of_map);
         LocationRecyclerViewAdapter locationAdapter =
-                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
+                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this);
         recyclerLayoutManager = new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.HORIZONTAL, true);
         recyclerView.setLayoutManager(recyclerLayoutManager);
@@ -1088,7 +1243,7 @@ public class Map extends AppCompatActivity {
                 elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
             }
             LocationRecyclerViewAdapter locationAdapter =
-                    new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap);
+                    new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this);
             recyclerView.setAdapter(locationAdapter);
         }
         prevQuery = listaParse;
@@ -1114,6 +1269,8 @@ public class Map extends AppCompatActivity {
             res = false;
         return  res;
     }
+
+
 
     class SingleRecyclerViewLocation {
 
@@ -1146,16 +1303,18 @@ public class Map extends AppCompatActivity {
         }
 
         /*** Clase que se encarga de actualizar la vista es decir el contenido de las tarjetas **/
-        static class LocationRecyclerViewAdapter extends
+        public static class LocationRecyclerViewAdapter extends
                 RecyclerView.Adapter<LocationRecyclerViewAdapter.MyViewHolder> {
 
             private List<SingleRecyclerViewLocation> locationList;
             private MapboxMap map;
+            private Context contextoApp;
 
-            public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap) {
+            public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap, Context contextoApp) {
                 super();
                 this.locationList = locationList;
                 this.map = mapBoxMap;
+                this.contextoApp = contextoApp;
             }
 
             @Override
@@ -1179,6 +1338,7 @@ public class Map extends AppCompatActivity {
                     manejador.sendMessage(msg);
                 });
                 holder.coordenadas = singleRecyclerViewLocation.getLocationCoordinates();
+                holder.contextoApp = contextoApp;
             }
 
             @Override
@@ -1186,7 +1346,7 @@ public class Map extends AppCompatActivity {
                 return locationList.size();
             }
 
-            static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
                 TextView lugar_textview;
                 CardView cardview;
                 ImageView imagen;
@@ -1194,7 +1354,9 @@ public class Map extends AppCompatActivity {
                 Button botonIr;
                 LatLng coordenadas;
                 ItemClickListener clickListener;
+                Context contextoApp;
 
+                @SuppressLint("RestrictedApi")
                 MyViewHolder(View view) {
                     super(view);
                     lugar_textview = view.findViewById(R.id.lugar_textview);
@@ -1208,7 +1370,25 @@ public class Map extends AppCompatActivity {
                     });
                     botonIr = view.findViewById(R.id.boton_IR);
                     botonIr.setOnClickListener(v -> {
+                        PopupMenu popup = new PopupMenu(contextoApp, v);
+                        popup.getMenuInflater().inflate(R.menu.popup_menu,popup.getMenu());
 
+                        popup.setOnMenuItemClickListener(item -> {
+                            if(item.getItemId() == R.id.modoCoche)
+                                modoRuta = DirectionsCriteria.PROFILE_DRIVING;
+                            else if(item.getItemId() == R.id.modoBicicleta)
+                                modoRuta = DirectionsCriteria.PROFILE_CYCLING;
+                            else
+                                modoRuta = DirectionsCriteria.PROFILE_WALKING;
+                            Message msg = new Message();
+                            msg.obj = coordenadas;
+                            msg.what = MSG_RUTA;
+                            manejador.sendMessage(msg);
+                            return true;
+                        });
+                        MenuPopupHelper menuHelper = new MenuPopupHelper(contextoApp, (MenuBuilder) popup.getMenu(), v);
+                        menuHelper.setForceShowIcon(true);
+                        menuHelper.show();
                     });
 
                     cardview = view.findViewById(R.id.cardviewLugar);

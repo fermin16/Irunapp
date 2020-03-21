@@ -8,7 +8,7 @@
 
     <!-- Strings del  Mapa -->
     <!--Tokens mapa -->
-    <string name="map_token">pk.eyJ1IjoiaXJ1bmFwcCIsImEiOiJjazcyMDRkbGowNGVhM2Vud2xmcHhraXVrIn0.DzS0V3QRI35Ds9qXhhuBNg</string>
+    <string name="map_token">sk.eyJ1IjoiaXJ1bmFwcCIsImEiOiJjazgxaTRuYzYwZjc5M25tczNzYmUxdDd5In0.ZMEU3ig7Z2a-xAVEHEUbUA</string>
     <string name="map_style_basic">mapbox://styles/irunapp/ck720snyp0s0f1io8add5kxrj</string>
     <string name="map_style_road">mapbox://styles/irunapp/ck720osjv0www1ipg3lrjfbrn</string>
     <!--Boton Flotante del mapa -->
@@ -29,11 +29,14 @@
     <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
     <!--RecyclerView-->
     <string name="ver_mas">VER MÁS</string>
-    <string name="ir">IR</string>
+    <string name="ir">RUTA</string>
     <string name="id_transicion_imagen">TransicionImagen</string>
     <string name="id_transicion_nombre">TransicionNombre</string>
     <string name="id_transicion_boton_mas">TransicionBotonMas</string>
     <string name="id_transicion_boton_ruta">TransicionBotonRuta</string>
+    <string name="popup_coche">COCHE</string>
+    <string name="popup_bici">BICICLETA</string>
+    <string name="popup_andar">CAMINAR</string>
 
     <!-- Mensajes mapa -->
     <string name="activarPermisosAjustes">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
@@ -52,6 +55,7 @@
     <string name="puntos_no_localizados">No se han localizado puntos a su alrededor ¿Desea buscar de nuevo?</string>
     <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
     <string name="title_activity_amplia_card">ampliaCard</string>
+    <string name="error_ruta"> No se ha podido generar la ruta, no se ha encontrado su localización</string>
 
     <!-- Strings Activity Info -->
     <!--Layout-->

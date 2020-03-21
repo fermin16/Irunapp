@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
                     app:icon="@drawable/iconoir"
-                    android:text="@string/RUTA"
+                    android:text="@string/ir"
                     android:theme="@style/Widget.MaterialComponents.Button.Icon"
                     android:transitionName="@string/id_transicion_boton_ruta"/>
             </LinearLayout>
