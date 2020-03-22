@@ -41,6 +41,10 @@
                     android:textColor="#000"
                     android:textSize="20sp"
                     android:transitionName="@string/id_transicion_nombre"/>
+                <View android:id="@+id/tile_divider3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/dividerVertical" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

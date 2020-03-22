@@ -2,7 +2,9 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
@@ -56,7 +58,17 @@ public class activityInfo extends AppCompatActivity {
                 imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen_bytes, 0, imagen_bytes.length));
 
                 boton_menos = findViewById(R.id.boton_verMenos);
-                boton_menos.setOnClickListener(v -> super.onBackPressed());
+                boton_menos.setOnClickListener(new View.OnClickListener() {
+                                                   @Override
+                                                   public void onClick(View v) {
+                                                       Intent resultIntent = new Intent();
+                                                       // TODO Add extras or a data URI to this intent as appropriate.
+                                                       resultIntent.putExtra("some_key", "String data");
+                                                       setResult(Activity.RESULT_OK, resultIntent);
+                                                       finish();
+                                                   }
+                                               }
+                );
 
                 boton_ruta =  findViewById(R.id.boton_ruta);
                 boton_ruta.setOnClickListener(v -> {

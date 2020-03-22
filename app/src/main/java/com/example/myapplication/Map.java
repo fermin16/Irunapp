@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -25,7 +24,6 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -300,15 +298,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                          bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Alert)cardSelected).getFoto());
                          intent.putExtras(bundle);
 
-
-
-                         //Pausar al hijo:
-                         dormir();
-                         //Start the Intent
                          startActivity(intent, options.toBundle());
                      }
                      else if(msg.what == MSG_RUTA){
-                        vibrate();
                          getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
                      }
                  }
@@ -462,9 +454,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         switch (requestCode) {
             case ACTIVAR_UBICACION: //Comprobar si el usuario ha activado o no los activity_ajustes de ubicacion.
                 findMe();
-                break;
-            case SUBACTIVITY_INFO:
-                despertar();
                 break;
         }
     }
@@ -966,8 +955,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     /** Metodo para dormir o pausar al hijo **/
     public void dormir(){
         if(hijo != null && hijo.isAlive()) {
-            pause = true;
-            hijo.interrupt();
+            if(!pause) {
+                pause = true;
+                hijo.interrupt();
+            }
         }
     }
 
@@ -1133,9 +1124,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             NavigationLauncherOptions options = NavigationLauncherOptions.builder()
                     .directionsRoute(currentRoute)
                     .shouldSimulateRoute(simularRuta)
-                    .waynameChipEnabled(true)
                     .build();
-            dormir();
+            vibrate();
             NavigationLauncher.startNavigation(Map.this, options);
         }
     }
@@ -1210,6 +1200,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
         }
     }
+
+
 
     /****
      **********************************************************
