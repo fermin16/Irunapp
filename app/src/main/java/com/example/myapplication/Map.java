@@ -101,7 +101,6 @@ import retrofit2.Response;
 
 
 public class Map extends AppCompatActivity implements OnMapReadyCallback {
-
     //Macros:
     //Macros relacionadas con el mapa y la camara:
     private final int ACTIVAR_UBICACION = 0; //Codigo de la actividad que nos servira para saber si el usuario a activado o no la ubicacion
