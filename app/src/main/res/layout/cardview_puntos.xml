@@ -37,11 +37,37 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"
-                    android:text=""
                     android:id="@+id/lugar_textview"
                     android:textColor="#000"
                     android:textSize="20sp"
                     android:transitionName="@string/id_transicion_nombre"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imagen_distancia_cardview">
+                    </androidx.appcompat.widget.AppCompatImageView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/texto_distancia_cardview"
+                        />
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imagen_duracion_cardview">
+                    </androidx.appcompat.widget.AppCompatImageView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/texto_duracion_cardview"
+                        />
+                </LinearLayout>
             </LinearLayout>
             <View android:id="@+id/tile_divider2"
                 android:layout_width="match_parent"

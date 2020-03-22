@@ -86,7 +86,11 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -212,7 +216,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private NavigationMapRoute navigationMapRoute;
     private ProgressBar routeLoading;
     private FloatingActionButton BotonNavegacion;
-    public static String modoRuta;
+    private static String modoRuta;
+    private static TextView textodistancia;
+    private static TextView textoDuracion;
+    private static ImageView imagendistancia;
+    private static ImageView imagenduracion;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
@@ -424,11 +432,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         Toast.makeText(context,getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
                     }
                     else{ //Si se han activado
-                        //Comprobamos si es la primera vez que se activan
-                        if(locationComponent == null)
-                            enableLocationComponent(mapboxMap.getStyle());
                         findMe(); //Mostrar localizacion
-                        if(hijo!=null) {//Si el hijo estaba dormido, reactivarlo:
+                        if(hijo != null && hijo.isAlive()) {//Si el hijo estaba dormido, reactivarlo:
                             if (pause)
                                 despertar();
                         }
@@ -499,6 +504,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     //Establecer el compas (brujula)
                     locationComponent.setRenderMode(RenderMode.COMPASS);
 
+                    //Colocar el modo de la camara en Tracking
+                    locationComponent.setCameraMode(CameraMode.TRACKING);
+
+                    //Hacer zoom a la ubicacion del usuario
+                    locationComponent.zoomWhileTracking(ZOOM_FIND);
+
                     //Comenzar a printear los puntos en el mapa
                     buscaPuntos();
                 }
@@ -529,17 +540,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             //Notificar al usuario que tiene desactivados los servicios de ubicacion.
             alertDialog = new AlertDialog.Builder(this)
                     .setMessage(R.string.gps_desactivado)
-                    .setPositiveButton(R.string.activar_gps, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION);
-                        }
-                    }).setNegativeButton(R.string.cancelar_gps, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(getApplicationContext(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
-                        }
-                    })
+                    .setPositiveButton(R.string.activar_gps, (paramDialogInterface, paramInt) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION)).setNegativeButton(R.string.cancelar_gps, (dialog, which) -> Toast.makeText(getApplicationContext(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show())
                     .show();
             return false;
         }
@@ -1055,7 +1056,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         }
         finally {
             super.onStop();
-            navigationMapRoute.onStop();
+            if(navigationMapRoute != null)
+                navigationMapRoute.onStop();
             mapView.onStop();
         }
     }
@@ -1154,6 +1156,17 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
                                 if(response.body() != null && response.body().routes().size() >= 1){
                                     currentRoute = response.body().routes().get(0);
+                                    String distancia = String.format("%.2f",currentRoute.distance()/1000);
+                                    textodistancia.setText("  "+distancia+" KM   ");
+                                    try {
+                                        String duracion = String.format("%06d", currentRoute.duration().intValue());
+                                        DateFormat format = new SimpleDateFormat("HH:mm:ss");
+                                        Date date = format.parse(duracion);
+                                        textoDuracion.setText(date.toString());
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
+                                    ;
                                     updateNavigationRoute();
                                     navigationMapRoute.addRoute(currentRoute);
                                     routeLoading.setVisibility(View.INVISIBLE);
@@ -1370,6 +1383,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 ItemClickListener clickListener;
                 Context contextoApp;
 
+
                 @SuppressLint("RestrictedApi")
                 MyViewHolder(View view) {
                     super(view);
@@ -1388,12 +1402,23 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         popup.getMenuInflater().inflate(R.menu.popup_menu,popup.getMenu());
 
                         popup.setOnMenuItemClickListener(item -> {
-                            if(item.getItemId() == R.id.modoCoche)
+                            imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
+                            if(item.getItemId() == R.id.modoCoche) {
                                 modoRuta = DirectionsCriteria.PROFILE_DRIVING;
-                            else if(item.getItemId() == R.id.modoBicicleta)
+                                imagendistancia.setImageResource(R.drawable.modo_coche);
+                            }
+                            else if(item.getItemId() == R.id.modoBicicleta) {
                                 modoRuta = DirectionsCriteria.PROFILE_CYCLING;
-                            else
+                                imagendistancia.setImageResource(R.drawable.modo_bici);
+                            }
+                            else {
                                 modoRuta = DirectionsCriteria.PROFILE_WALKING;
+                                imagendistancia.setImageResource(R.drawable.modo_andar);
+                            }
+                            textodistancia = view.findViewById(R.id.texto_distancia_cardview);
+                            textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
+                            imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
+                            imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
                             Message msg = new Message();
                             msg.obj = coordenadas;
                             msg.what = MSG_RUTA;
