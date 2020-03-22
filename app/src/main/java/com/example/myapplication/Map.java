@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -92,6 +93,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
 import pl.droidsonroids.gif.GifImageView;
@@ -1156,18 +1158,21 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
                                 if(response.body() != null && response.body().routes().size() >= 1){
                                     currentRoute = response.body().routes().get(0);
+
+                                    //Printear y dibujar las distancias y sus simbolos
+                                    updateNavigationRoute();
                                     String distancia = String.format("%.2f",currentRoute.distance()/1000);
                                     textodistancia.setText("  "+distancia+" KM   ");
                                     try {
                                         String duracion = String.format("%06d", currentRoute.duration().intValue());
-                                        DateFormat format = new SimpleDateFormat("HH:mm:ss");
+                                        DateFormat format = new SimpleDateFormat("HHmmss", Locale.US);
                                         Date date = format.parse(duracion);
-                                        textoDuracion.setText(date.toString());
+                                        textoDuracion.setText(date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
                                     } catch (ParseException e) {
-                                        e.printStackTrace();
+                                        Toast.makeText(getApplicationContext(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
                                     }
-                                    ;
-                                    updateNavigationRoute();
+                                    imagendistancia.setVisibility(View.VISIBLE);
+                                    imagenduracion.setVisibility(View.VISIBLE);
                                     navigationMapRoute.addRoute(currentRoute);
                                     routeLoading.setVisibility(View.INVISIBLE);
                                     if(alertDialog != null)
@@ -1196,6 +1201,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             navigationMapRoute.updateRouteVisibilityTo(false);
             if(BotonNavegacion.isEnabled())
                 BotonNavegacion.setEnabled(false);
+            textodistancia.setText("");
+            textoDuracion.setText("");
+            imagendistancia.setVisibility(View.INVISIBLE);
+            imagenduracion.setVisibility(View.INVISIBLE);
         }
         else{
             navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
@@ -1215,7 +1224,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private void initRecyclerView(List<ParseObject> listaParse) {
         recyclerView = findViewById(R.id.rv_on_top_of_map);
         LocationRecyclerViewAdapter locationAdapter =
-                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this);
+                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this,true);
         recyclerLayoutManager = new LinearLayoutManager(getApplicationContext(),
                 LinearLayoutManager.HORIZONTAL, true);
         recyclerView.setLayoutManager(recyclerLayoutManager);
@@ -1260,6 +1269,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateAdapter(ArrayList<ParseObject> listaParse){
+        boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
         if(!listas_iguales(listaParse)) {
             //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
             if(cardSelected != null){
@@ -1268,9 +1278,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
                 listaParse.add(0,cardSelected);
                 elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
+                update_info = false;
             }
             LocationRecyclerViewAdapter locationAdapter =
-                    new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this);
+                    new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this,update_info);
             recyclerView.setAdapter(locationAdapter);
         }
         prevQuery = listaParse;
@@ -1336,12 +1347,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             private List<SingleRecyclerViewLocation> locationList;
             private MapboxMap map;
             private Context contextoApp;
+            private boolean update_info;
 
-            public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap, Context contextoApp) {
+            public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap, Context contextoApp, boolean update_info) {
                 super();
                 this.locationList = locationList;
                 this.map = mapBoxMap;
                 this.contextoApp = contextoApp;
+                this.update_info = update_info;
             }
 
             @Override
@@ -1353,6 +1366,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
             @Override
             public void onBindViewHolder(MyViewHolder holder, int position) {
+                //Si se trata de la tarjeta seleccionada (que ocupará la posición 0) y no hay que updatear la info:
+                if(!update_info && position == 0){
+                    holder.restauraComponentes(holder.itemView);
+                }
                 SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
                 holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
                 byte[] imagen = singleRecyclerViewLocation.getImagen();
@@ -1366,6 +1383,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 });
                 holder.coordenadas = singleRecyclerViewLocation.getLocationCoordinates();
                 holder.contextoApp = contextoApp;
+
             }
 
             @Override
@@ -1382,7 +1400,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 LatLng coordenadas;
                 ItemClickListener clickListener;
                 Context contextoApp;
-
 
                 @SuppressLint("RestrictedApi")
                 MyViewHolder(View view) {
@@ -1402,7 +1419,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         popup.getMenuInflater().inflate(R.menu.popup_menu,popup.getMenu());
 
                         popup.setOnMenuItemClickListener(item -> {
-                            imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
+                            iniciaComponentesRuta(view);
                             if(item.getItemId() == R.id.modoCoche) {
                                 modoRuta = DirectionsCriteria.PROFILE_DRIVING;
                                 imagendistancia.setImageResource(R.drawable.modo_coche);
@@ -1415,10 +1432,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                                 modoRuta = DirectionsCriteria.PROFILE_WALKING;
                                 imagendistancia.setImageResource(R.drawable.modo_andar);
                             }
-                            textodistancia = view.findViewById(R.id.texto_distancia_cardview);
-                            textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
-                            imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
-                            imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
+
                             Message msg = new Message();
                             msg.obj = coordenadas;
                             msg.what = MSG_RUTA;
@@ -1429,9 +1443,26 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         menuHelper.setForceShowIcon(true);
                         menuHelper.show();
                     });
-
                     cardview = view.findViewById(R.id.cardviewLugar);
                     cardview.setOnClickListener(this);
+                }
+
+                public void iniciaComponentesRuta(View view){
+                    imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
+                    textodistancia = view.findViewById(R.id.texto_distancia_cardview);
+                    textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
+                    imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
+                    imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
+                }
+
+                public void restauraComponentes(View view){
+                    Drawable imagen = imagendistancia.getDrawable();
+                    CharSequence textoDistancia = textodistancia.getText();
+                    CharSequence textoduracion = textoDuracion.getText();
+                    iniciaComponentesRuta(view);
+                    imagendistancia.setImageDrawable(imagen);
+                    textodistancia.setText(textoDistancia);
+                    textoDuracion.setText(textoduracion);
                 }
 
                 public void setClickListener(ItemClickListener itemClickListener) {

@@ -59,6 +59,7 @@
     <string name="iniciar_ruta">¿Desea iniciar la ruta al lugar al lugar seleccionado?</string>
     <string name="iniciar">Iniciar</string>
     <string name="cancelar_navegavecion">Cancelar</string>
+    <string name="error_calculo_tiempo">No se ha podido calcular el tiempo aproximado de la ruta, disculpe lass molestias</string>
 
     <!-- Strings Activity Info -->
     <!--Layout-->
