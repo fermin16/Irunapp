@@ -101,6 +101,7 @@ import retrofit2.Response;
 
 
 public class Map extends AppCompatActivity implements OnMapReadyCallback {
+
     //Macros:
     //Macros relacionadas con el mapa y la camara:
     private final int ACTIVAR_UBICACION = 0; //Codigo de la actividad que nos servira para saber si el usuario a activado o no la ubicacion
@@ -146,7 +147,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     //Macros de subactivities:
     private static final int SUBACTIVITY_INFO = 1; //Campo para llamar a la actividad de crear alerta.
-    public static final String PUNTO = "punto";
+    private static final String PUNTO = "punto";
 
     //Macros para Ruta:
     private static final int DURACION_VIBRACION = 100;
@@ -220,6 +221,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private static TextView textoDuracion;
     private static ImageView imagendistancia;
     private static ImageView imagenduracion;
+    public static String rutaSeleccionada; //Ruta para seleccionar desde activity Info.
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
@@ -1018,6 +1020,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         super.onResume();
         mapView.onResume();
         despertar();
+        if(rutaSeleccionada != null){
+            modoRuta = rutaSeleccionada;
+            ParseGeoPoint puntoSeleccionado = ((Alert)cardSelected).getLocalizacion();
+            getroute(Point.fromLngLat(puntoSeleccionado.getLongitude(),puntoSeleccionado.getLatitude()));
+            rutaSeleccionada = null;
+        }
     }
 
     @Override

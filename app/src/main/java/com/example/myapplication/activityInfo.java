@@ -1,7 +1,11 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.PopupMenu;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.parse.ParseObject;
 
 public class activityInfo extends AppCompatActivity {
@@ -27,6 +32,7 @@ public class activityInfo extends AppCompatActivity {
     private Button boton_menos;
     private Button boton_ruta;
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +42,7 @@ public class activityInfo extends AppCompatActivity {
 
         if(intent!=null){
             Bundle bundle = intent.getExtras();
-            if(bundle != null){
+            if(bundle != null) {
                 nombreLugar = findViewById(R.id.nombre_lugar);
                 nombreLugar.setText(bundle.getString(String.valueOf(R.string.bundle_titulo)));
                 descripcion = findViewById(R.id.descripcion);
@@ -54,13 +60,28 @@ public class activityInfo extends AppCompatActivity {
                 imagen = findViewById(R.id.imagen_principal);
                 byte[] imagen_bytes = bundle.getByteArray(String.valueOf(R.string.bundle_imagen));
                 imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen_bytes, 0, imagen_bytes.length));
-
                 boton_menos = findViewById(R.id.boton_verMenos);
                 boton_menos.setOnClickListener(v -> super.onBackPressed());
 
-                boton_ruta =  findViewById(R.id.boton_ruta);
+                boton_ruta = findViewById(R.id.boton_ruta);
                 boton_ruta.setOnClickListener(v -> {
+                    PopupMenu popup = new PopupMenu(getApplicationContext(), v);
+                    popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
+                    popup.setOnMenuItemClickListener(item -> {
+                        if (item.getItemId() == R.id.modoCoche) {
+                            Map.rutaSeleccionada = DirectionsCriteria.PROFILE_DRIVING;
+                        } else if (item.getItemId() == R.id.modoBicicleta) {
+                            Map.rutaSeleccionada = DirectionsCriteria.PROFILE_CYCLING;
+                        } else {
+                            Map.rutaSeleccionada = DirectionsCriteria.PROFILE_WALKING;
+                        }
+                        super.onBackPressed();
+                        return true;
+                    });
+                    MenuPopupHelper menuHelper = new MenuPopupHelper(getApplicationContext(), (MenuBuilder) popup.getMenu(), v);
+                    menuHelper.setForceShowIcon(true);
+                    menuHelper.show();
                 });
             }
             else {
