@@ -79,7 +79,7 @@ public class activityInfo extends AppCompatActivity {
                         super.onBackPressed();
                         return true;
                     });
-                    MenuPopupHelper menuHelper = new MenuPopupHelper(getApplicationContext(), (MenuBuilder) popup.getMenu(), v);
+                    MenuPopupHelper menuHelper = new MenuPopupHelper(activityInfo.this, (MenuBuilder) popup.getMenu(), v);
                     menuHelper.setForceShowIcon(true);
                     menuHelper.show();
                 });

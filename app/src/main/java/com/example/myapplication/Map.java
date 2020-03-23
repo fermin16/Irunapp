@@ -608,15 +608,16 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     mapboxMap.addOnMapClickListener(mapListener = point -> {
                         //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
                         simboloActivado--;
+                        System.out.println(markerSelected+"......"+simboloActivado);
                         if((markerSelected != null) && simboloActivado!=0){
                             deselectMarker();
+                            System.out.println("HOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLA");
                             updateNavigationRoute();
                         }
                         return false;
                     });
                     symbolManager.setIconAllowOverlap(true);
                     symbolManager.setTextAllowOverlap(true);
-                    markerSelected = null;
                     enableLocationComponent(style);
 //                    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
                 };
@@ -1021,10 +1022,18 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         mapView.onResume();
         despertar();
         if(rutaSeleccionada != null){
-            modoRuta = rutaSeleccionada;
-            ParseGeoPoint puntoSeleccionado = ((Alert)cardSelected).getLocalizacion();
-            getroute(Point.fromLngLat(puntoSeleccionado.getLongitude(),puntoSeleccionado.getLatitude()));
-            rutaSeleccionada = null;
+            if(cardSelected != null) {
+                modoRuta = rutaSeleccionada;
+                ParseGeoPoint puntoSeleccionado = ((Alert) cardSelected).getLocalizacion();
+                if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
+                    imagendistancia.setImageResource(R.drawable.modo_coche);
+                else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
+                    imagendistancia.setImageResource(R.drawable.modo_bici);
+                else
+                    imagendistancia.setImageResource(R.drawable.modo_andar);
+                getroute(Point.fromLngLat(puntoSeleccionado.getLongitude(), puntoSeleccionado.getLatitude()));
+                rutaSeleccionada = null;
+            }
         }
     }
 
@@ -1407,6 +1416,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     imagen = view.findViewById(R.id.imagen);
                     botonVermas = view.findViewById(R.id.boton_verMas);
                     botonVermas.setOnClickListener(v -> {
+                        iniciaComponentesRuta(view);
                         Message msg = new Message();
                         msg.obj = coordenadas;
                         msg.what = MSG_AMPLIA_CARD;
@@ -1451,6 +1461,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     textodistancia = view.findViewById(R.id.texto_distancia_cardview);
                     textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
                     imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
+                    imagenduracion.setVisibility(view.INVISIBLE);
                     imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
                 }
 
