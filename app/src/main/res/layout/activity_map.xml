@@ -120,7 +120,7 @@
         android:orientation="vertical"
         android:background="@drawable/layout_bg"
         android:id="@+id/drawview"
-        android:clickable="true"
+        android:clickable="false"
         android:gravity="center">
         <RelativeLayout
             android:layout_width="match_parent"

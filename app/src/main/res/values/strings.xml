@@ -60,6 +60,7 @@
     <string name="iniciar">Iniciar</string>
     <string name="cancelar_navegavecion">Cancelar</string>
     <string name="error_calculo_tiempo">No se ha podido calcular el tiempo aproximado de la ruta, disculpe lass molestias</string>
+    <string name="error_ajustes_mapa">No se han podido modificar los ajustes, intentelo de nuevo.</string>
 
     <!-- Strings Activity Info -->
     <!--Layout-->
