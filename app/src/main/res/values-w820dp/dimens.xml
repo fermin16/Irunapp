@@ -1,0 +1,13 @@
+<resources>
+    <!-- Example customization of dimensions originally defined in res/values/dimens.xml
+         (such as screen margins) for screens with more than 820dp of available width. This
+         would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively). -->
+    <dimen name="activity_horizontal_margin">64dp</dimen>
+
+    <dimen name="alto_tarjeta_grande">500dp</dimen>
+    <dimen name="alto_degradado">160dp</dimen>
+    <dimen name="tamano_imagen_crear_ruta">300dp</dimen>
+    <dimen name="tamano_texto_crear_ruta">45sp</dimen>
+
+    <integer name="numero_columnas">2</integer>
+</resources>

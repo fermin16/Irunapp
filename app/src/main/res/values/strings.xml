@@ -1,9 +1,29 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Iruñapp</string>
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
 
     <!-- Change the following strings as required -->
     <string name="back4app_app_id">Qzk8sGh31MvniNznswsCSecB3xRkbvR09xs8BFgr</string>
     <string name="back4app_client_key">Ixwjr0fMKaKHVOwwAayYIreukIpprB1tYXBnG9NJ</string>
-    <string name="boton">Boton</string>
+    <string name="title_activity_main2">Iruñapp</string>
+    <string name="lugares">Lugares</string>
+    <string name="mapa">Mapa</string>
+    <string name="rutas">Rutas</string>
+    <string name="ver_mas">Ver más</string>
+    <string name="como_llegar">Como llegar</string>
+    <string name="escribe_nombre_lugar">Escribe el nombre del lugar</string>
+    <string name="crear_ruta">Crear ruta</string>
+    <string name="ver_mapa">Ver en mapa</string>
+    <string name="direccion">Dirección</string>
+    <string name="horario">Horario</string>
+    <string name="precio">Precio</string>
+    <string name="contacto">Contacto</string>
+    <string name="pagina_web">Página web</string>
+    <string name="eliminar">ELIMINAR</string>
+    <string name="lugar_eliminado">Lugar eliminado de la ruta</string>
+    <string name="deshacer">Deshacer</string>
+    <string name="nombre_ruta">Nombre de la ruta</string>
+    <string name="descripcion_ruta">Descripción de la ruta</string>
+    <string name="titulo_ruta_vacia">No hay lugares en tu ruta</string>
+    <string name="instrucciones_ruta_vacia">Usa el buscador de arriba para añadir lugares a la ruta. Si quieres eliminar un lugar de tu ruta deslízalo hacia la izquierda.</string>
 </resources>

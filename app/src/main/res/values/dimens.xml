@@ -1,0 +1,19 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="appbar_padding">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+
+    <dimen name="alto_tarjeta_grande">250dp</dimen>
+    <dimen name="alto_degradado">80dp</dimen>
+    <dimen name="ancho_boton_tarjeta">160dp</dimen>
+    <dimen name="alto_boton_tarjeta">30dp</dimen>
+    <dimen name="tamano_letra_boton">14sp</dimen>
+    <dimen name="tamano_imagen_crear_ruta">100dp</dimen>
+    <dimen name="tamano_texto_crear_ruta">22sp</dimen>
+
+    <integer name="numero_columnas">1</integer>
+</resources>
