@@ -47,6 +47,8 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="fab_size">56dp</dimen>
+	    <dimen name="activity_vertical_margin">16dp</dimen>
+
 
     <dimen name="alto_tarjeta_grande">250dp</dimen>
     <dimen name="alto_degradado">80dp</dimen>

@@ -61,7 +61,7 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
                 public void onClick(View view) {
                     // TODO cargar los datos en activity_info
                     // TODO mostrar activity_info
-                    Intent intent = new Intent(view.getContext(), ActivityInfo.class);
+                    Intent intent = new Intent(view.getContext(), activityInfo.class);
                     view.getContext().startActivity(intent);
                 }
             });
