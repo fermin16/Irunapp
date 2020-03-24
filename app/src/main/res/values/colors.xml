@@ -3,4 +3,12 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="mapboxPurpleDark10">#5E3AD2</color>
+    <color name="mapboxYellowFaint">#FCFCDF</color>
+
+    <color name="botonTarjetasNormal">#008F1C</color>
+    <color name="botonTarjetasDesactivado">#FF8F00</color>
+    <color name="botonTarjetasRipple">#E9FF00</color>
+    <color name="Boton_cerrar_tarjeta">#000000</color>
+    <color name="BotonRuta">#00EDF8</color>
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/modoCoche"
+        android:title="@string/popup_coche"
+        android:icon="@drawable/modo_coche"
+        />
+    <item
+        android:id="@+id/modoBicicleta"
+        android:icon="@drawable/modo_bici"
+        android:title="@string/popup_bici" />
+    <item
+        android:id="@+id/modoAndar"
+        android:icon="@drawable/modo_andar"
+        android:title="@string/popup_andar" />
+</menu>

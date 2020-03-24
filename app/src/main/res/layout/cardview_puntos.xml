@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.MaterialComponents.CardView"
+        android:id="@+id/cardviewLugar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="300dp"
+                    android:layout_height="100dp"
+                    android:scaleType="centerCrop"
+                    android:id="@+id/imagen"
+                    android:transitionName="@string/id_transicion_imagen"/>
+            </RelativeLayout>
+            <View android:id="@+id/tile_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:id="@+id/lugar_textview"
+                    android:textColor="#000"
+                    android:textSize="20sp"
+                    android:transitionName="@string/id_transicion_nombre"/>
+                <View android:id="@+id/tile_divider3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/dividerVertical" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imagen_distancia_cardview">
+                    </androidx.appcompat.widget.AppCompatImageView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/texto_distancia_cardview"
+                        />
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/imagen_duracion_cardview">
+                    </androidx.appcompat.widget.AppCompatImageView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/texto_duracion_cardview"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+            <View android:id="@+id/tile_divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/boton_verMas"
+                    android:text="@string/ver_mas"
+                    android:layout_marginStart="27dp"
+                    app:icon="@drawable/vermas"
+                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_mas"/>
+                <Button
+                    android:id="@+id/boton_IR"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
+                    app:icon="@drawable/iconoir"
+                    android:text="@string/ir"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_ruta"/>
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</RelativeLayout>

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Eliminar el shadow al elevar el panel  transparent fade color-->
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Map"
+    android:id="@+id/PanelDeslizante"
+    app:umanoDragView="@id/drawview"
+    app:umanoScrollableView="@id/AjustesMapa"
+    android:layout_gravity="bottom"
+    android:gravity="bottom"
+    app:umanoPanelHeight="55dp"
+    app:umanoOverlay="true"
+    app:umanoParallaxOffset="100dp"
+    app:umanoFadeColor="@android:color/transparent"
+    app:umanoShadowHeight="4dp">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:mapbox_cameraTargetLat="42.8168700"
+            app:mapbox_cameraTargetLng=" -1.6432300"
+            app:mapbox_cameraTilt="0"
+            app:mapbox_cameraZoom="12">
+            <ProgressBar
+                android:id="@+id/routeLoadingProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_on_top_of_map"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="60dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.github.clans.fab.FloatingActionButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginBottom="90dp"
+                    android:id="@+id/BotonNavegacion"
+                    android:src="@drawable/boton_flotante_ruta"
+                    app:fab_colorNormal="@color/BotonRuta"
+                    />
+                <com.github.clans.fab.FloatingActionButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginBottom="155dp"
+                    android:id="@+id/BotonTarjetas"
+                    android:src="@drawable/iconotarjetas"
+                    app:fab_colorNormal="@color/botonTarjetasNormal"
+                    app:rippleColor="@color/botonTarjetasRipple"
+                    app:fab_colorPressed="@color/botonTarjetasRipple"
+                    />
+                <com.github.clans.fab.FloatingActionMenu
+                    android:id="@+id/BotonFlotante"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginBottom="220dp"
+                    android:visibility="visible"
+                    app:menu_fab_label="@string/boton_flotante"
+                    tools:visibility="visible">
+
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/BotonCambioMapa"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/cambiomapa"
+                        app:fab_label="@string/modo_mapa" />
+
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/FindMe"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/miubicacion"
+                        app:fab_label="@string/boton_localizar" />
+
+                    <com.github.clans.fab.FloatingActionButton
+                        android:id="@+id/BuscaPuntos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/botonrefrescabusqueda"
+                        app:fab_label="@string/boton_busqueda" />
+                </com.github.clans.fab.FloatingActionMenu>
+            </RelativeLayout>
+        </com.mapbox.mapboxsdk.maps.MapView>
+    </FrameLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:background="@drawable/layout_bg"
+        android:id="@+id/drawview"
+        android:clickable="true"
+        android:gravity="center">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_gravity="center">
+            <pl.droidsonroids.gif.GifImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="40dp"
+                android:id="@+id/swipe_gif"
+                android:src="@drawable/tenor"
+                android:gravity="center_horizontal"
+                android:paddingBottom="35dp"
+                />
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="225dp"
+            android:orientation="vertical"
+            android:focusable="false"
+            android:id="@+id/AjustesMapa"
+            android:gravity="center">
+            <View android:id="@+id/tile_divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/imagen_distancia_deslizante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/icono_distancia_deslizante" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Texto_distancia"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large">
+                </TextView>
+            </LinearLayout>
+            <com.d.lib.tabview.TabView
+                android:id="@+id/kilometros"
+                android:layout_width="365dp"
+                android:layout_height="36dp"
+                app:tabv_colorMain="#4577B7"
+                app:tabv_colorSub="#ffffff"
+                app:tabv_duration="250"
+                app:tabv_padding="2dp"
+                app:tabv_textSize="14dp"
+                android:layout_gravity="center"
+                app:tabv_title="@string/ajustes_distancia"/>
+            <View android:id="@+id/tile_divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/imagen_refresco_deslizante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/icono_refresco_deslizante" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Texto_refresco"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large">
+                </TextView>
+            </LinearLayout>
+            <com.d.lib.tabview.TabView
+                android:id="@+id/frecuencia"
+                android:layout_width="365dp"
+                android:layout_height="36dp"
+                app:tabv_colorMain="#4577B7"
+                app:tabv_colorSub="#ffffff"
+                app:tabv_duration="250"
+                app:tabv_padding="2dp"
+                android:layout_gravity="center"
+                app:tabv_textSize="14dp"
+                app:tabv_title="@string/ajustes_referesco"/>
+            <View android:id="@+id/tile_divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/imagen_resultados_deslizante"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/icono_puntos_deslizante" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Texto_num_puntos"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large">
+                </TextView>
+            </LinearLayout>
+            <com.d.lib.tabview.TabView
+                android:id="@+id/numpuntos"
+                android:layout_width="365dp"
+                android:layout_height="36dp"
+                app:tabv_colorMain="#4577B7"
+                app:tabv_colorSub="#ffffff"
+                app:tabv_duration="250"
+                app:tabv_padding="2dp"
+                android:layout_gravity="center"
+                app:tabv_textSize="14dp"
+                app:tabv_title="@string/ajustes_num_puntos"/>
+            <View android:id="@+id/tile_divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/dividerVertical" />
+        </LinearLayout>
+    </LinearLayout>
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

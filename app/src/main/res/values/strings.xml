@@ -1,10 +1,85 @@
 <resources>
     <string name="app_name">Iruñapp</string>
+    <!-- Tokens para la conexion con el servidor Parse-->
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
-
-    <!-- Change the following strings as required -->
     <string name="back4app_app_id">Qzk8sGh31MvniNznswsCSecB3xRkbvR09xs8BFgr</string>
     <string name="back4app_client_key">Ixwjr0fMKaKHVOwwAayYIreukIpprB1tYXBnG9NJ</string>
+
+    <!-- Strings del  Mapa -->
+    <!--Tokens mapa -->
+    <string name="map_token">sk.eyJ1IjoiaXJ1bmFwcCIsImEiOiJjazgxaTRuYzYwZjc5M25tczNzYmUxdDd5In0.ZMEU3ig7Z2a-xAVEHEUbUA</string>
+    <string name="map_style_basic">mapbox://styles/irunapp/ck720snyp0s0f1io8add5kxrj</string>
+    <string name="map_style_road">mapbox://styles/irunapp/ck720osjv0www1ipg3lrjfbrn</string>
+    <!--Boton Flotante del mapa -->
+    <string name="boton_flotante">Cerrar Menú</string>
+    <string name="modo_mapa">Satélite/Estándar</string>
+    <string name="boton_localizar">Ubícame</string>
+    <string name="boton_busqueda">Buscar puntos</string>
+
+    <!-- Tabview Ajustes Mapa -->
+    <string name="Texto_distancia">Distancia:</string>
+    <string name="Texto_refresco">Frecuencia:</string>
+    <string name="Texto_num_puntos">Resultados:</string>
+    <string name="ajustes_distancia">500 m;1 km;2 km</string>
+    <string name="ajustes_referesco">15 s;30 s;60 s</string>
+    <string name="ajustes_num_puntos">10 puntos;30 puntos;50 puntos</string>
+    <string name="distancia_actualizada"> La distancia ha cambiado a </string>
+    <string name="frecuencia_actualizada"> La frecuencia de busqueda ha cambiado a </string>
+    <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
+    <!--RecyclerView-->
+    <string name="ver_mas">VER MÁS</string>
+    <string name="ir">RUTA</string>
+    <string name="id_transicion_imagen">TransicionImagen</string>
+    <string name="id_transicion_nombre">TransicionNombre</string>
+    <string name="id_transicion_boton_mas">TransicionBotonMas</string>
+    <string name="id_transicion_boton_ruta">TransicionBotonRuta</string>
+    <string name="popup_coche">COCHE</string>
+    <string name="popup_bici">BICICLETA</string>
+    <string name="popup_andar">CAMINAR</string>
+
+    <!-- Mensajes mapa -->
+    <string name="activarPermisosAjustes">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades, vaya a Ajustes -> Permisos de aplicaciones -> Irunapp -> Activar</string>
+    <string name="activarPermisos">Debe activar los permisos de ubicación para usar el mapa y sus funcionalidades</string>
+    <string name="gps_desactivado"> Los servicios de ubicación estan desactivados</string>
+    <string name="net_desactivada"> Los servicios de red estan desactivados</string>
+    <string name="activar_gps"> Activar </string>
+    <string name="cancelar_gps"> Cancelar </string>
+    <string name="cargando_mapa">Cargando mapa, por favor espere...</string>
+    <string name="serviciosDesactivados">Sin servicios de ubicación/red no se podrán obtener las ubicaciones cercanas</string>
+    <string name="obteniendoUbicacion">Obteniendo su ubicación...</string>
+    <string name="obteniendoPuntos">Obteniendo lugares cercanos a </string>
+    <string name="obteniendoPuntos2"> de su ubicación, por favor espere...</string>
+    <string name="volver_buscar">Volver a buscar</string>
+    <string name="cancelar_busqueda">Cancelar</string>
+    <string name="puntos_no_localizados">No se han localizado puntos a su alrededor ¿Desea buscar de nuevo?</string>
+    <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
+    <string name="title_activity_amplia_card">ampliaCard</string>
+    <string name="error_ruta"> No se ha podido generar la ruta, no se ha encontrado su localización</string>
+    <string name="iniciar_ruta">¿Desea iniciar la ruta al lugar al lugar seleccionado?</string>
+    <string name="iniciar">Iniciar</string>
+    <string name="cancelar_navegavecion">Cancelar</string>
+    <string name="error_calculo_tiempo">No se ha podido calcular el tiempo aproximado de la ruta, disculpe lass molestias</string>
+
+    <!-- Strings Activity Info -->
+    <!--Layout-->
+    <string name="direccion">Dirección</string>
+    <string name="horario">Horario</string>
+    <string name="precio">Precio</string>
+    <string name="contacto">Contacto</string>
+    <string name="pagina_web">Página web</string>
+    <string name="ver_menos">VER MENOS</string>
+    <string name="RUTA">RUTA</string>
+    <!-- Componentes del Bundle -->
+    <string name="bundle_direccion">direccion_bundle</string>
+    <string name="bundle_horario">horario_bundle</string>
+    <string name="bundle_precio">precio_bundle</string>
+    <string name="bundle_contacto">contacto_bundle</string>
+    <string name="bundle_web">web_bundle</string>
+    <string name="bundle_titulo">titulo_bundle</string>
+    <string name="bundle_descripcion">descripcion_bundle</string>
+    <string name="bundle_imagen">imagen_bundle</string>
+    <!--Mensajes-->
+    <string name="punto_no_recibido">No se ha recibido la información asociada al punto, intentelo de nuevo más tarde.</string>
     <string name="title_activity_main2">Iruñapp</string>
     <string name="lugares">Lugares</string>
     <string name="mapa">Mapa</string>

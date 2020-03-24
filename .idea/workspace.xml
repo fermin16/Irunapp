@@ -17,6 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0acc301b-534e-4d1f-a9dd-8abfd4eee11f" name="Default Changelist" comment="">
+<<<<<<< HEAD
       <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_image_black_24dp.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -27,6 +28,13 @@
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values-w820dp/dimens.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-w820dp/dimens.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/dimens.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/dimens.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/Map.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/Map.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/activityInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/myapplication/activityInfo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_info.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_info.xml" afterDir="false" />
+>>>>>>> mapa
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -34,7 +42,11 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
   <component name="ExecutionTargetManager" SELECTED_TARGET="WE035018" />
+=======
+  <component name="ExecutionTargetManager" SELECTED_TARGET="d3590734" />
+>>>>>>> mapa
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -43,6 +55,7 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
+<<<<<<< HEAD
         <task path="$PROJECT_DIR$/app">
           <activation />
         </task>
@@ -65,6 +78,11 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
             </expand>
+=======
+        <projects_view>
+          <tree_state>
+            <expand />
+>>>>>>> mapa
             <select />
           </tree_state>
         </projects_view>
@@ -77,11 +95,15 @@
         <option value="resourceFile" />
         <option value="layoutResourceFile_vertical" />
         <option value="Class" />
+        <option value="valueResourceFile" />
+        <option value="layoutResourceFile" />
+        <option value="resourceFile" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+<<<<<<< HEAD
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/app/src/main/java/com/example/myapplication/ui/main/PestanaLugares.java" root0="FORCE_HIGHLIGHTING" />
@@ -89,8 +111,12 @@
   <component name="ProjectId" id="1YaGYieMd25QIP8SA8oyCqHl2tm" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
+=======
+>>>>>>> mapa
   </component>
+  <component name="ProjectId" id="1YWQKdEwHInxte8z53dgImIKdca" />
   <component name="PropertiesComponent">
+<<<<<<< HEAD
     <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="Pixel_C_API_27" />
     <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2020-03-14T15:28:34.692Z" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -98,13 +124,38 @@
     <property name="device.picker.selection" value="Nexus_5X_API_28" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/app/src/main/res/layout" />
     <property name="settings.editor.selected.configurable" value="preferences.externalDependencies" />
+=======
+    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="d3590734" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2020-03-19T19:21:31.753Z" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JSON" />
+    <property name="device.picker.selection" value="Pixel_2_XL_API_27" />
+    <property name="ignore.virus.scanning.warn.message" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+  </component>
+  <component name="PsdUISettings">
+    <option name="MODULE_TAB" value="Default Config" />
+>>>>>>> mapa
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Irunapp\app\src\main\res\values" />
+      <recent name="E:\Irunapp\app\src\main\res\menu" />
+      <recent name="D:\Irunapp-git\app\src\main\res\drawable-anydpi" />
+      <recent name="D:\Irunapp-git\app\src\main\res\layout" />
+      <recent name="D:\Irunapp-git\app\src\main\res\drawable" />
+    </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.example.myapplication" />
     </key>
     <key name="android.template.packageName">
       <recent name="com.example.myapplication" />
+<<<<<<< HEAD
       <recent name="com.example.myapplication.ui.main" />
     </key>
     <key name="android.template.parentActivityClass">
@@ -117,6 +168,16 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Ibon\Desktop\Irunapp\app\src\main\res\layout" />
       <recent name="D:\UPNA\4 (4) - Aplicaciones sobre Redes de Ordenadores\Irunapp\app\src\main\res\layout" />
+=======
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.example.myapplication.Modelos" />
+      <recent name="com.example.myapplication" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Irunapp-git\app\src\main\res\drawable" />
+      <recent name="D:\Irunapp-git\app\src\main\res\layout" />
+>>>>>>> mapa
     </key>
   </component>
   <component name="RunDashboard">
