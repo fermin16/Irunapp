@@ -27,7 +27,6 @@
     <string name="frecuencia_actualizada"> La frecuencia de busqueda ha cambiado a </string>
     <string name="puntos_actualizados"> El número de puntos pasa a ser </string>
     <!--RecyclerView-->
-    <string name="ver_mas">VER MÁS</string>
     <string name="ir">RUTA</string>
     <string name="id_transicion_imagen">TransicionImagen</string>
     <string name="id_transicion_nombre">TransicionNombre</string>
@@ -62,11 +61,6 @@
 
     <!-- Strings Activity Info -->
     <!--Layout-->
-    <string name="direccion">Dirección</string>
-    <string name="horario">Horario</string>
-    <string name="precio">Precio</string>
-    <string name="contacto">Contacto</string>
-    <string name="pagina_web">Página web</string>
     <string name="ver_menos">VER MENOS</string>
     <string name="RUTA">RUTA</string>
     <!-- Componentes del Bundle -->
