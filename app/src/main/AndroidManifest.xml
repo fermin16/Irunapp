@@ -15,15 +15,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activityInfo"></activity>
-        <activity android:name=".Map">
+        <activity android:name=".activityInfo" />
+        <activity android:name=".Map" />
+        <activity android:name=".ActivityInicio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityInfo"></activity>
-        <activity android:name=".ui.main.CrearRuta"></activity>
+        <activity android:name=".ui.main.CrearRuta" />
         <meta-data
             android:name="com.parse.SERVER_URL"
             android:value="@string/back4app_server_url" />

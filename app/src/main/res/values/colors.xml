@@ -6,6 +6,7 @@
     <color name="mapboxPurpleDark10">#5E3AD2</color>
     <color name="mapboxYellowFaint">#FCFCDF</color>
 
+    <color name="white">#FFFFFF</color>
     <color name="botonTarjetasNormal">#008F1C</color>
     <color name="botonTarjetasDesactivado">#FF8F00</color>
     <color name="botonTarjetasRipple">#E9FF00</color>

@@ -29,8 +29,8 @@ public class ActivityInicio extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
 
         // Establecer la barra de herramientas para que pueda haber un menú
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        /*Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);*/
     }
 
     @Override
