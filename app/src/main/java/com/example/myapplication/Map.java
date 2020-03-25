@@ -609,7 +609,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     //Añadir Listener al mapa:
                     mapboxMap.addOnMapClickListener(mapListener = point -> {
                         //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
-                        System.out.println("Click mapaaaaa");
                         simboloActivado--;
                         if((markerSelected != null) && simboloActivado!=0){
                             if(BotonFlotante.isOpened())
@@ -626,7 +625,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 //Limitar el mapa y la vista:
                 mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
                 mapboxMap.setMinZoomPreference(ZOOM_MIN);
-                //Inicilizar componente para navegacion:
 
             });
             loading_style.release();
@@ -729,6 +727,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
             symbolManager.delete(lista_symbol);
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
+
                 //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
                 if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
                     if(markerSelected == null)
@@ -846,44 +845,46 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private void deselectMarker() {
         if (markerSelected != null){
             int index = lista_symbol.indexOf(markerSelected);
-            lista_symbol.remove(markerSelected);
-            if(isVisibleRoute){
-                updateNavigationRoute();
-                isVisibleRoute = false;
-            }
-            if(noMarker){
-                //Solo estaba disponible el punto seleccionado:
-                if(lista_symbol.isEmpty()) {
-                    cardSelected = null;
-                    BotonTarjetas.setEnabled(false);
-                    BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
-                    recyclerView.animate()
-                            .alpha(0f)
-                            .setDuration(ANIMACION_TARJETAS)
-                            .setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    recyclerView.setVisibility(View.GONE);
-                                    updateAdapter(new ArrayList<>());
-                                }
-                            });
+            if(lista_symbol.remove(markerSelected)) {
+                if (isVisibleRoute) {
+                    updateNavigationRoute();
+                    isVisibleRoute = false;
                 }
-                //Habia más puntos ademas del seleccionado pero en la ultima query no se recupero (ya no esta en alcance)
-                else{
-                    ArrayList<ParseObject> query_elimnaTarjeta = new ArrayList<>(prevQuery);
-                    query_elimnaTarjeta.removeIf(obj -> obj.hasSameId(cardSelected));
+                if (noMarker) {
+                    //Solo estaba disponible el punto seleccionado:
+                    if (lista_symbol.isEmpty()) {
+                        cardSelected = null;
+                        BotonTarjetas.setEnabled(false);
+                        BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
+                        recyclerView.animate()
+                                .alpha(0f)
+                                .setDuration(ANIMACION_TARJETAS)
+                                .setListener(null);
+
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                recyclerView.setVisibility(View.GONE);
+                                updateAdapter(new ArrayList<>());
+                            }
+                        },ANIMACION_TARJETAS);
+                    }
+                    //Habia más puntos ademas del seleccionado pero en la ultima query no se recupero (ya no esta en alcance)
+                    else {
+                        ArrayList<ParseObject> query_elimnaTarjeta = new ArrayList<>(prevQuery);
+                        query_elimnaTarjeta.removeIf(obj -> obj.hasSameId(cardSelected));
+                        cardSelected = null;
+                        updateAdapter(query_elimnaTarjeta);
+                    }
+                } else {
+                    //Punto seleccionado sigue al alcance
                     cardSelected = null;
-                    updateAdapter(query_elimnaTarjeta);
+                    markerSelected.setIconSize(TAMANO_MIN_ICONO);
+                    lista_symbol.add(index, markerSelected);
                 }
+                markerSelected = null;
+                symbolManager.deleteAll();
+                symbolManager.update(lista_symbol);
             }
-            else{
-                cardSelected = null;
-                markerSelected.setIconSize(TAMANO_MIN_ICONO);
-                lista_symbol.add(index,markerSelected);
-            }
-            markerSelected = null;
-            symbolManager.deleteAll();
-            symbolManager.update(lista_symbol);
         }
     }
 
@@ -897,8 +898,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 dormir();
             }
             semaforo_ajustes.acquire();
-            System.out.println("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTTTT1");
-
             if(tabViewId == R.id.kilometros) {
                 if (index == 0) {
                     max_distancia = TAB_1_DISTANCIA;
@@ -984,13 +983,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 .alpha(0f)
                 .translationY(recyclerView.getWidth())
                 .setDuration(ANIMACION_TARJETAS)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        recyclerView.setVisibility(View.GONE);
-                        BotonTarjetas.setEnabled(true);
-                    }
-                });
+                .setListener(null);
+        new Handler().postDelayed(() -> {
+            recyclerView.setVisibility(View.GONE);
+            BotonTarjetas.setEnabled(true);
+        },ANIMACION_TARJETAS);
     }
 
 
@@ -1275,7 +1272,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateAdapter(ArrayList<ParseObject> listaParse){
-        if(listaParse.size() == lista_symbol.size()) {
+       // if(listaParse.size() <= lista_symbol.size()) {
             if (!listas_iguales(listaParse)) {
                 boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
                 //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
@@ -1285,15 +1282,16 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
                     listaParse.add(0, cardSelected);
                     //elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
-                    if (isVisibleRoute)
+                    if (isVisibleRoute) {
                         update_info = false;
+                    }
                 }
                 LocationRecyclerViewAdapter locationAdapter =
                         new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this, update_info);
                 recyclerView.setAdapter(locationAdapter);
             }
             prevQuery = listaParse;
-        }
+      //  }
     }
 
     /** Metodo que chequea que la query actual y la anterior sean iguales, comprueba tamaño y objeto a objeto.
@@ -1409,7 +1407,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 LatLng coordenadas;
                 ItemClickListener clickListener;
                 Context contextoApp;
-                boolean componentesIniciados;
 
                 @SuppressLint("RestrictedApi")
                 MyViewHolder(View view) {
@@ -1477,6 +1474,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
                         imagenduracion.setVisibility(view.INVISIBLE);
                         imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
+                        imagendistancia.setVisibility(view.INVISIBLE);
                     }
                 }
 
@@ -1488,6 +1486,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     imagendistancia.setImageDrawable(imagen);
                     textodistancia.setText(textoDistancia);
                     textoDuracion.setText(textoduracion);
+                    imagenduracion.setVisibility(View.VISIBLE);
+                    imagendistancia.setVisibility(view.VISIBLE);
                 }
 
                 public void setClickListener(ItemClickListener itemClickListener) {
