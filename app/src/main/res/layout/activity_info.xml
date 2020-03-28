@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,7 +25,7 @@
             <ImageView
                 android:id="@+id/imagen_principal"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
+                android:layout_height="@dimen/tamano_imagen_crear_ruta"
                 app:srcCompat="@drawable/degradado_tarjeta"
                 android:transitionName="@string/id_transicion_imagen"/>
             <View android:id="@+id/imagen_divider_info"
@@ -79,11 +78,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
+                            android:padding="5dp"
                             app:srcCompat="@drawable/ic_location_on_black_24dp" />
                         <TextView
                             android:id="@+id/texto_direccion"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:text="@string/direccion"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -117,12 +118,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
+                            android:padding="5dp"
                             app:srcCompat="@drawable/ic_access_time_black_24dp" />
                         <TextView
                             android:id="@+id/texto_horario"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/horario"
+                            android:layout_gravity="center_vertical"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -154,12 +157,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
+                            android:padding="5dp"
                             app:srcCompat="@drawable/ic_attach_money_black_24dp" />
                         <TextView
                             android:id="@+id/texto_precio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/precio"
+                            android:layout_gravity="center_vertical"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -191,12 +196,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
+                            android:padding="5dp"
                             app:srcCompat="@drawable/ic_phone_black_24dp" />
                         <TextView
                             android:id="@+id/texto_contacto"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/contacto"
+                            android:layout_gravity="center_vertical"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -228,12 +235,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
+                            android:padding="5dp"
                             app:srcCompat="@drawable/ic_link_black_24dp" />
                         <TextView
                             android:id="@+id/texto_web"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/pagina_web"
+                            android:layout_gravity="center_vertical"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -256,13 +265,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center">
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/boton_verMenos"
                     android:text="@string/ver_menos"
-                    android:layout_marginStart="50dp"
                     app:icon="@drawable/ver_menos_boton"
                     style="@style/Widget.MaterialComponents.Button.Icon"
                     android:transitionName="@string/id_transicion_boton_mas"/>
@@ -270,7 +279,6 @@
                     android:id="@+id/boton_ruta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
                     app:icon="@drawable/iconoir"
                     android:text="@string/RUTA"
                     android:theme="@style/Widget.MaterialComponents.Button.Icon"
