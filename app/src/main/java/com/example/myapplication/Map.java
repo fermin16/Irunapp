@@ -209,7 +209,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     //RecycleView y componentes:
     private RecyclerView recyclerView;
     private LinearLayoutManager recyclerLayoutManager;
-    private int elementoActualRecyclerView;
+//    private int elementoActualRecyclerView;
 
     //Elementos para navegacion:
     private DirectionsRoute currentRoute;
@@ -222,6 +222,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private static ImageView imagendistancia;
     private static ImageView imagenduracion;
     public static String rutaSeleccionada; //Ruta para seleccionar desde activity Info.
+    private boolean isVisibleRoute;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
@@ -259,6 +260,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                         mostrarPuntos(lista_puntos);
                  }
                  else{
+                     if(BotonFlotante.isOpened())
+                         BotonFlotante.close(true);
                      LatLng cardclick = (LatLng) msg.obj;
                      int i = 0;
                      boolean salir = false;
@@ -273,8 +276,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                      }
                      //Si era un click sobre el boton mostrar mas
                      if(msg.what == MSG_AMPLIA_CARD) {
-                         if(BotonFlotante.isOpened())
-                            BotonFlotante.close(true);
                          // Ordinary Intent for launching a new activity
                          Intent intent = new Intent(getApplicationContext(), activityInfo.class);
                          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -391,25 +392,25 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         semaforo_ajustes = new Semaphore(1);
         tab_distancia = findViewById(R.id.kilometros);
         tab_distancia.setOnTabSelectedListener(index -> {
-            setAjustesMapa(index, tab_distancia.getId(),true);
+            setAjustesMapa(index, tab_distancia.getId());
         });
 
         tab_frecuencia = findViewById(R.id.frecuencia);
         tab_frecuencia.setOnTabSelectedListener(index -> {
-            setAjustesMapa(index, tab_frecuencia.getId(),true);
+            setAjustesMapa(index, tab_frecuencia.getId());
         });
 
         tab_puntos = findViewById(R.id.numpuntos);
         tab_puntos.setOnTabSelectedListener(index -> {
-            setAjustesMapa(index, tab_puntos.getId(),true);
+            setAjustesMapa(index, tab_puntos.getId());
         });
 
         tab_distancia.selectTab(selected_tab_distancia,false);
-        setAjustesMapa(selected_tab_distancia,tab_distancia.getId(),false);
+        setAjustesMapa(selected_tab_distancia,tab_distancia.getId());
         tab_frecuencia.selectTab(tiempo_refresco,false);
-        setAjustesMapa(tiempo_refresco,tab_frecuencia.getId(),false);
+        setAjustesMapa(tiempo_refresco,tab_frecuencia.getId());
         tab_puntos.selectTab(max_puntos,false);
-        setAjustesMapa(max_puntos, tab_puntos.getId(),false);
+        setAjustesMapa(max_puntos, tab_puntos.getId());
 
         //Inicializar los dos estilos de mapa:
         BasicStyle = new Style.Builder().fromUri(getString(R.string.map_style_basic));
@@ -503,7 +504,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     locationComponent.zoomWhileTracking(ZOOM_FIND);
 
                     //Comenzar a printear los puntos en el mapa
-                    buscaPuntos();
+                    if(hijo == null || !hijo.isAlive())
+                        buscaPuntos();
                 }
             }
         }
@@ -608,24 +610,21 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     mapboxMap.addOnMapClickListener(mapListener = point -> {
                         //Decrementar el valor de simboloActivado si es igual a 0 acaba de ocurrir un evento en symbolManager y no debemos deseleccionar el marcador
                         simboloActivado--;
-                        System.out.println(markerSelected+"......"+simboloActivado);
                         if((markerSelected != null) && simboloActivado!=0){
+                            if(BotonFlotante.isOpened())
+                                BotonFlotante.close(true);
                             deselectMarker();
-                            System.out.println("HOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLA");
-                            updateNavigationRoute();
                         }
                         return false;
                     });
                     symbolManager.setIconAllowOverlap(true);
                     symbolManager.setTextAllowOverlap(true);
                     enableLocationComponent(style);
-//                    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap);
                 };
                 mapboxMap.setStyle(newStyle,loadedStyle);
                 //Limitar el mapa y la vista:
                 mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
                 mapboxMap.setMinZoomPreference(ZOOM_MIN);
-                //Inicilizar componente para navegacion:
 
             });
             loading_style.release();
@@ -647,6 +646,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             aux = max_distancia;
         }
         Toast.makeText(getApplicationContext(),getString(R.string.obteniendoPuntos)+" "+aux+" "+units+" "+getString(R.string.obteniendoPuntos2),Toast.LENGTH_LONG).show();
+        pause = false;
         Runnable hilo = () -> {
             Location myLocation;
             do{
@@ -666,12 +666,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                                 units2 = "km";
                                 aux2 = max_distancia;
                             }
-                        manejador.postDelayed(new Runnable() {
-                            public void run() {
-                                Toast.makeText(Map.this, getString(R.string.obteniendoPuntos)+" "+aux2+" "+units2+" "+getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show();
-
-                            }
-                        }, 2000);
+                        runOnUiThread(() -> Toast.makeText(Map.this, getString(R.string.obteniendoPuntos)+" "+aux2+" "+units2+" "+getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show());
                         if(BotonBuscaPuntos.isEnabled())
                             runOnUiThread(() -> BotonBuscaPuntos.setEnabled(false));
                     }
@@ -732,6 +727,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
             symbolManager.delete(lista_symbol);
             if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
+
                 //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
                 if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
                     if(markerSelected == null)
@@ -831,7 +827,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     public void selectMarker(final Symbol symbol) {
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker();
-            updateNavigationRoute();
             noMarker = false; //Lo ponemos a false evitando asi que si es la primera query y no teniamos un punto seleccionado al deseleccionar no se borre el punto.s
             animateCamera(symbol);
             markerAnimator = new ValueAnimator();
@@ -850,65 +845,67 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private void deselectMarker() {
         if (markerSelected != null){
             int index = lista_symbol.indexOf(markerSelected);
-            lista_symbol.remove(markerSelected);
-            if(noMarker){
-                //Solo estaba disponible el punto seleccionado:
-                if(lista_symbol.isEmpty()) {
-                    cardSelected = null;
-                    BotonTarjetas.setEnabled(false);
-                    BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
-                    recyclerView.animate()
-                            .alpha(0f)
-                            .setDuration(ANIMACION_TARJETAS)
-                            .setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    recyclerView.setVisibility(View.GONE);
-                                    updateAdapter(new ArrayList<>());
-                                }
-                            });
+            if(lista_symbol.remove(markerSelected)) {
+                if (isVisibleRoute) {
+                    updateNavigationRoute();
+                    isVisibleRoute = false;
                 }
-                //Habia más puntos ademas del seleccionado pero en la ultima query no se recupero (ya no esta en alcance)
-                else{
-                    ArrayList<ParseObject> query_elimnaTarjeta = new ArrayList<>(prevQuery);
-                    query_elimnaTarjeta.removeIf(obj -> obj.hasSameId(cardSelected));
+                if (noMarker) {
+                    //Solo estaba disponible el punto seleccionado:
+                    if (lista_symbol.isEmpty()) {
+                        cardSelected = null;
+                        BotonTarjetas.setEnabled(false);
+                        BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
+                        recyclerView.animate()
+                                .alpha(0f)
+                                .setDuration(ANIMACION_TARJETAS)
+                                .setListener(null);
+
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                recyclerView.setVisibility(View.GONE);
+                                updateAdapter(new ArrayList<>());
+                            }
+                        },ANIMACION_TARJETAS);
+                    }
+                    //Habia más puntos ademas del seleccionado pero en la ultima query no se recupero (ya no esta en alcance)
+                    else {
+                        ArrayList<ParseObject> query_elimnaTarjeta = new ArrayList<>(prevQuery);
+                        query_elimnaTarjeta.removeIf(obj -> obj.hasSameId(cardSelected));
+                        cardSelected = null;
+                        updateAdapter(query_elimnaTarjeta);
+                    }
+                } else {
+                    //Punto seleccionado sigue al alcance
                     cardSelected = null;
-                    updateAdapter(query_elimnaTarjeta);
+                    markerSelected.setIconSize(TAMANO_MIN_ICONO);
+                    lista_symbol.add(index, markerSelected);
                 }
+                markerSelected = null;
+                symbolManager.deleteAll();
+                symbolManager.update(lista_symbol);
             }
-            else{
-                cardSelected = null;
-                markerSelected.setIconSize(TAMANO_MIN_ICONO);
-                lista_symbol.add(index,markerSelected);
-            }
-            markerSelected = null;
-            symbolManager.deleteAll();
-            symbolManager.update(lista_symbol);
         }
     }
 
     /** Metodo para configurar los ajustes del mapa mediante los tabView del menu desplegable,
      * se recie el id del TaView y el index del mismo.
       **/
-    private void setAjustesMapa(int index, int tabViewId, boolean show_toast){
+    private void setAjustesMapa(int index, int tabViewId){
         try {
             //Si el hijo no está muerto:
             if(hijo != null && hijo.isAlive()){
                 dormir();
             }
             semaforo_ajustes.acquire();
-            if(tabViewId == R.id.kilometros){
-                if(index == 0){
+            if(tabViewId == R.id.kilometros) {
+                if (index == 0) {
                     max_distancia = TAB_1_DISTANCIA;
-                }
-                else if(index == 1){
+                } else if (index == 1) {
                     max_distancia = TAB_2_DISTANCIA;
-                }
-                else
+                } else
                     max_distancia = TAB_3_DISTANCIA;
-                Preferencias.guardaKilometros(getApplicationContext(),index);
-                if(show_toast)
-                    Toast.makeText(getApplicationContext(),getString(R.string.distancia_actualizada)+" "+Double.toString(max_distancia)+" km",Toast.LENGTH_LONG).show();
+                Preferencias.guardaKilometros(getApplicationContext(), index);
             }
             else if(tabViewId == R.id.frecuencia){
                 if(index == 0){
@@ -920,8 +917,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 else
                     tiempo_refresco = TAB_3_FRECUENCIA;
                 Preferencias.guardaFrecuencia(getApplicationContext(),index);
-                if(show_toast)
-                    Toast.makeText(this,getString(R.string.frecuencia_actualizada)+" "+tiempo_refresco/1000+" segundos",Toast.LENGTH_SHORT).show();
             }
             else{
                 if(index == 0){
@@ -933,14 +928,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 else
                     max_puntos = TAB_3_PUNTOS;
                 Preferencias.guardaPuntos(getApplicationContext(),index);
-                if(show_toast)
-                    Toast.makeText(this,getString(R.string.puntos_actualizados)+" "+max_puntos+" puntos",Toast.LENGTH_SHORT).show();
             }
             semaforo_ajustes.release();
             if(pause)
                 despertar();
         } catch (InterruptedException e) {
-            Log.v("Error en ajustes","No se pudieron modificar los ajustes del mapa");
+            Toast.makeText(this, R.string.error_ajustes_mapa, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -990,13 +983,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 .alpha(0f)
                 .translationY(recyclerView.getWidth())
                 .setDuration(ANIMACION_TARJETAS)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        recyclerView.setVisibility(View.GONE);
-                        BotonTarjetas.setEnabled(true);
-                    }
-                });
+                .setListener(null);
+        new Handler().postDelayed(() -> {
+            recyclerView.setVisibility(View.GONE);
+            BotonTarjetas.setEnabled(true);
+        },ANIMACION_TARJETAS);
     }
 
 
@@ -1042,11 +1033,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         super.onRestart();
         if(mGpsSwitchStateReceiver != null)
             contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
+        if(navigationMapRoute != null)
+            navigationMapRoute.onStart();
         despertar();
     }
 
     @Override
     public void onPause() {
+
         dormir(); //Pausar el hilo hijo
         super.onPause();
         mapView.onPause();
@@ -1187,6 +1181,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                                             .setMessage(R.string.iniciar_ruta )
                                             .setPositiveButton(R.string.iniciar, (paramDialogInterface, paramInt) -> startNavigation(mapView)).setNegativeButton(R.string.cancelar_navegavecion,null).show();
                                     BotonNavegacion.setEnabled(true);
+                                    isVisibleRoute = true;
                                 }
                             }
 
@@ -1277,22 +1272,26 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateAdapter(ArrayList<ParseObject> listaParse){
-        boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
-        if(!listas_iguales(listaParse)) {
-            //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
-            if(cardSelected != null){
-                lista_symbol.remove(markerSelected); //En este caso previamente se ha guardado el marcador asi que podemos usar un remove normal
-                lista_symbol.add(0,markerSelected);
-                listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
-                listaParse.add(0,cardSelected);
-                elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
-                update_info = false;
+       // if(listaParse.size() <= lista_symbol.size()) {
+            if (!listas_iguales(listaParse)) {
+                boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
+                //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
+                if (cardSelected != null) {
+                    lista_symbol.remove(markerSelected); //En este caso previamente se ha guardado el marcador asi que podemos usar un remove normal
+                    lista_symbol.add(0, markerSelected);
+                    listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
+                    listaParse.add(0, cardSelected);
+                    //elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
+                    if (isVisibleRoute) {
+                        update_info = false;
+                    }
+                }
+                LocationRecyclerViewAdapter locationAdapter =
+                        new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this, update_info);
+                recyclerView.setAdapter(locationAdapter);
             }
-            LocationRecyclerViewAdapter locationAdapter =
-                    new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this,update_info);
-            recyclerView.setAdapter(locationAdapter);
-        }
-        prevQuery = listaParse;
+            prevQuery = listaParse;
+      //  }
     }
 
     /** Metodo que chequea que la query actual y la anterior sean iguales, comprueba tamaño y objeto a objeto.
@@ -1414,13 +1413,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     super(view);
                     lugar_textview = view.findViewById(R.id.lugar_textview);
                     imagen = view.findViewById(R.id.imagen);
+
                     botonVermas = view.findViewById(R.id.boton_verMas);
                     botonVermas.setOnClickListener(v -> {
-                        iniciaComponentesRuta(view);
                         Message msg = new Message();
                         msg.obj = coordenadas;
                         msg.what = MSG_AMPLIA_CARD;
                         manejador.sendMessage(msg);
+                        iniciaComponentesRuta(view);
                     });
                     botonIr = view.findViewById(R.id.boton_IR);
                     botonIr.setOnClickListener(v -> {
@@ -1457,12 +1457,25 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 }
 
                 public void iniciaComponentesRuta(View view){
-                    imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
-                    textodistancia = view.findViewById(R.id.texto_distancia_cardview);
-                    textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
-                    imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
-                    imagenduracion.setVisibility(view.INVISIBLE);
-                    imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
+                    boolean vistaResfrescada = false;
+                    if(imagenduracion != null) {
+                        if(!imagenduracion.equals(view.findViewById(R.id.imagen_duracion_cardview))){
+                            vistaResfrescada = true;
+                            textodistancia.setText("");
+                            textoDuracion.setText("");
+                            imagendistancia.setVisibility(View.INVISIBLE);
+                            imagenduracion.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                    if(imagenduracion == null || vistaResfrescada){
+                        imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
+                        textodistancia = view.findViewById(R.id.texto_distancia_cardview);
+                        textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
+                        imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
+                        imagenduracion.setVisibility(view.INVISIBLE);
+                        imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
+                        imagendistancia.setVisibility(view.INVISIBLE);
+                    }
                 }
 
                 public void restauraComponentes(View view){
@@ -1473,6 +1486,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     imagendistancia.setImageDrawable(imagen);
                     textodistancia.setText(textoDistancia);
                     textoDuracion.setText(textoduracion);
+                    imagenduracion.setVisibility(View.VISIBLE);
+                    imagendistancia.setVisibility(view.VISIBLE);
                 }
 
                 public void setClickListener(ItemClickListener itemClickListener) {
