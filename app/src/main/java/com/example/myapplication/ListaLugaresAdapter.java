@@ -2,6 +2,8 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.Modelos.Lugar;
 
 import java.util.List;
 
@@ -52,8 +56,18 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
 
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
-        holder.imagenPrincipal.setImageResource(mData.get(position).getImagenPrincipal());
-        holder.nombreLugar.setText(mData.get(position).getNombreLugar());
+
+        byte[] foto = mData.get(position).getFoto();
+        Bitmap fotoBmp = BitmapFactory.decodeByteArray(foto, 0, foto.length);
+
+        holder.imagenPrincipal.setImageBitmap(Bitmap.createScaledBitmap(
+                fotoBmp,
+                holder.imagenPrincipal.getWidth(),
+                holder.imagenPrincipal.getHeight(),
+                false
+        ));
+
+        holder.nombreLugar.setText(mData.get(position).getNombre());
         if (tarjetaGrande) {
             holder.horario.setText(mData.get(position).getHorario());
             holder.botonVerMas.setOnClickListener(new View.OnClickListener() {

@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myapplication.ui.main.PestanaMapa;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.parse.ParseObject;
 
@@ -100,11 +101,11 @@ public class activityInfo extends AppCompatActivity {
 
                     popup.setOnMenuItemClickListener(item -> {
                         if (item.getItemId() == R.id.modoCoche) {
-                            Map.rutaSeleccionada = DirectionsCriteria.PROFILE_DRIVING;
+                            PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_DRIVING;
                         } else if (item.getItemId() == R.id.modoBicicleta) {
-                            Map.rutaSeleccionada = DirectionsCriteria.PROFILE_CYCLING;
+                            PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_CYCLING;
                         } else {
-                            Map.rutaSeleccionada = DirectionsCriteria.PROFILE_WALKING;
+                            PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_WALKING;
                         }
                         super.onBackPressed();
                         return true;

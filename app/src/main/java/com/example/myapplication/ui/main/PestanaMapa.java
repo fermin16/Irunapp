@@ -1,5 +1,4 @@
-package com.example.myapplication;
-
+package com.example.myapplication.ui.main;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
@@ -33,13 +32,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSnapHelper;
@@ -47,8 +47,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
-import com.example.myapplication.Modelos.lugar;
+import com.example.myapplication.Modelos.Lugar;
 import com.example.myapplication.Modelos.Preferencias;
+import com.example.myapplication.R;
+import com.example.myapplication.activityInfo;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.material.snackbar.Snackbar;
@@ -97,8 +99,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.content.Context.LOCATION_SERVICE;
 
-public class Map extends AppCompatActivity implements OnMapReadyCallback {
+
+public class PestanaMapa extends Fragment implements OnMapReadyCallback {
+
+    private static PestanaMapa pestana = null;
+    View root;
 
     //Macros:
     //Macros relacionadas con el mapa y la camara:
@@ -222,17 +229,31 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     public static String rutaSeleccionada; //Ruta para seleccionar desde activity Info.
     private boolean isVisibleRoute;
 
+    public static PestanaMapa getPestana() {
+        if (pestana == null) {
+            pestana = new PestanaMapa();
+        }
+        return pestana;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, getString(R.string.map_token));
-        setContentView(R.layout.activity_map);
-        mapView = findViewById(R.id.mapView);
+        Mapbox.getInstance(getActivity(), getString(R.string.map_token));
+
+        root = inflater.inflate(R.layout.activity_map, container, false);
+
+        mapView = root.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
 
-        routeLoading = findViewById(R.id.routeLoadingProgressBar);
+        routeLoading = root.findViewById(R.id.routeLoadingProgressBar);
 
         //Inicializar los semaforos
         loading_style = new Semaphore(1);
@@ -248,77 +269,77 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         noMarker = false;
 
         //Inicializar el handler del main thread:
-         manejador = new Handler(getApplicationContext().getMainLooper()){
-             @RequiresApi(api = Build.VERSION_CODES.N)
-             @Override
-             public void handleMessage(Message msg) {
-                    super.handleMessage(msg);
-                 if(msg.what == MSG_QUERY) {
-                        ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
-                        mostrarPuntos(lista_puntos);
-                 }
-                 else{
-                     if(BotonFlotante.isOpened())
-                         BotonFlotante.close(true);
-                     LatLng cardclick = (LatLng) msg.obj;
-                     int i = 0;
-                     boolean salir = false;
-                     while (i < lista_symbol.size() && !salir){
-                         Symbol simbolo = lista_symbol.get(i);
-                         if(simbolo.getLatLng().getLatitude() == cardclick.getLatitude() && simbolo.getLatLng().getLongitude() == cardclick.getLongitude()) {
-                             salir = true;
-                             selectMarker(simbolo,true);
-                             selectCard();
-                         }
-                         i++;
-                     }
-                     //Si era un click sobre el boton mostrar mas
-                     if(msg.what == MSG_AMPLIA_CARD) {
-                         // Ordinary Intent for launching a new activity
-                         Intent intent = new Intent(getApplicationContext(), activityInfo.class);
-                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        manejador = new Handler(getActivity().getMainLooper()){
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if(msg.what == MSG_QUERY) {
+                    ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
+                    mostrarPuntos(lista_puntos);
+                }
+                else{
+                    if(BotonFlotante.isOpened())
+                        BotonFlotante.close(true);
+                    LatLng cardclick = (LatLng) msg.obj;
+                    int i = 0;
+                    boolean salir = false;
+                    while (i < lista_symbol.size() && !salir){
+                        Symbol simbolo = lista_symbol.get(i);
+                        if(simbolo.getLatLng().getLatitude() == cardclick.getLatitude() && simbolo.getLatLng().getLongitude() == cardclick.getLongitude()) {
+                            salir = true;
+                            selectMarker(simbolo,true);
+                            selectCard();
+                        }
+                        i++;
+                    }
+                    //Si era un click sobre el boton mostrar mas
+                    if(msg.what == MSG_AMPLIA_CARD) {
+                        // Ordinary Intent for launching a new activity
+                        Intent intent = new Intent(getActivity(), activityInfo.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                         //Animaciones para la transicion:
-                         // Ibtener la vistas de los objetos para la animacion:
-                         View cardview = findViewById(R.id.cardviewLugar);
+                        //Animaciones para la transicion:
+                        // Ibtener la vistas de los objetos para la animacion:
+                        View cardview = root.findViewById(R.id.cardviewLugar);
 
-                         Pair<View, String> imagen = Pair.create(cardview.findViewById(R.id.imagen), getString(R.string.id_transicion_imagen));
-                         Pair<View, String> nombre = Pair.create(cardview.findViewById(R.id.lugar_textview), getString(R.string.id_transicion_nombre));
-                         Pair<View, String> boton_mas = Pair.create(cardview.findViewById(R.id.boton_verMas), getString(R.string.id_transicion_boton_mas));
-                         Pair<View, String> boton_ruta = Pair.create(cardview.findViewById(R.id.boton_IR), getString(R.string.id_transicion_boton_ruta));
+                        Pair<View, String> imagen = Pair.create(cardview.findViewById(R.id.imagen), getString(R.string.id_transicion_imagen));
+                        Pair<View, String> nombre = Pair.create(cardview.findViewById(R.id.lugar_textview), getString(R.string.id_transicion_nombre));
+                        Pair<View, String> boton_mas = Pair.create(cardview.findViewById(R.id.boton_verMas), getString(R.string.id_transicion_boton_mas));
+                        Pair<View, String> boton_ruta = Pair.create(cardview.findViewById(R.id.boton_IR), getString(R.string.id_transicion_boton_ruta));
 
-                         ActivityOptionsCompat options =
-                                 ActivityOptionsCompat.makeSceneTransitionAnimation(Map.this, imagen,nombre,boton_mas,boton_ruta);
+                        ActivityOptionsCompat options =
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), imagen,nombre,boton_mas,boton_ruta);
 
-                         //Información de la tarjeta seleccionada
-                         Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
-                         bundle.putString(String.valueOf(R.string.bundle_direccion),((lugar)cardSelected).getDireccion()); //Guardar direccion
-                         bundle.putString(String.valueOf(R.string.bundle_titulo),((lugar)cardSelected).getNombre()); //Guardar nombre
-                         bundle.putString(String.valueOf(R.string.bundle_descripcion),((lugar)cardSelected).getDescripcion()); //Guardar descripcion
-                         bundle.putString(String.valueOf(R.string.bundle_horario),((lugar)cardSelected).getHorario()); //Guardar horario
-                         bundle.putString(String.valueOf(R.string.bundle_web),((lugar)cardSelected).getWeb()); //Guardar web
-                         bundle.putString(String.valueOf(R.string.bundle_precio),((lugar)cardSelected).getPrecio()); //Guardar precio
-                         bundle.putString(String.valueOf(R.string.bundle_contacto),((lugar)cardSelected).getContacto()); //Guardar contacto
-                         bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((lugar)cardSelected).getFoto());
+                        //Información de la tarjeta seleccionada
+                        Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
+                        bundle.putString(String.valueOf(R.string.bundle_direccion),((Lugar)cardSelected).getDireccion()); //Guardar direccion
+                        bundle.putString(String.valueOf(R.string.bundle_titulo),((Lugar)cardSelected).getNombre()); //Guardar nombre
+                        bundle.putString(String.valueOf(R.string.bundle_descripcion),((Lugar)cardSelected).getDescripcion()); //Guardar descripcion
+                        bundle.putString(String.valueOf(R.string.bundle_horario),((Lugar)cardSelected).getHorario()); //Guardar horario
+                        bundle.putString(String.valueOf(R.string.bundle_web),((Lugar)cardSelected).getWeb()); //Guardar web
+                        // TODO bundle.putString(String.valueOf(R.string.bundle_precio),((Lugar)cardSelected).getPrecio()); //Guardar precio
+                        bundle.putString(String.valueOf(R.string.bundle_contacto),((Lugar)cardSelected).getContacto()); //Guardar contacto
+                        bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Lugar)cardSelected).getFoto());
 
-                         intent.putExtras(bundle);
+                        intent.putExtras(bundle);
 
-                         startActivity(intent, options.toBundle());
-                     }
-                     else if(msg.what == MSG_RUTA){
-                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
-                     }
-                 }
-             }
-         };
+                        startActivity(intent, options.toBundle());
+                    }
+                    else if(msg.what == MSG_RUTA){
+                        getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
+                    }
+                }
+            }
+        };
 
         //Instanciamos el Boton flotante con el mnú y los botones de localización y cambio de estilo:
-        BotonFlotante = findViewById(R.id.BotonFlotante);
+        BotonFlotante = root.findViewById(R.id.BotonFlotante);
         BotonFlotante.setClosedOnTouchOutside(true);
         BotonFlotante.getMenuIconView().setImageResource(R.drawable.botonmapaflotante);
         BotonFlotante.bringToFront();
 
-        BotonMapa =  findViewById(R.id.BotonCambioMapa);
+        BotonMapa =  root.findViewById(R.id.BotonCambioMapa);
         BotonMapa.setOnClickListener(v -> {
             if(!style){
                 set_style(SatelliteStyle);
@@ -330,37 +351,37 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
-        BotonLocalizacion =  findViewById(R.id.FindMe);
+        BotonLocalizacion = root.findViewById(R.id.FindMe);
         BotonLocalizacion.setOnClickListener(v -> findMe());
 
-        BotonBuscaPuntos = findViewById(R.id.BuscaPuntos);
+        BotonBuscaPuntos = root.findViewById(R.id.BuscaPuntos);
         BotonBuscaPuntos.setEnabled(false);
         BotonBuscaPuntos.setOnClickListener(v -> {
             despertar();
             BotonBuscaPuntos.setEnabled(false);
         });
 
-        BotonTarjetas = findViewById(R.id.BotonTarjetas);
+        BotonTarjetas = root.findViewById(R.id.BotonTarjetas);
         BotonTarjetas.setEnabled(false);
         BotonTarjetas.setOnClickListener(v -> {
-            if(BotonTarjetas.getColorNormal() == getColor(R.color.botonTarjetasNormal)) {
-                runOnUiThread(() ->BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado)));
-                runOnUiThread(() ->BotonTarjetas.setEnabled(false));
+            if(BotonTarjetas.getColorNormal() == ContextCompat.getColor(getActivity(), R.color.botonTarjetasNormal)) {
+                getActivity().runOnUiThread(() ->BotonTarjetas.setColorNormal(ContextCompat.getColor(getActivity(), R.color.botonTarjetasDesactivado)));
+                getActivity().runOnUiThread(() ->BotonTarjetas.setEnabled(false));
                 ocultarTarjetas();
             }else{
-                runOnUiThread(() ->BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasNormal)));
+                getActivity().runOnUiThread(() ->BotonTarjetas.setColorNormal(ContextCompat.getColor(getActivity(), R.color.botonTarjetasNormal)));
                 mostrarTarjetas();
             }
         });
 
-        BotonNavegacion = findViewById(R.id.BotonNavegacion);
+        BotonNavegacion = root.findViewById(R.id.BotonNavegacion);
         BotonNavegacion.setEnabled(false);
         BotonNavegacion.setOnClickListener(v ->{
             startNavigation(mapView);
         });
 
-        gif_ajustes = findViewById(R.id.swipe_gif);
-        panelDeslizante = findViewById(R.id.PanelDeslizante);
+        gif_ajustes = root.findViewById(R.id.swipe_gif);
+        panelDeslizante = root.findViewById(R.id.PanelDeslizante);
         panelDeslizante.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
@@ -388,22 +409,22 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
         //Inicializar variables para busqueda de puntos y ajustes:
         //Obtener valores de ajustes almacenados
-        max_puntos = Preferencias.getPuntos(this);
-        int selected_tab_distancia = Preferencias.getKilometros(this);
-        tiempo_refresco = Preferencias.getFrecuencia(this);
+        max_puntos = Preferencias.getPuntos(getActivity());
+        int selected_tab_distancia = Preferencias.getKilometros(getActivity());
+        tiempo_refresco = Preferencias.getFrecuencia(getActivity());
 
         semaforo_ajustes = new Semaphore(1);
-        tab_distancia = findViewById(R.id.kilometros);
+        tab_distancia = root.findViewById(R.id.kilometros);
         tab_distancia.setOnTabSelectedListener(index -> {
             setAjustesMapa(index, tab_distancia.getId());
         });
 
-        tab_frecuencia = findViewById(R.id.frecuencia);
+        tab_frecuencia = root.findViewById(R.id.frecuencia);
         tab_frecuencia.setOnTabSelectedListener(index -> {
             setAjustesMapa(index, tab_frecuencia.getId());
         });
 
-        tab_puntos = findViewById(R.id.numpuntos);
+        tab_puntos = root.findViewById(R.id.numpuntos);
         tab_puntos.setOnTabSelectedListener(index -> {
             setAjustesMapa(index, tab_puntos.getId());
         });
@@ -444,17 +465,18 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 }
             }
         };
-        contextoBroadcast = getApplicationContext();
+        contextoBroadcast = getActivity();
         //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
         contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
         set_style(BasicStyle);
         initRecyclerView(null);
 
+        return root;
     }
 
     /* Metodo para chequear los resultados de las subactiviades:*/
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case ACTIVAR_UBICACION: //Comprobar si el usuario ha activado o no los activity_ajustes de ubicacion.
@@ -467,10 +489,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
      * (en caso de no haberlos pedido antes) y si el usuario acepta podra utilizar el mapa en caso
      * contrario se terminara el activity.*/
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-         permissionsManager = new PermissionsManager(new PermissionsListener() {
+        permissionsManager = new PermissionsManager(new PermissionsListener() {
             @Override
             public void onExplanationNeeded(List<String> permissionsToExplain) {
-                Toast.makeText(getApplicationContext(),getString(R.string.activarPermisosAjustes),Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.activarPermisosAjustes),Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -479,20 +501,20 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     enableLocationComponent(loadedMapStyle);
                 } else {
                     if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION))
-                        Toast.makeText(getApplicationContext(),getString(R.string.activarPermisos),Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), getString(R.string.activarPermisos),Toast.LENGTH_LONG).show();
                     else
                         onExplanationNeeded(null);
                 }
             }
         });
         //Comprobar si se han concedido los permisos de ubicacion:
-        if (permissionsManager.areLocationPermissionsGranted(this)) {
+        if (permissionsManager.areLocationPermissionsGranted(getActivity())) {
             if(checkLocationServices()) {//Comprobar si estan activados los servicios de red y ubicacion.
                 //Obtener una instancia del componente de localizacion
-                 locationComponent = mapboxMap.getLocationComponent();
+                locationComponent = mapboxMap.getLocationComponent();
 
                 // Activate with a built LocationComponentActivationOptions object
-                locationComponent.activateLocationComponent(LocationComponentActivationOptions.builder(this, mapboxMap.getStyle()).build());
+                locationComponent.activateLocationComponent(LocationComponentActivationOptions.builder(getActivity(), mapboxMap.getStyle()).build());
                 if(checkLocationServices()) {//Comprobar si estan activados los servicios de red y ubicacion.
                     //Hacer el indicador visible
                     locationComponent.setLocationComponentEnabled(true);
@@ -513,14 +535,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             }
         }
         else{ //Si no se han concedido permisos y el usuario no ha marcado la opcion no volver a preguntar, solicitarlos
-            permissionsManager.requestLocationPermissions(this);
+            permissionsManager.requestLocationPermissions(getActivity());
         }
     }
 
     /* Metodo que permite chequear los servicios de acceso para ver si estan activados o no. Devuelve
      *  falso si estan desactivados y verdadero en caso contrario.*/
     public boolean checkLocationServices(){
-        LocationManager lm = (LocationManager)this.getSystemService(LOCATION_SERVICE);
+        LocationManager lm = (LocationManager)getActivity().getSystemService(LOCATION_SERVICE);
         boolean gps = false;
         boolean network = false;
 
@@ -535,15 +557,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             alertDialog.dismiss();
         if(!gps){
             //Notificar al usuario que tiene desactivados los servicios de ubicacion.
-            alertDialog = new AlertDialog.Builder(this)
+            alertDialog = new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.gps_desactivado)
-                    .setPositiveButton(R.string.activar_gps, (paramDialogInterface, paramInt) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION)).setNegativeButton(R.string.cancelar_gps, (dialog, which) -> Toast.makeText(getApplicationContext(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show())
+                    .setPositiveButton(R.string.activar_gps, (paramDialogInterface, paramInt) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION)).setNegativeButton(R.string.cancelar_gps, (dialog, which) -> Toast.makeText(getActivity(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show())
                     .show();
             return false;
         }
         else if(!network){
             //Notificar al usuario que tiene desactivados los servicios de red.
-            alertDialog = new AlertDialog.Builder(this)
+            alertDialog = new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.net_desactivada)
                     .setPositiveButton(R.string.activar_gps, new DialogInterface.OnClickListener() {
                         @Override
@@ -583,7 +605,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 }
             }
             else{
-                Toast.makeText(this,getString(R.string.cargando_mapa),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.cargando_mapa),Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -594,7 +616,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         try {
             loading_style.acquire();
             mapView.getMapAsync(mapboxMap -> {
-                Map.this.mapboxMap = mapboxMap;
+                PestanaMapa.this.mapboxMap = mapboxMap;
                 //Iinicializar la variable que almacenara los añadidos del mapa
                 loadedStyle = style -> {
                     if(symbolManager!=null)
@@ -648,7 +670,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             units = "km";
             aux = max_distancia;
         }
-        Toast.makeText(getApplicationContext(),getString(R.string.obteniendoPuntos)+" "+aux+" "+units+" "+getString(R.string.obteniendoPuntos2),Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(),getString(R.string.obteniendoPuntos)+" "+aux+" "+units+" "+getString(R.string.obteniendoPuntos2),Toast.LENGTH_LONG).show();
         pause = false;
         Runnable hilo = () -> {
             Location myLocation;
@@ -666,12 +688,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                             aux2 = max_distancia*1000;
                         }
                         else{
-                                units2 = "km";
-                                aux2 = max_distancia;
-                            }
-                        runOnUiThread(() -> Toast.makeText(Map.this, getString(R.string.obteniendoPuntos)+" "+aux2+" "+units2+" "+getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show());
+                            units2 = "km";
+                            aux2 = max_distancia;
+                        }
+                        getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), getString(R.string.obteniendoPuntos)+" "+aux2+" "+units2+" "+getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show());
                         if(BotonBuscaPuntos.isEnabled())
-                            runOnUiThread(() -> BotonBuscaPuntos.setEnabled(false));
+                            getActivity().runOnUiThread(() -> BotonBuscaPuntos.setEnabled(false));
                     }
                     //Comprobar que la componente de localizacion esta activada
                     if (locationComponent != null) {
@@ -698,92 +720,92 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     private void queryPuntos(Location myLocation ){
         try {
 
-                    ParseGeoPoint userLocation = new ParseGeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery("lugar");
-                    semaforo_ajustes.acquire();
-                    query.whereWithinKilometers("localizacion", userLocation, max_distancia);
-                    query.setLimit(max_puntos);
-                    semaforo_ajustes.release();
-                    query.findInBackground((queryresult, e) -> {
-                        if (e == null) {
-                            guardarAlertas(queryresult);
-                        }
-                    });
+            ParseGeoPoint userLocation = new ParseGeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("lugar");
+            semaforo_ajustes.acquire();
+            query.whereWithinKilometers("localizacion", userLocation, max_distancia);
+            query.setLimit(max_puntos);
+            semaforo_ajustes.release();
+            query.findInBackground((queryresult, e) -> {
+                if (e == null) {
+                    guardarAlertas(queryresult);
+                }
+            });
         }catch (InterruptedException e){
             Log.v("Hijo interrumpido", "No se ha podido completar la query, hijo interrumpido");
         }
     }
 
     /* Metodo que pasa los puntos que recoge el hilo hijo. requiere de acceso al semaforo por si el padre esta mostrando los puntos.
-    * Los puntos se envían a traves de un mensaje con el handler del main */
+     * Los puntos se envían a traves de un mensaje con el handler del main */
     private void guardarAlertas(List<ParseObject> queryresult){
-            Message msg = new Message();
-            msg.obj = queryresult;
-            msg.what = MSG_QUERY;
-            manejador.sendMessage(msg);
+        Message msg = new Message();
+        msg.obj = queryresult;
+        msg.what = MSG_QUERY;
+        manejador.sendMessage(msg);
     }
 
     /*Metodo que utilizará el hilo main para obetener los puntos que ha leido el hijo y mostrarlos en el mapa.
-    * El padre es el que muestra puesto que invocar metodos de mapbox en un hilo worker, lleva a errores y cuelgues
-    * en la aplicación.*/
+     * El padre es el que muestra puesto que invocar metodos de mapbox en un hilo worker, lleva a errores y cuelgues
+     * en la aplicación.*/
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void mostrarPuntos(ArrayList<ParseObject> listaPuntos){
-            symbolManager.delete(lista_symbol);
-            if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
+        symbolManager.delete(lista_symbol);
+        if(loading_style.tryAcquire() && mapboxMap.getStyle() != null) {
 
-                //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
-                if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
-                    if(markerSelected == null)
-                        BotonTarjetas.setEnabled(false);
-                    lista_symbol.clear();
-                    sinPuntos();
-                }
-                //Caso en el que ninguna lista es vacia y hay que añadir elementos
-                else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
-                    //Considerar que el marker seleccionado no esta en la lista de la query
-                    noMarker=true;
-                    BotonTarjetas.setEnabled(true);
-                    //Limpiar la lista de puntos y volver a añadirlos:
-                    lista_symbol.clear();
-                    float icon_size;
-                    //Añadir nuevos puntos
-                    for (ParseObject punto : listaPuntos) {
-                        ParseGeoPoint loc = ((lugar) punto).getLocalizacion();
-                        //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
-                        if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
-                            icon_size = TAMANO_MAX_ICONO;
-                            noMarker=false;
-                        }
-                        else
-                            icon_size = TAMANO_MIN_ICONO;
-                        // Add symbol at specified lat/lon
-                        Symbol symbol = symbolManager.create(new SymbolOptions()
-                                    .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
-                                    .withIconImage(MAKI_ICON_CAFE)
-                                    .withIconSize(icon_size)
-                                    .withDraggable(false)); //No permitir el movimiento del icono
-                        if(icon_size == TAMANO_MAX_ICONO)
-                            markerSelected = symbol;
-                        lista_symbol.add(symbol);
-                    }
-                }
-                //Si no se ha encontrado ningún punto cercano a la ubicación
-                else{
-                    sinPuntos();
-                }
-                //Comprobar si habia marker seleccionado y no se ha recuperado en la query
-                if(markerSelected != null && !lista_symbol.contains(markerSelected)){
-                    markerSelected = symbolManager.create(new SymbolOptions()
-                            .withLatLng(markerSelected.getLatLng())
-                            .withIconImage(markerSelected.getIconImage())
-                            .withIconSize(TAMANO_MAX_ICONO)
-                            .withDraggable(markerSelected.isDraggable()));
-                    lista_symbol.add(0,markerSelected);
-                }
-                // Actualizar el adapter del recyclerView:
-                updateAdapter(listaPuntos);
-                loading_style.release();
+            //Caso en el que la query es empty y habia puntos en el mapa. Eliminarlos todos.
+            if(listaPuntos.isEmpty() && !lista_symbol.isEmpty()){
+                if(markerSelected == null)
+                    BotonTarjetas.setEnabled(false);
+                lista_symbol.clear();
+                sinPuntos();
             }
+            //Caso en el que ninguna lista es vacia y hay que añadir elementos
+            else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
+                //Considerar que el marker seleccionado no esta en la lista de la query
+                noMarker=true;
+                BotonTarjetas.setEnabled(true);
+                //Limpiar la lista de puntos y volver a añadirlos:
+                lista_symbol.clear();
+                float icon_size;
+                //Añadir nuevos puntos
+                for (ParseObject punto : listaPuntos) {
+                    ParseGeoPoint loc = ((Lugar) punto).getLocalizacion();
+                    //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
+                    if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
+                        icon_size = TAMANO_MAX_ICONO;
+                        noMarker=false;
+                    }
+                    else
+                        icon_size = TAMANO_MIN_ICONO;
+                    // Add symbol at specified lat/lon
+                    Symbol symbol = symbolManager.create(new SymbolOptions()
+                            .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
+                            .withIconImage(MAKI_ICON_CAFE)
+                            .withIconSize(icon_size)
+                            .withDraggable(false)); //No permitir el movimiento del icono
+                    if(icon_size == TAMANO_MAX_ICONO)
+                        markerSelected = symbol;
+                    lista_symbol.add(symbol);
+                }
+            }
+            //Si no se ha encontrado ningún punto cercano a la ubicación
+            else{
+                sinPuntos();
+            }
+            //Comprobar si habia marker seleccionado y no se ha recuperado en la query
+            if(markerSelected != null && !lista_symbol.contains(markerSelected)){
+                markerSelected = symbolManager.create(new SymbolOptions()
+                        .withLatLng(markerSelected.getLatLng())
+                        .withIconImage(markerSelected.getIconImage())
+                        .withIconSize(TAMANO_MAX_ICONO)
+                        .withDraggable(markerSelected.isDraggable()));
+                lista_symbol.add(0,markerSelected);
+            }
+            // Actualizar el adapter del recyclerView:
+            updateAdapter(listaPuntos);
+            loading_style.release();
+        }
     }
 
     private  void sinPuntos() {
@@ -792,15 +814,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         noMarker = true;
         if (alertDialog != null)
             alertDialog.dismiss();
-        alertDialog = new AlertDialog.Builder(this)
-                    .setMessage(R.string.puntos_no_localizados)
-                    .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
-                        if (hijo != null) {
-                            despertar();
-                        }
-                    }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
-                Toast.makeText(getApplicationContext(), R.string.busqueda_detenida, Toast.LENGTH_LONG).show();
-            }).show();
+        alertDialog = new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.puntos_no_localizados)
+                .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
+                    if (hijo != null) {
+                        despertar();
+                    }
+                }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
+                    Toast.makeText(getActivity(), R.string.busqueda_detenida, Toast.LENGTH_LONG).show();
+                }).show();
     }
 
     /** Metodo que anima la camara y la lleva hasta el lugar indicado mediante las coordenadas de un objeto Symbol **/
@@ -825,7 +847,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
-    * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
+     * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void selectMarker(final Symbol symbol, boolean anim) {
         if(anim)
@@ -844,7 +866,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /* Metodo que permite deseleccionar un marcador del mapa haciendolo más pequeño mediante una animación.
-    * Comprobar que hay un marcador seleccionado.*/
+     * Comprobar que hay un marcador seleccionado.*/
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void deselectMarker() {
         if (markerSelected != null){
@@ -859,7 +881,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     if (lista_symbol.isEmpty()) {
                         cardSelected = null;
                         BotonTarjetas.setEnabled(false);
-                        BotonTarjetas.setColorNormal(getColor(R.color.botonTarjetasDesactivado));
+                        BotonTarjetas.setColorNormal(ContextCompat.getColor(getActivity(), R.color.botonTarjetasDesactivado));
                         recyclerView.animate()
                                 .alpha(0f)
                                 .setDuration(ANIMACION_TARJETAS)
@@ -894,7 +916,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     /** Metodo para configurar los ajustes del mapa mediante los tabView del menu desplegable,
      * se recie el id del TaView y el index del mismo.
-      **/
+     **/
     private void setAjustesMapa(int index, int tabViewId){
         try {
             //Si el hijo no está muerto:
@@ -909,7 +931,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     max_distancia = TAB_2_DISTANCIA;
                 } else
                     max_distancia = TAB_3_DISTANCIA;
-                Preferencias.guardaKilometros(getApplicationContext(), index);
+                Preferencias.guardaKilometros(getActivity(), index);
             }
             else if(tabViewId == R.id.frecuencia){
                 if(index == 0){
@@ -920,7 +942,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 }
                 else
                     tiempo_refresco = TAB_3_FRECUENCIA;
-                Preferencias.guardaFrecuencia(getApplicationContext(),index);
+                Preferencias.guardaFrecuencia(getActivity(),index);
             }
             else{
                 if(index == 0){
@@ -931,13 +953,13 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 }
                 else
                     max_puntos = TAB_3_PUNTOS;
-                Preferencias.guardaPuntos(getApplicationContext(),index);
+                Preferencias.guardaPuntos(getActivity(),index);
             }
             semaforo_ajustes.release();
             if(pause)
                 despertar();
         } catch (InterruptedException e) {
-            Toast.makeText(this, R.string.error_ajustes_mapa, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.error_ajustes_mapa, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1019,7 +1041,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         if(rutaSeleccionada != null){
             if(cardSelected != null) {
                 modoRuta = rutaSeleccionada;
-                ParseGeoPoint puntoSeleccionado = ((lugar) cardSelected).getLocalizacion();
+                ParseGeoPoint puntoSeleccionado = ((Lugar) cardSelected).getLocalizacion();
                 if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
                     imagendistancia.setImageResource(R.drawable.modo_coche);
                 else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
@@ -1032,9 +1054,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-    @Override
-    protected  void onRestart() {
-        super.onRestart();
+    // TODO modificar OnResume y OnPause
+    /*@Override
+    public void onResume() {
+        super.onResume();
         if(mGpsSwitchStateReceiver != null)
             contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
         if(navigationMapRoute != null)
@@ -1048,7 +1071,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         dormir(); //Pausar el hilo hijo
         super.onPause();
         mapView.onPause();
-    }
+    }*/
 
     @SuppressLint("LongLogTag")
     @Override
@@ -1077,7 +1100,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @SuppressLint("LongLogTag")
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         stop = true;
         if(hijo != null) {
             if(hijo.getState() == Thread.State.TIMED_WAITING) //Si el hijo está durmiendo:
@@ -1101,7 +1124,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }
@@ -1121,7 +1144,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private void vibrate() {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator == null) {
             return;
         }
@@ -1140,7 +1163,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     .shouldSimulateRoute(simularRuta)
                     .build();
             vibrate();
-            NavigationLauncher.startNavigation(Map.this, options);
+            NavigationLauncher.startNavigation(getActivity(), options);
         }
     }
 
@@ -1150,7 +1173,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
             if (localizacionActual != null) {
                 routeLoading.setVisibility(View.VISIBLE);
                 Point PuntoOrigen = Point.fromLngLat(localizacionActual.getLongitude(), localizacionActual.getLatitude());
-                NavigationRoute.builder(this).
+                NavigationRoute.builder(getActivity()).
                         accessToken(getString(R.string.map_token))
                         .origin(PuntoOrigen)
                         .destination(puntoDestino)
@@ -1173,7 +1196,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                                         Date date = format.parse(duracion);
                                         textoDuracion.setText(date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
                                     } catch (ParseException e) {
-                                        Toast.makeText(getApplicationContext(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getActivity(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
                                     }
                                     imagendistancia.setVisibility(View.VISIBLE);
                                     imagenduracion.setVisibility(View.VISIBLE);
@@ -1181,7 +1204,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                                     routeLoading.setVisibility(View.INVISIBLE);
                                     if(alertDialog != null)
                                         alertDialog.dismiss();
-                                    alertDialog = new AlertDialog.Builder(Map.this)
+                                    alertDialog = new AlertDialog.Builder(getActivity())
                                             .setMessage(R.string.iniciar_ruta )
                                             .setPositiveButton(R.string.iniciar, (paramDialogInterface, paramInt) -> startNavigation(mapView)).setNegativeButton(R.string.cancelar_navegavecion,null).show();
                                     BotonNavegacion.setEnabled(true);
@@ -1229,10 +1252,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void initRecyclerView(List<ParseObject> listaParse) {
-        recyclerView = findViewById(R.id.rv_on_top_of_map);
-        LocationRecyclerViewAdapter locationAdapter =
-                new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this,true);
-        recyclerLayoutManager = new LinearLayoutManager(getApplicationContext(),
+        recyclerView = root.findViewById(R.id.rv_on_top_of_map);
+        PestanaMapa.LocationRecyclerViewAdapter locationAdapter =
+                new PestanaMapa.LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, getActivity(),true);
+        recyclerLayoutManager = new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, true);
         recyclerView.setLayoutManager(recyclerLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -1260,14 +1283,14 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
-    private List<SingleRecyclerViewLocation> createRecyclerViewLocations(List<ParseObject> listaParse) {
-        ArrayList<SingleRecyclerViewLocation> locationList = new ArrayList<>();
+    private List<PestanaMapa.SingleRecyclerViewLocation> createRecyclerViewLocations(List<ParseObject> listaParse) {
+        ArrayList<PestanaMapa.SingleRecyclerViewLocation> locationList = new ArrayList<>();
         if(listaParse != null && !listaParse.isEmpty()) {
             for (ParseObject object : listaParse) {
-                SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
-                singleLocation.setNombreLugar(((lugar) object).getNombre());
-                singleLocation.setLocationCoordinates(new LatLng(((lugar) object).getLocalizacion().getLatitude(), ((lugar) object).getLocalizacion().getLongitude()));
-                singleLocation.setImagen(((lugar) object).getFoto());
+                PestanaMapa.SingleRecyclerViewLocation singleLocation = new PestanaMapa.SingleRecyclerViewLocation();
+                singleLocation.setNombreLugar(((Lugar) object).getNombre());
+                singleLocation.setLocationCoordinates(new LatLng(((Lugar) object).getLocalizacion().getLatitude(), ((Lugar) object).getLocalizacion().getLongitude()));
+                singleLocation.setImagen(((Lugar) object).getFoto());
                 locationList.add(singleLocation);
             }
         }
@@ -1276,26 +1299,26 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateAdapter(ArrayList<ParseObject> listaParse){
-       // if(listaParse.size() <= lista_symbol.size()) {
-            if (!listas_iguales(listaParse)) {
-                boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
-                //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
-                if (cardSelected != null) {
-                    lista_symbol.remove(markerSelected); //En este caso previamente se ha guardado el marcador asi que podemos usar un remove normal
-                    lista_symbol.add(0, markerSelected);
-                    listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
-                    listaParse.add(0, cardSelected);
-                    elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
-                    if (isVisibleRoute) {
-                        update_info = false;
-                    }
+        // if(listaParse.size() <= lista_symbol.size()) {
+        if (!listas_iguales(listaParse)) {
+            boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
+            //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
+            if (cardSelected != null) {
+                lista_symbol.remove(markerSelected); //En este caso previamente se ha guardado el marcador asi que podemos usar un remove normal
+                lista_symbol.add(0, markerSelected);
+                listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
+                listaParse.add(0, cardSelected);
+                elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
+                if (isVisibleRoute) {
+                    update_info = false;
                 }
-                LocationRecyclerViewAdapter locationAdapter =
-                        new LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, Map.this, update_info);
-                recyclerView.setAdapter(locationAdapter);
             }
-            prevQuery = listaParse;
-      //  }
+            PestanaMapa.LocationRecyclerViewAdapter locationAdapter =
+                    new PestanaMapa.LocationRecyclerViewAdapter(createRecyclerViewLocations(listaParse), mapboxMap, getActivity(), update_info);
+            recyclerView.setAdapter(locationAdapter);
+        }
+        prevQuery = listaParse;
+        //  }
     }
 
     /** Metodo que chequea que la query actual y la anterior sean iguales, comprueba tamaño y objeto a objeto.
@@ -1323,190 +1346,190 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
     class SingleRecyclerViewLocation {
 
-            private String lugar;
-            private byte[] imagen;
-            private LatLng locationCoordinates;
+        private String lugar;
+        private byte[] imagen;
+        private LatLng locationCoordinates;
 
-            public String getNombreLugar() {
-                return lugar;
-            }
-
-            public void setNombreLugar(String name) {
-                this.lugar = name;
-            }
-
-            public byte[] getImagen(){
-                return imagen;
-            }
-            public void setImagen(byte[] imagenBitmap){
-                imagen = imagenBitmap;
-            }
-
-            public LatLng getLocationCoordinates() {
-                return locationCoordinates;
-            }
-
-            public void setLocationCoordinates(LatLng locationCoordinates) {
-                this.locationCoordinates = locationCoordinates;
-            }
+        public String getNombreLugar() {
+            return lugar;
         }
 
-        /*** Clase que se encarga de actualizar la vista es decir el contenido de las tarjetas **/
-        public static class LocationRecyclerViewAdapter extends
-                RecyclerView.Adapter<LocationRecyclerViewAdapter.MyViewHolder> {
-
-            private List<SingleRecyclerViewLocation> locationList;
-            private MapboxMap map;
-            private Context contextoApp;
-            private boolean update_info;
-
-            public LocationRecyclerViewAdapter(List<SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap, Context contextoApp, boolean update_info) {
-                super();
-                this.locationList = locationList;
-                this.map = mapBoxMap;
-                this.contextoApp = contextoApp;
-                this.update_info = update_info;
-            }
-
-            @Override
-            public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View itemView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.cardview_puntos, parent, false);
-                return new MyViewHolder(itemView);
-            }
-
-            @Override
-            public void onBindViewHolder(MyViewHolder holder, int position) {
-                //Si se trata de la tarjeta seleccionada (que ocupará la posición 0) y no hay que updatear la info:
-                if(!update_info && position == 0){
-                    holder.restauraComponentes(holder.itemView);
-                }
-                SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
-                holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
-                byte[] imagen = singleRecyclerViewLocation.getImagen();
-                if(imagen!=null)
-                    holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
-                holder.setClickListener((view, position1) -> {
-                    LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
-                    Message msg = new Message();
-                    msg.obj = selectedLocationLatLng;
-                    msg.what = MSG_CLICK_CARD;
-                    manejador.sendMessage(msg);
-                });
-                holder.coordenadas = singleRecyclerViewLocation.getLocationCoordinates();
-                holder.contextoApp = contextoApp;
-
-            }
-
-            @Override
-            public int getItemCount() {
-                return locationList.size();
-            }
-
-            public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-                TextView lugar_textview;
-                CardView cardview;
-                ImageView imagen;
-                Button botonVermas;
-                Button botonIr;
-                LatLng coordenadas;
-                ItemClickListener clickListener;
-                Context contextoApp;
-
-                @SuppressLint("RestrictedApi")
-                MyViewHolder(View view) {
-                    super(view);
-                    lugar_textview = view.findViewById(R.id.lugar_textview);
-                    imagen = view.findViewById(R.id.imagen);
-
-                    botonVermas = view.findViewById(R.id.boton_verMas);
-                    botonVermas.setOnClickListener(v -> {
-                        Message msg = new Message();
-                        msg.obj = coordenadas;
-                        msg.what = MSG_AMPLIA_CARD;
-                        manejador.sendMessage(msg);
-                        iniciaComponentesRuta(view);
-                    });
-                    botonIr = view.findViewById(R.id.boton_IR);
-                    botonIr.setOnClickListener(v -> {
-                        PopupMenu popup = new PopupMenu(contextoApp, v);
-                        popup.getMenuInflater().inflate(R.menu.popup_menu,popup.getMenu());
-
-                        popup.setOnMenuItemClickListener(item -> {
-                            iniciaComponentesRuta(view);
-                            if(item.getItemId() == R.id.modoCoche) {
-                                modoRuta = DirectionsCriteria.PROFILE_DRIVING;
-                                imagendistancia.setImageResource(R.drawable.modo_coche);
-                            }
-                            else if(item.getItemId() == R.id.modoBicicleta) {
-                                modoRuta = DirectionsCriteria.PROFILE_CYCLING;
-                                imagendistancia.setImageResource(R.drawable.modo_bici);
-                            }
-                            else {
-                                modoRuta = DirectionsCriteria.PROFILE_WALKING;
-                                imagendistancia.setImageResource(R.drawable.modo_andar);
-                            }
-
-                            Message msg = new Message();
-                            msg.obj = coordenadas;
-                            msg.what = MSG_RUTA;
-                            manejador.sendMessage(msg);
-                            return true;
-                        });
-                        MenuPopupHelper menuHelper = new MenuPopupHelper(contextoApp, (MenuBuilder) popup.getMenu(), v);
-                        menuHelper.setForceShowIcon(true);
-                        menuHelper.show();
-                    });
-                    cardview = view.findViewById(R.id.cardviewLugar);
-                    cardview.setOnClickListener(this);
-                }
-
-                public void iniciaComponentesRuta(View view){
-                    boolean vistaResfrescada = false;
-                    if(imagenduracion != null) {
-                        if(!imagenduracion.equals(view.findViewById(R.id.imagen_duracion_cardview))){
-                            vistaResfrescada = true;
-                            textodistancia.setText("");
-                            textoDuracion.setText("");
-                            imagendistancia.setVisibility(View.INVISIBLE);
-                            imagenduracion.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                    if(imagenduracion == null || vistaResfrescada){
-                        imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
-                        textodistancia = view.findViewById(R.id.texto_distancia_cardview);
-                        textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
-                        imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
-                        imagenduracion.setVisibility(view.INVISIBLE);
-                        imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
-                        imagendistancia.setVisibility(view.INVISIBLE);
-                    }
-                }
-
-                public void restauraComponentes(View view){
-                    Drawable imagen = imagendistancia.getDrawable();
-                    CharSequence textoDistancia = textodistancia.getText();
-                    CharSequence textoduracion = textoDuracion.getText();
-                    iniciaComponentesRuta(view);
-                    imagendistancia.setImageDrawable(imagen);
-                    textodistancia.setText(textoDistancia);
-                    textoDuracion.setText(textoduracion);
-                    imagenduracion.setVisibility(View.VISIBLE);
-                    imagendistancia.setVisibility(view.VISIBLE);
-                }
-
-                public void setClickListener(ItemClickListener itemClickListener) {
-                    this.clickListener = itemClickListener;
-                }
-
-                @Override
-                public void onClick(View view) {
-                    clickListener.onClick(view, getLayoutPosition());
-                }
-            }
+        public void setNombreLugar(String name) {
+            this.lugar = name;
         }
 
-        public interface ItemClickListener {
-            void onClick(View view, int position);
+        public byte[] getImagen(){
+            return imagen;
+        }
+        public void setImagen(byte[] imagenBitmap){
+            imagen = imagenBitmap;
+        }
+
+        public LatLng getLocationCoordinates() {
+            return locationCoordinates;
+        }
+
+        public void setLocationCoordinates(LatLng locationCoordinates) {
+            this.locationCoordinates = locationCoordinates;
         }
     }
+
+    /*** Clase que se encarga de actualizar la vista es decir el contenido de las tarjetas **/
+    public static class LocationRecyclerViewAdapter extends
+            RecyclerView.Adapter<PestanaMapa.LocationRecyclerViewAdapter.MyViewHolder> {
+
+        private List<PestanaMapa.SingleRecyclerViewLocation> locationList;
+        private MapboxMap map;
+        private Context contextoApp;
+        private boolean update_info;
+
+        public LocationRecyclerViewAdapter(List<PestanaMapa.SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap, Context contextoApp, boolean update_info) {
+            super();
+            this.locationList = locationList;
+            this.map = mapBoxMap;
+            this.contextoApp = contextoApp;
+            this.update_info = update_info;
+        }
+
+        @Override
+        public PestanaMapa.LocationRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.cardview_puntos, parent, false);
+            return new PestanaMapa.LocationRecyclerViewAdapter.MyViewHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(PestanaMapa.LocationRecyclerViewAdapter.MyViewHolder holder, int position) {
+            //Si se trata de la tarjeta seleccionada (que ocupará la posición 0) y no hay que updatear la info:
+            if(!update_info && position == 0){
+                holder.restauraComponentes(holder.itemView);
+            }
+            PestanaMapa.SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
+            holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
+            byte[] imagen = singleRecyclerViewLocation.getImagen();
+            if(imagen!=null)
+                holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
+            holder.setClickListener((view, position1) -> {
+                LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
+                Message msg = new Message();
+                msg.obj = selectedLocationLatLng;
+                msg.what = MSG_CLICK_CARD;
+                manejador.sendMessage(msg);
+            });
+            holder.coordenadas = singleRecyclerViewLocation.getLocationCoordinates();
+            holder.contextoApp = contextoApp;
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return locationList.size();
+        }
+
+        public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            TextView lugar_textview;
+            CardView cardview;
+            ImageView imagen;
+            Button botonVermas;
+            Button botonIr;
+            LatLng coordenadas;
+            PestanaMapa.ItemClickListener clickListener;
+            Context contextoApp;
+
+            @SuppressLint("RestrictedApi")
+            MyViewHolder(View view) {
+                super(view);
+                lugar_textview = view.findViewById(R.id.lugar_textview);
+                imagen = view.findViewById(R.id.imagen);
+
+                botonVermas = view.findViewById(R.id.boton_verMas);
+                botonVermas.setOnClickListener(v -> {
+                    Message msg = new Message();
+                    msg.obj = coordenadas;
+                    msg.what = MSG_AMPLIA_CARD;
+                    manejador.sendMessage(msg);
+                    iniciaComponentesRuta(view);
+                });
+                botonIr = view.findViewById(R.id.boton_IR);
+                botonIr.setOnClickListener(v -> {
+                    PopupMenu popup = new PopupMenu(contextoApp, v);
+                    popup.getMenuInflater().inflate(R.menu.popup_menu,popup.getMenu());
+
+                    popup.setOnMenuItemClickListener(item -> {
+                        iniciaComponentesRuta(view);
+                        if(item.getItemId() == R.id.modoCoche) {
+                            modoRuta = DirectionsCriteria.PROFILE_DRIVING;
+                            imagendistancia.setImageResource(R.drawable.modo_coche);
+                        }
+                        else if(item.getItemId() == R.id.modoBicicleta) {
+                            modoRuta = DirectionsCriteria.PROFILE_CYCLING;
+                            imagendistancia.setImageResource(R.drawable.modo_bici);
+                        }
+                        else {
+                            modoRuta = DirectionsCriteria.PROFILE_WALKING;
+                            imagendistancia.setImageResource(R.drawable.modo_andar);
+                        }
+
+                        Message msg = new Message();
+                        msg.obj = coordenadas;
+                        msg.what = MSG_RUTA;
+                        manejador.sendMessage(msg);
+                        return true;
+                    });
+                    MenuPopupHelper menuHelper = new MenuPopupHelper(contextoApp, (MenuBuilder) popup.getMenu(), v);
+                    menuHelper.setForceShowIcon(true);
+                    menuHelper.show();
+                });
+                cardview = view.findViewById(R.id.cardviewLugar);
+                cardview.setOnClickListener(this);
+            }
+
+            public void iniciaComponentesRuta(View view){
+                boolean vistaResfrescada = false;
+                if(imagenduracion != null) {
+                    if(!imagenduracion.equals(view.findViewById(R.id.imagen_duracion_cardview))){
+                        vistaResfrescada = true;
+                        textodistancia.setText("");
+                        textoDuracion.setText("");
+                        imagendistancia.setVisibility(View.INVISIBLE);
+                        imagenduracion.setVisibility(View.INVISIBLE);
+                    }
+                }
+                if(imagenduracion == null || vistaResfrescada){
+                    imagendistancia = view.findViewById(R.id.imagen_distancia_cardview);
+                    textodistancia = view.findViewById(R.id.texto_distancia_cardview);
+                    textoDuracion = view.findViewById(R.id.texto_duracion_cardview);
+                    imagenduracion = view.findViewById(R.id.imagen_duracion_cardview);
+                    imagenduracion.setVisibility(view.INVISIBLE);
+                    imagenduracion.setImageResource(R.drawable.icono_duracion_ruta);
+                    imagendistancia.setVisibility(view.INVISIBLE);
+                }
+            }
+
+            public void restauraComponentes(View view){
+                Drawable imagen = imagendistancia.getDrawable();
+                CharSequence textoDistancia = textodistancia.getText();
+                CharSequence textoduracion = textoDuracion.getText();
+                iniciaComponentesRuta(view);
+                imagendistancia.setImageDrawable(imagen);
+                textodistancia.setText(textoDistancia);
+                textoDuracion.setText(textoduracion);
+                imagenduracion.setVisibility(View.VISIBLE);
+                imagendistancia.setVisibility(view.VISIBLE);
+            }
+
+            public void setClickListener(PestanaMapa.ItemClickListener itemClickListener) {
+                this.clickListener = itemClickListener;
+            }
+
+            @Override
+            public void onClick(View view) {
+                clickListener.onClick(view, getLayoutPosition());
+            }
+        }
+    }
+
+    public interface ItemClickListener {
+        void onClick(View view, int position);
+    }
+}

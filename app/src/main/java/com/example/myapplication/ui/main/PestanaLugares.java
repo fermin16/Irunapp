@@ -4,16 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.Lugar;
 import com.example.myapplication.ListaLugaresAdapter;
+import com.example.myapplication.Modelos.Lugar;
 import com.example.myapplication.R;
 
 import java.util.ArrayList;
@@ -44,10 +42,7 @@ public class PestanaLugares extends Fragment {
         List<Lugar> listaLugares = new ArrayList<>();
 
         // TODO Añadir los lugares a la lista de la siguiente manera:
-        //listaLugares.add(new ItemLista(imagenPrincipal, nombreLugar, horarioLugar));
-        listaLugares.add(new Lugar(0, "Lugar 0", "Abre a las 17:00"));
-        listaLugares.add(new Lugar(0, "Lugar 1", "Cerrado"));
-        listaLugares.add(new Lugar(0, "Lugar 2", "Abierto todo el día"));
+        // listaLugares.add(LUGAR);
 
         ListaLugaresAdapter listaLugaresAdapter = new ListaLugaresAdapter(getActivity(), listaLugares, true);
         GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.numero_columnas));

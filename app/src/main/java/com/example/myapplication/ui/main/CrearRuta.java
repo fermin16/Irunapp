@@ -18,13 +18,12 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.myapplication.EmptyRecyclerView;
 import com.example.myapplication.ListaLugaresAdapter;
-import com.example.myapplication.Lugar;
 import com.example.myapplication.LugarAutoCompleteAdapter;
+import com.example.myapplication.Modelos.Lugar;
 import com.example.myapplication.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -42,13 +41,9 @@ public class CrearRuta extends AppCompatActivity {
         setContentView(R.layout.activity_crear_ruta);
 
         final AutoCompleteTextView buscadorLugares = findViewById(R.id.buscador_lugares);
-        // Adapter por defecto
-        // ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, LUGARES);
-        // TODO una vez buscados los lugares en el servidor se puede eliminar esta lista
+
         ArrayList<Lugar> listaLugares = new ArrayList<>();
-        listaLugares.add(new Lugar(0, "Lugar 1", "Abre a las 17:00"));
-        listaLugares.add(new Lugar(0, "Otro lugar", "Abierto todo el día"));
-        listaLugares.add(new Lugar(0, "Y otro lugar más", "Cierra a las 20:00"));
+        // TODO añadir los lugares a la lista
         LugarAutoCompleteAdapter adapter = new LugarAutoCompleteAdapter(this, listaLugares);
         buscadorLugares.setAdapter(adapter);
 

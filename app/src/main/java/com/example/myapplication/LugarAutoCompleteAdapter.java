@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.myapplication.Modelos.Lugar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +49,17 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
         Lugar lugar = getItem(position);
 
         if (lugar != null) {
-            textViewLugar.setText(lugar.getNombreLugar());
-            imageViewLugar.setImageResource(lugar.getImagenPrincipal());
+            textViewLugar.setText(lugar.getNombre());
+
+            byte[] foto = lugar.getFoto();
+            Bitmap fotoBmp = BitmapFactory.decodeByteArray(foto, 0, foto.length);
+
+            imageViewLugar.setImageBitmap(Bitmap.createScaledBitmap(
+                    fotoBmp,
+                    imageViewLugar.getWidth(),
+                    imageViewLugar.getHeight(),
+                    false
+            ));
         }
 
         return convertView;
@@ -66,7 +79,7 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
                 String filtro = charSequence.toString().toLowerCase().trim();
 
                 for (Lugar l : todosLugares) {
-                    if (l.getNombreLugar().toLowerCase().contains(filtro)) {
+                    if (l.getNombre().toLowerCase().contains(filtro)) {
                         sugerencias.add(l);
                     }
                 }
@@ -86,7 +99,7 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
 
         @Override
         public CharSequence convertResultToString(Object resultValue) {
-            return ((Lugar)resultValue).getNombreLugar();
+            return ((Lugar)resultValue).getNombre();
         }
     };
 }
