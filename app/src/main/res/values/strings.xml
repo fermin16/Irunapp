@@ -95,4 +95,5 @@
     <string name="descripcion_ruta">Descripción de la ruta</string>
     <string name="titulo_ruta_vacia">No hay lugares en tu ruta</string>
     <string name="instrucciones_ruta_vacia">Usa el buscador de arriba para añadir lugares a la ruta. Si quieres eliminar un lugar de tu ruta deslízalo hacia la izquierda.</string>
+    <string name="error_ajustes_mapa">error</string>
 </resources>

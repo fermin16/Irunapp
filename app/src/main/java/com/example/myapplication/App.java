@@ -2,7 +2,7 @@ package com.example.myapplication;
 
 import android.app.Application;
 
-import com.example.myapplication.Modelos.Alert;
+import com.example.myapplication.Modelos.Lugar;
 import com.parse.Parse;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -11,7 +11,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ParseObject.registerSubclass(Alert.class);
+        ParseObject.registerSubclass(Lugar.class);
 
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId("PampApp")

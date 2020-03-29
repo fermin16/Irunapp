@@ -2,8 +2,6 @@ package com.example.myapplication;
 
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -49,7 +47,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
-import com.example.myapplication.Modelos.Alert;
+import com.example.myapplication.Modelos.Lugar;
 import com.example.myapplication.Modelos.Preferencias;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -294,10 +292,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
                          //Información de la tarjeta seleccionada
                          Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
-                         bundle.putString(String.valueOf(R.string.bundle_direccion),((Alert)cardSelected).getDireccion()); //Guardar direccion
-                         bundle.putString(String.valueOf(R.string.bundle_titulo),((Alert)cardSelected).getTitulo()); //Guardar nombre
-                         bundle.putString(String.valueOf(R.string.bundle_descripcion),((Alert)cardSelected).getDescripcion()); //Guardar descripcion
-                         bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Alert)cardSelected).getFoto());
+                         bundle.putString(String.valueOf(R.string.bundle_direccion),((Lugar)cardSelected).getDireccion()); //Guardar direccion
+                         bundle.putString(String.valueOf(R.string.bundle_titulo),((Lugar)cardSelected).getTitulo()); //Guardar nombre
+                         bundle.putString(String.valueOf(R.string.bundle_descripcion),((Lugar)cardSelected).getDescripcion()); //Guardar descripcion
+                         bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Lugar)cardSelected).getFoto());
                          intent.putExtras(bundle);
 
                          startActivity(intent, options.toBundle());
@@ -696,7 +694,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         try {
 
                     ParseGeoPoint userLocation = new ParseGeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Alert");
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Lugar");
                     semaforo_ajustes.acquire();
                     query.whereWithinKilometers("localizacion", userLocation, max_distancia);
                     query.setLimit(max_puntos);
@@ -745,7 +743,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     float icon_size;
                     //Añadir nuevos puntos
                     for (ParseObject alerta : listaPuntos) {
-                        ParseGeoPoint loc = ((Alert) alerta).getLocalizacion();
+                        ParseGeoPoint loc = ((Lugar) alerta).getLocalizacion();
                         //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
                         if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
                             icon_size = TAMANO_MAX_ICONO;
@@ -1015,7 +1013,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         if(rutaSeleccionada != null){
             if(cardSelected != null) {
                 modoRuta = rutaSeleccionada;
-                ParseGeoPoint puntoSeleccionado = ((Alert) cardSelected).getLocalizacion();
+                ParseGeoPoint puntoSeleccionado = ((Lugar) cardSelected).getLocalizacion();
                 if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
                     imagendistancia.setImageResource(R.drawable.modo_coche);
                 else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
@@ -1261,9 +1259,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         if(listaParse != null && !listaParse.isEmpty()) {
             for (ParseObject object : listaParse) {
                 SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
-                singleLocation.setNombreLugar(((Alert) object).getTitulo());
-                singleLocation.setLocationCoordinates(new LatLng(((Alert) object).getLocalizacion().getLatitude(), ((Alert) object).getLocalizacion().getLongitude()));
-                singleLocation.setImagen(((Alert) object).getFoto());
+                singleLocation.setNombreLugar(((Lugar) object).getTitulo());
+                singleLocation.setLocationCoordinates(new LatLng(((Lugar) object).getLocalizacion().getLatitude(), ((Lugar) object).getLocalizacion().getLongitude()));
+                singleLocation.setImagen(((Lugar) object).getFoto());
                 locationList.add(singleLocation);
             }
         }

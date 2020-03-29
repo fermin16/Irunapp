@@ -9,43 +9,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@ParseClassName("Alert")
-public class Alert extends ParseObject {
-    public Alert() {
+@ParseClassName("Lugar")
+public class Lugar extends ParseObject {
+    public Lugar() {
     }
 
-
     //Metodos setter:
-    public void setTitulo(String titulo) {
-        put("titulo", titulo);
+    public void setNombre(String nombre) {
+        put("nombre", nombre);
     }
 
     public void setDescripcion(String descripcion) {
         put("descripcion", descripcion);
     }
 
-    public void setUser(String user) {
-        put("user", user);
+    public void setContacto(String contacto) {
+        put("contacto", contacto);
     }
 
-    public void setRate(int rate) {
-        put("rate", rate);
-    }
-
-    public void setNumRate(int numRate) {
-        put("numRate", numRate);
+    public void setWeb(String web) {
+        put("web", web);
     }
 
     public void setDireccion(String direccion) {
         put("direccion", direccion);
     }
 
-    public void setlocalizacion(ParseGeoPoint localizacion) {
+    public void setLocalizacion(ParseGeoPoint localizacion) {
         put("localizacion", localizacion);
     }
 
     public void setFoto(byte[] foto) {
         put("foto", foto);
+    }
+
+    public void setMas(String mas) {
+        put("mas", mas);
     }
 
     //Metodos getter:
@@ -58,30 +57,21 @@ public class Alert extends ParseObject {
         return getString("descripcion");
     }
 
-    public String getTitulo() {
-        return getString("titulo");
+    public String getNombre() {
+        return getString("nombre");
     }
 
-    public String getDni() {
-        return getString("dni");
+    public String getHorario() {
+        return getString("horario");
     }
 
-    public String getUser() {
-        return getString("user");
+    public String getContacto() {
+        return getString("contacto");
     }
 
-    public int getRate() {
-        return getInt("rate");
+    public String getWeb() {
+        return getString("web");
     }
-
-    public int getNumRate() {
-        return getInt("numRate");
-    }
-
-    public List<String> getSoluciones() {
-        return getList("solucion");
-    }
-
 
     public ParseGeoPoint getLocalizacion() {
         return getParseGeoPoint("localizacion");
@@ -89,6 +79,10 @@ public class Alert extends ParseObject {
 
     public byte[] getFoto() {
         return (byte[]) get("foto");
+    }
+
+    public String getMas() {
+        return getString("mas");
     }
 
 
