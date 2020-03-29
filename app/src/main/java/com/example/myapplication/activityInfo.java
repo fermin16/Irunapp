@@ -43,23 +43,53 @@ public class activityInfo extends AppCompatActivity {
         if(intent!=null){
             Bundle bundle = intent.getExtras();
             if(bundle != null) {
-                nombreLugar = findViewById(R.id.nombre_lugar);
-                nombreLugar.setText(bundle.getString(String.valueOf(R.string.bundle_titulo)));
-                descripcion = findViewById(R.id.descripcion);
-                descripcion.setText(bundle.getString(String.valueOf(R.string.bundle_descripcion)));
-                direccion = findViewById(R.id.direccion);
-                direccion.setText(bundle.getString(String.valueOf(R.string.bundle_direccion)));
-                horario = findViewById(R.id.horario);
-                horario.setText("PRUEBA HORARIO");
-                precio = findViewById(R.id.precio);
-                precio.setText("PRUEBA PRECIO");
-                contacto = findViewById(R.id.contacto);
-                contacto.setText("PRUEBA CONTACTO");
-                web = findViewById(R.id.web);
-                web.setText("PRUEBA WEB");
-                imagen = findViewById(R.id.imagen_principal);
-                byte[] imagen_bytes = bundle.getByteArray(String.valueOf(R.string.bundle_imagen));
-                imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen_bytes, 0, imagen_bytes.length));
+                String nombre_lugar = bundle.getString(String.valueOf(R.string.bundle_titulo));
+                if (nombre_lugar != null) {
+                    nombreLugar = findViewById(R.id.nombre_lugar);
+                    nombreLugar.setText(nombre_lugar);
+                }
+
+                String descripcion_lugar = bundle.getString(String.valueOf(R.string.bundle_descripcion));
+                if (descripcion_lugar != null) {
+                    descripcion = findViewById(R.id.descripcion);
+                    descripcion.setText(descripcion_lugar);
+                }
+
+                String direccion_lugar = bundle.getString(String.valueOf(R.string.bundle_direccion));
+                if (direccion_lugar != null) {
+                    direccion = findViewById(R.id.direccion);
+                    direccion.setText(direccion_lugar);
+                }
+
+                String horario_lugar = bundle.getString(String.valueOf(R.string.bundle_horario));
+                if (horario_lugar != null){
+                    horario = findViewById(R.id.horario);
+                    horario.setText(horario_lugar);
+                }
+
+                String precio_lugar = bundle.getString(String.valueOf(R.string.bundle_precio));
+                if(precio_lugar != null) {
+                    precio = findViewById(R.id.precio);
+                    precio.setText(precio_lugar);
+                }
+
+                String contacto_lugar = bundle.getString(String.valueOf(R.string.bundle_contacto));
+                if(contacto_lugar != null) {
+                    contacto = findViewById(R.id.contacto);
+                    contacto.setText(contacto_lugar);
+                }
+
+                String web_lugar = bundle.getString(String.valueOf(R.string.bundle_web));
+                if(web_lugar != null) {
+                    web = findViewById(R.id.web);
+                    web.setText(web_lugar);
+                }
+
+                byte[] imagen_bytes =  bundle.getByteArray(String.valueOf(R.string.bundle_imagen));
+                if(imagen_bytes != null) {
+                    imagen = findViewById(R.id.imagen_principal);
+                    imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen_bytes, 0, imagen_bytes.length));
+                }
                 boton_menos = findViewById(R.id.boton_verMenos);
                 boton_menos.setOnClickListener(v -> super.onBackPressed());
 

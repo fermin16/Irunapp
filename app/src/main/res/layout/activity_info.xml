@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/mapboxYellowFaint">
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             <ImageView
                 android:id="@+id/imagen_principal"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/tamano_imagen_crear_ruta"
+                android:layout_height="250dp"
                 app:srcCompat="@drawable/degradado_tarjeta"
                 android:transitionName="@string/id_transicion_imagen"/>
             <View android:id="@+id/imagen_divider_info"
@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:textColor="#000000"
-                android:textSize="50sp"
+                android:textSize="20dp"
                 android:textStyle="bold"
                 android:transitionName="@string/id_transicion_nombre"/>
 
@@ -272,6 +272,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/boton_verMenos"
                     android:text="@string/ver_menos"
+                    android:layout_marginStart="50dp"
                     app:icon="@drawable/ver_menos_boton"
                     style="@style/Widget.MaterialComponents.Button.Icon"
                     android:transitionName="@string/id_transicion_boton_mas"/>
@@ -279,6 +280,7 @@
                     android:id="@+id/boton_ruta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="25dp"
                     app:icon="@drawable/iconoir"
                     android:text="@string/RUTA"
                     android:theme="@style/Widget.MaterialComponents.Button.Icon"

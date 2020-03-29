@@ -47,7 +47,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
-import com.example.myapplication.Modelos.Lugar;
+import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.Modelos.Preferencias;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -207,7 +207,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     //RecycleView y componentes:
     private RecyclerView recyclerView;
     private LinearLayoutManager recyclerLayoutManager;
-//    private int elementoActualRecyclerView;
+    private int elementoActualRecyclerView;
 
     //Elementos para navegacion:
     private DirectionsRoute currentRoute;
@@ -267,7 +267,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                          Symbol simbolo = lista_symbol.get(i);
                          if(simbolo.getLatLng().getLatitude() == cardclick.getLatitude() && simbolo.getLatLng().getLongitude() == cardclick.getLongitude()) {
                              salir = true;
-                             selectMarker(simbolo);
+                             selectMarker(simbolo,true);
                              selectCard();
                          }
                          i++;
@@ -292,10 +292,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
 
                          //Información de la tarjeta seleccionada
                          Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
-                         bundle.putString(String.valueOf(R.string.bundle_direccion),((Lugar)cardSelected).getDireccion()); //Guardar direccion
-                         bundle.putString(String.valueOf(R.string.bundle_titulo),((Lugar)cardSelected).getTitulo()); //Guardar nombre
-                         bundle.putString(String.valueOf(R.string.bundle_descripcion),((Lugar)cardSelected).getDescripcion()); //Guardar descripcion
-                         bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Lugar)cardSelected).getFoto());
+                         bundle.putString(String.valueOf(R.string.bundle_direccion),((lugar)cardSelected).getDireccion()); //Guardar direccion
+                         bundle.putString(String.valueOf(R.string.bundle_titulo),((lugar)cardSelected).getNombre()); //Guardar nombre
+                         bundle.putString(String.valueOf(R.string.bundle_descripcion),((lugar)cardSelected).getDescripcion()); //Guardar descripcion
+                         bundle.putString(String.valueOf(R.string.bundle_horario),((lugar)cardSelected).getHorario()); //Guardar horario
+                         bundle.putString(String.valueOf(R.string.bundle_web),((lugar)cardSelected).getWeb()); //Guardar web
+                         bundle.putString(String.valueOf(R.string.bundle_precio),((lugar)cardSelected).getPrecio()); //Guardar precio
+                         bundle.putString(String.valueOf(R.string.bundle_contacto),((lugar)cardSelected).getContacto()); //Guardar contacto
+                         bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((lugar)cardSelected).getFoto());
+
                          intent.putExtras(bundle);
 
                          startActivity(intent, options.toBundle());
@@ -599,7 +604,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     // Add click listener and change the symbol to a cafe icon on click
                     symbolManager.addClickListener(symbol -> {
                         simboloActivado = 1;
-                        selectMarker(symbol);
+                        selectMarker(symbol,true);
                         selectCard();
                     });
                     if(mapListener !=null)
@@ -694,7 +699,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         try {
 
                     ParseGeoPoint userLocation = new ParseGeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Lugar");
+                    ParseQuery<ParseObject> query = ParseQuery.getQuery("lugar");
                     semaforo_ajustes.acquire();
                     query.whereWithinKilometers("localizacion", userLocation, max_distancia);
                     query.setLimit(max_puntos);
@@ -742,8 +747,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     lista_symbol.clear();
                     float icon_size;
                     //Añadir nuevos puntos
-                    for (ParseObject alerta : listaPuntos) {
-                        ParseGeoPoint loc = ((Lugar) alerta).getLocalizacion();
+                    for (ParseObject punto : listaPuntos) {
+                        ParseGeoPoint loc = ((lugar) punto).getLocalizacion();
                         //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
                         if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
                             icon_size = TAMANO_MAX_ICONO;
@@ -822,11 +827,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
     /* Metodo que permite seleccionar un marcador del mapa haciendolo más grande mediante una animación.
     * Primero comprobar que el marcador seleccionado no es el mismo que el que se acaba de seleccionar.*/
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void selectMarker(final Symbol symbol) {
+    public void selectMarker(final Symbol symbol, boolean anim) {
+        if(anim)
+            animateCamera(symbol);
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker();
             noMarker = false; //Lo ponemos a false evitando asi que si es la primera query y no teniamos un punto seleccionado al deseleccionar no se borre el punto.s
-            animateCamera(symbol);
             markerAnimator = new ValueAnimator();
             markerAnimator.setObjectValues(TAMANO_MAX_ICONO, TAMANO_MIN_ICONO);
             markerAnimator.setDuration(ANIMACION_ICONO);
@@ -1013,7 +1019,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         if(rutaSeleccionada != null){
             if(cardSelected != null) {
                 modoRuta = rutaSeleccionada;
-                ParseGeoPoint puntoSeleccionado = ((Lugar) cardSelected).getLocalizacion();
+                ParseGeoPoint puntoSeleccionado = ((lugar) cardSelected).getLocalizacion();
                 if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
                     imagendistancia.setImageResource(R.drawable.modo_coche);
                 else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
@@ -1235,22 +1241,22 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         recyclerView.setOnFlingListener(null);
 
         //Seleccionar card en scroll (Desactivado por el momento):
-//        RecyclerView.OnScrollListener listenerScroll = new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//
-//                if(newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                    int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
-//
-//                    if (elementoVisible != elementoActualRecyclerView) {
-//                        selectMarker(lista_symbol.get(elementoVisible));
-//                        selectCard();
-//                        elementoActualRecyclerView = elementoVisible;
-//                    }
-//                }
-//            }
-//        };
-//        recyclerView.addOnScrollListener(listenerScroll);
+        RecyclerView.OnScrollListener listenerScroll = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+
+                if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    int elementoVisible = recyclerLayoutManager.findFirstVisibleItemPosition();
+
+                    if (elementoVisible != elementoActualRecyclerView) {
+                        selectMarker(lista_symbol.get(elementoVisible),false);
+                        selectCard();
+                        elementoActualRecyclerView = elementoVisible;
+                    }
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(listenerScroll);
         snapHelper.attachToRecyclerView(recyclerView);
     }
 
@@ -1259,9 +1265,9 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
         if(listaParse != null && !listaParse.isEmpty()) {
             for (ParseObject object : listaParse) {
                 SingleRecyclerViewLocation singleLocation = new SingleRecyclerViewLocation();
-                singleLocation.setNombreLugar(((Lugar) object).getTitulo());
-                singleLocation.setLocationCoordinates(new LatLng(((Lugar) object).getLocalizacion().getLatitude(), ((Lugar) object).getLocalizacion().getLongitude()));
-                singleLocation.setImagen(((Lugar) object).getFoto());
+                singleLocation.setNombreLugar(((lugar) object).getNombre());
+                singleLocation.setLocationCoordinates(new LatLng(((lugar) object).getLocalizacion().getLatitude(), ((lugar) object).getLocalizacion().getLongitude()));
+                singleLocation.setImagen(((lugar) object).getFoto());
                 locationList.add(singleLocation);
             }
         }
@@ -1279,7 +1285,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                     lista_symbol.add(0, markerSelected);
                     listaParse.removeIf(obj -> (obj.hasSameId(cardSelected))); //Este remove es diferente pues el id de card selected entre iteraciones habrá cambiado
                     listaParse.add(0, cardSelected);
-                    //elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
+                    elementoActualRecyclerView = 0; //Actualizar la posicion para el scrollview evitando asi conflictos.
                     if (isVisibleRoute) {
                         update_info = false;
                     }
@@ -1378,7 +1384,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback {
                 SingleRecyclerViewLocation singleRecyclerViewLocation = locationList.get(position);
                 holder.lugar_textview.setText(singleRecyclerViewLocation.getNombreLugar());
                 byte[] imagen = singleRecyclerViewLocation.getImagen();
-                holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
+                if(imagen!=null)
+                    holder.imagen.setImageBitmap(BitmapFactory.decodeByteArray(imagen, 0, imagen.length));
                 holder.setClickListener((view, position1) -> {
                     LatLng selectedLocationLatLng = locationList.get(position1).getLocationCoordinates();
                     Message msg = new Message();
