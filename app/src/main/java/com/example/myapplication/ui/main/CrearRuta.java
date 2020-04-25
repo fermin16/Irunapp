@@ -23,7 +23,7 @@ import android.widget.ImageView;
 import com.example.myapplication.EmptyRecyclerView;
 import com.example.myapplication.ListaLugaresAdapter;
 import com.example.myapplication.LugarAutoCompleteAdapter;
-import com.example.myapplication.Modelos.Lugar;
+import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 public class CrearRuta extends AppCompatActivity {
 
-    public ArrayList<Lugar> ruta;
+    public ArrayList<lugar> ruta;
     private ListaLugaresAdapter listaLugaresAdapter;
 
     @Override
@@ -42,7 +42,7 @@ public class CrearRuta extends AppCompatActivity {
 
         final AutoCompleteTextView buscadorLugares = findViewById(R.id.buscador_lugares);
 
-        ArrayList<Lugar> listaLugares = new ArrayList<>();
+        ArrayList<lugar> listaLugares = new ArrayList<>();
         // TODO añadir los lugares a la lista
         LugarAutoCompleteAdapter adapter = new LugarAutoCompleteAdapter(this, listaLugares);
         buscadorLugares.setAdapter(adapter);
@@ -61,7 +61,7 @@ public class CrearRuta extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 RecyclerView listaLugares = view.findViewById(R.id.lugares_ruta);
-                Lugar lugar = (Lugar)adapterView.getItemAtPosition(i);
+                lugar lugar = (com.example.myapplication.Modelos.lugar)adapterView.getItemAtPosition(i);
                 // Añadir el punto a la ruta
                 ruta.add(lugar);
 
@@ -127,7 +127,7 @@ public class CrearRuta extends AppCompatActivity {
             final RecyclerView recyclerView = findViewById(R.id.lista_lugares);
 
             // Obtener el ítem eliminado
-            final Lugar deletedItem = ruta.get(viewHolder.getAdapterPosition());
+            final lugar deletedItem = ruta.get(viewHolder.getAdapterPosition());
             final int deletedIndex = viewHolder.getAdapterPosition();
 
             // Eliminarlo de la lista

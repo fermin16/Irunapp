@@ -11,8 +11,9 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.ListaLugaresAdapter;
-import com.example.myapplication.Modelos.Lugar;
+import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
+import com.parse.ParseObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,30 @@ import java.util.List;
 public class PestanaLugares extends Fragment {
 
     private static PestanaLugares pestana = null;
+    private ListaLugaresAdapter listaLugaresAdapter;
+    private  RecyclerView recyclerView;
 
     public static PestanaLugares getPestana() {
         if (pestana == null) {
             pestana = new PestanaLugares();
         }
         return pestana;
+    }
+
+    public void updateList(ArrayList<ParseObject> newList){
+        if(listaLugaresAdapter!= null) {
+            // update data in our adapter
+            listaLugaresAdapter.getData().clear();
+            ArrayList<lugar> lista_lugares = new ArrayList<>();
+            for (ParseObject obj : newList) {
+                lista_lugares.add((lugar) obj);
+            }
+            listaLugaresAdapter.getData().addAll(lista_lugares);
+            // fire the event
+            listaLugaresAdapter.notifyDataSetChanged();
+        }
+        else
+            System.out.println("HOLAAAAA");
     }
 
     @Override
@@ -38,13 +57,13 @@ public class PestanaLugares extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.activity_lista_lugares, container, false);
 
-        RecyclerView recyclerView = root.findViewById(R.id.lista_lugares);
-        List<Lugar> listaLugares = new ArrayList<>();
+        recyclerView = root.findViewById(R.id.lista_lugares);
+        List listaLugares = new ArrayList<lugar>();
 
         // TODO Añadir los lugares a la lista de la siguiente manera:
         // listaLugares.add(LUGAR);
 
-        ListaLugaresAdapter listaLugaresAdapter = new ListaLugaresAdapter(getActivity(), listaLugares, true);
+        listaLugaresAdapter = new ListaLugaresAdapter(getActivity(), listaLugares, true);
         GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.numero_columnas));
 
         recyclerView.setLayoutManager(manager);

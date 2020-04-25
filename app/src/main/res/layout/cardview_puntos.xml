@@ -6,6 +6,7 @@
     <com.google.android.material.card.MaterialCardView
         style="@style/Widget.MaterialComponents.CardView"
         android:id="@+id/cardviewLugar"
+        android:theme="@style/Theme.MaterialComponents.Light"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp">
@@ -86,9 +87,9 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/boton_verMas"
                     android:text="@string/ver_mas"
-                    android:layout_marginStart="18dp"
+                    android:layout_marginStart="50dp"
                     app:icon="@drawable/vermas"
-                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
                     android:transitionName="@string/id_transicion_boton_mas"/>
                 <Button
                     android:id="@+id/boton_IR"

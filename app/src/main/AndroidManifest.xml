@@ -16,7 +16,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activityInfo" />
-        <activity android:name=".Map" />
         <activity android:name=".ActivityInicio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,5 +33,4 @@
             android:name="com.parse.CLIENT_KEY"
             android:value="@string/back4app_client_key" />
     </application>
-
 </manifest>

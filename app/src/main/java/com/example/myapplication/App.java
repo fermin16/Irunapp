@@ -2,7 +2,7 @@ package com.example.myapplication;
 
 import android.app.Application;
 
-import com.example.myapplication.Modelos.Lugar;
+import com.example.myapplication.Modelos.lugar;
 import com.parse.Parse;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -11,7 +11,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ParseObject.registerSubclass(Lugar.class);
+        ParseObject.registerSubclass(lugar.class);
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId(getString(R.string.back4app_app_id))
                 // if defined

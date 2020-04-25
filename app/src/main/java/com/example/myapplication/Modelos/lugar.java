@@ -5,13 +5,9 @@ import com.parse.ParseClassName;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
-@ParseClassName("Lugar")
-public class Lugar extends ParseObject {
-    public Lugar() {
+@ParseClassName("lugar")
+public class lugar extends ParseObject {
+    public lugar() {
     }
 
     //Metodos setter:

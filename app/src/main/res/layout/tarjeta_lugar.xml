@@ -7,7 +7,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/alto_tarjeta_grande"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/cardLugarGrande"
+        >
 
         <ImageView
             android:id="@+id/imagen_principal"
@@ -22,19 +24,6 @@
 
             app:srcCompat="@color/colorPrimary" />
 
-        <ImageView
-            android:id="@+id/degradado"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/alto_degradado"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            app:srcCompat="@drawable/degradado_tarjeta" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -42,10 +31,10 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/nombre_lugar"
+                android:id="@+id/nombre_lugar_grande"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:transitionName="@string/id_transicion_nombre_lugar"
                 android:textColor="#FFFFFF"
                 android:textSize="30sp" />
 
@@ -53,9 +42,9 @@
                 android:id="@+id/horario_lugar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:text="TextView"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:transitionName="@string/id_transicion_horario_lugar" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,6 +58,7 @@
                     android:layout_height="@dimen/alto_boton_tarjeta"
                     android:background="@drawable/estilo_boton_tarjeta"
                     android:text="@string/ver_mas"
+                    android:transitionName="@string/id_transicion_botonMas_lugar"
                     android:textSize="@dimen/tamano_letra_boton" />
 
                 <Button
@@ -78,7 +68,21 @@
                     android:layout_marginLeft="8dp"
                     android:background="@drawable/estilo_boton_tarjeta"
                     android:text="@string/como_llegar"
+                    android:transitionName="@string/id_transicion_botonRuta_lugar"
                     android:textSize="@dimen/tamano_letra_boton" />
+
+                <ImageView
+                    android:id="@+id/degradado"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/alto_degradado"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:transitionName="@string/id_transicion_imagen_lugar"
+                    app:srcCompat="@drawable/degradado_tarjeta" />
             </LinearLayout>
 
         </LinearLayout>

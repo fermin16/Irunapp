@@ -14,16 +14,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.myapplication.Modelos.Lugar;
+import com.example.myapplication.Modelos.lugar;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
+public class LugarAutoCompleteAdapter extends ArrayAdapter<lugar> {
 
-    private List<Lugar> todosLugares;   // Lista de todos los lugares
+    private List<lugar> todosLugares;   // Lista de todos los lugares
 
-    public LugarAutoCompleteAdapter(@NonNull Context context, @NonNull List<Lugar> lugares) {
+    public LugarAutoCompleteAdapter(@NonNull Context context, @NonNull List<lugar> lugares) {
         super(context, 0, lugares);
         todosLugares = new ArrayList<>(lugares);
     }
@@ -46,7 +46,7 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
         TextView textViewLugar = convertView.findViewById(R.id.nombre_lugar);
         ImageView imageViewLugar = convertView.findViewById(R.id.imagen_principal);
 
-        Lugar lugar = getItem(position);
+        lugar lugar = getItem(position);
 
         if (lugar != null) {
             textViewLugar.setText(lugar.getNombre());
@@ -70,7 +70,7 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
         protected FilterResults performFiltering(CharSequence charSequence) {
             // TODO modificar para que la búsqueda se realice en el servidor
             FilterResults resultados = new FilterResults();
-            List<Lugar> sugerencias = new ArrayList<>();
+            List<lugar> sugerencias = new ArrayList<>();
 
             if (charSequence == null || charSequence.length() == 0) {
                 sugerencias.addAll(todosLugares);
@@ -78,7 +78,7 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
             else {
                 String filtro = charSequence.toString().toLowerCase().trim();
 
-                for (Lugar l : todosLugares) {
+                for (lugar l : todosLugares) {
                     if (l.getNombre().toLowerCase().contains(filtro)) {
                         sugerencias.add(l);
                     }
@@ -99,7 +99,7 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<Lugar> {
 
         @Override
         public CharSequence convertResultToString(Object resultValue) {
-            return ((Lugar)resultValue).getNombre();
+            return ((lugar)resultValue).getNombre();
         }
     };
 }

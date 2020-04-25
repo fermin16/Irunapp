@@ -47,7 +47,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
-import com.example.myapplication.Modelos.Lugar;
+import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.Modelos.Preferencias;
 import com.example.myapplication.R;
 import com.example.myapplication.activityInfo;
@@ -103,9 +103,6 @@ import static android.content.Context.LOCATION_SERVICE;
 
 
 public class PestanaMapa extends Fragment implements OnMapReadyCallback {
-
-    private static PestanaMapa pestana = null;
-    View root;
 
     //Macros:
     //Macros relacionadas con el mapa y la camara:
@@ -229,6 +226,12 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
     public static String rutaSeleccionada; //Ruta para seleccionar desde activity Info.
     private boolean isVisibleRoute;
 
+    //Componentes comunicación con la lista:
+    private PestanaLugares pestanaLugares;
+    private static PestanaMapa pestana = null;
+    private View root;
+
+
     public static PestanaMapa getPestana() {
         if (pestana == null) {
             pestana = new PestanaMapa();
@@ -255,6 +258,9 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
 
         routeLoading = root.findViewById(R.id.routeLoadingProgressBar);
 
+        //Inicializar la pestaña de lugares:
+        pestanaLugares = PestanaLugares.getPestana();
+
         //Inicializar los semaforos
         loading_style = new Semaphore(1);
 
@@ -276,6 +282,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                 super.handleMessage(msg);
                 if(msg.what == MSG_QUERY) {
                     ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
+                    pestanaLugares.updateList(lista_puntos);
                     mostrarPuntos(lista_puntos);
                 }
                 else{
@@ -300,7 +307,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                         //Animaciones para la transicion:
-                        // Ibtener la vistas de los objetos para la animacion:
+                        // Obtener la vistas de los objetos para la animacion:
                         View cardview = root.findViewById(R.id.cardviewLugar);
 
                         Pair<View, String> imagen = Pair.create(cardview.findViewById(R.id.imagen), getString(R.string.id_transicion_imagen));
@@ -313,14 +320,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
 
                         //Información de la tarjeta seleccionada
                         Bundle bundle = new Bundle(); //Crear bundle para enviar coordenadas
-                        bundle.putString(String.valueOf(R.string.bundle_direccion),((Lugar)cardSelected).getDireccion()); //Guardar direccion
-                        bundle.putString(String.valueOf(R.string.bundle_titulo),((Lugar)cardSelected).getNombre()); //Guardar nombre
-                        bundle.putString(String.valueOf(R.string.bundle_descripcion),((Lugar)cardSelected).getDescripcion()); //Guardar descripcion
-                        bundle.putString(String.valueOf(R.string.bundle_horario),((Lugar)cardSelected).getHorario()); //Guardar horario
-                        bundle.putString(String.valueOf(R.string.bundle_web),((Lugar)cardSelected).getWeb()); //Guardar web
+                        bundle.putString(String.valueOf(R.string.bundle_direccion),((lugar)cardSelected).getDireccion()); //Guardar direccion
+                        bundle.putString(String.valueOf(R.string.bundle_titulo),((lugar)cardSelected).getNombre()); //Guardar nombre
+                        bundle.putString(String.valueOf(R.string.bundle_descripcion),((lugar)cardSelected).getDescripcion()); //Guardar descripcion
+                        bundle.putString(String.valueOf(R.string.bundle_horario),((lugar)cardSelected).getHorario()); //Guardar horario
+                        bundle.putString(String.valueOf(R.string.bundle_web),((lugar)cardSelected).getWeb()); //Guardar web
                         // TODO bundle.putString(String.valueOf(R.string.bundle_precio),((Lugar)cardSelected).getPrecio()); //Guardar precio
-                        bundle.putString(String.valueOf(R.string.bundle_contacto),((Lugar)cardSelected).getContacto()); //Guardar contacto
-                        bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((Lugar)cardSelected).getFoto());
+                        bundle.putString(String.valueOf(R.string.bundle_contacto),((lugar)cardSelected).getContacto()); //Guardar contacto
+                        bundle.putByteArray(String.valueOf(R.string.bundle_imagen),((lugar)cardSelected).getFoto());
 
                         intent.putExtras(bundle);
 
@@ -770,7 +777,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                 float icon_size;
                 //Añadir nuevos puntos
                 for (ParseObject punto : listaPuntos) {
-                    ParseGeoPoint loc = ((Lugar) punto).getLocalizacion();
+                    ParseGeoPoint loc = ((lugar) punto).getLocalizacion();
                     //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
                     if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
                         icon_size = TAMANO_MAX_ICONO;
@@ -1041,7 +1048,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         if(rutaSeleccionada != null){
             if(cardSelected != null) {
                 modoRuta = rutaSeleccionada;
-                ParseGeoPoint puntoSeleccionado = ((Lugar) cardSelected).getLocalizacion();
+                ParseGeoPoint puntoSeleccionado = ((lugar) cardSelected).getLocalizacion();
                 if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
                     imagendistancia.setImageResource(R.drawable.modo_coche);
                 else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
@@ -1288,9 +1295,9 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         if(listaParse != null && !listaParse.isEmpty()) {
             for (ParseObject object : listaParse) {
                 PestanaMapa.SingleRecyclerViewLocation singleLocation = new PestanaMapa.SingleRecyclerViewLocation();
-                singleLocation.setNombreLugar(((Lugar) object).getNombre());
-                singleLocation.setLocationCoordinates(new LatLng(((Lugar) object).getLocalizacion().getLatitude(), ((Lugar) object).getLocalizacion().getLongitude()));
-                singleLocation.setImagen(((Lugar) object).getFoto());
+                singleLocation.setNombreLugar(((lugar) object).getNombre());
+                singleLocation.setLocationCoordinates(new LatLng(((lugar) object).getLocalizacion().getLatitude(), ((lugar) object).getLocalizacion().getLongitude()));
+                singleLocation.setImagen(((lugar) object).getFoto());
                 locationList.add(singleLocation);
             }
         }
