@@ -1023,6 +1023,24 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         },ANIMACION_TARJETAS);
     }
 
+    public void check_modo_ruta(){
+        if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
+            imagendistancia.setImageResource(R.drawable.modo_coche);
+        else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
+            imagendistancia.setImageResource(R.drawable.modo_bici);
+        else
+            imagendistancia.setImageResource(R.drawable.modo_andar);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser) {
+            check_modo_ruta();
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -1035,6 +1053,11 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         try {
             super.onStart();
             mapView.onStart();
+            if(mGpsSwitchStateReceiver != null)
+                contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
+            if(navigationMapRoute != null)
+                navigationMapRoute.onStart();
+            despertar();
         }catch(SecurityException ex){
             Log.v("Última localización","No se pudo obtener la última localizacion del usuario");
         }
@@ -1049,27 +1072,11 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
             if(cardSelected != null) {
                 modoRuta = rutaSeleccionada;
                 ParseGeoPoint puntoSeleccionado = ((lugar) cardSelected).getLocalizacion();
-                if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
-                    imagendistancia.setImageResource(R.drawable.modo_coche);
-                else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
-                    imagendistancia.setImageResource(R.drawable.modo_bici);
-                else
-                    imagendistancia.setImageResource(R.drawable.modo_andar);
+                check_modo_ruta();
                 getroute(Point.fromLngLat(puntoSeleccionado.getLongitude(), puntoSeleccionado.getLatitude()));
                 rutaSeleccionada = null;
             }
         }
-    }
-
-    // TODO modificar OnResume y OnPause
-    /*@Override
-    public void onResume() {
-        super.onResume();
-        if(mGpsSwitchStateReceiver != null)
-            contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
-        if(navigationMapRoute != null)
-            navigationMapRoute.onStart();
-        despertar();
     }
 
     @Override
@@ -1078,7 +1085,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         dormir(); //Pausar el hilo hijo
         super.onPause();
         mapView.onPause();
-    }*/
+    }
 
     @SuppressLint("LongLogTag")
     @Override

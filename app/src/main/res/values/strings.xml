@@ -30,6 +30,7 @@
     <string name="ir">RUTA</string>
     <string name="id_transicion_imagen">TransicionImagen</string>
     <string name="id_transicion_nombre">TransicionNombre</string>
+    <string name="id_transicion_horario">TransicionHorario</string>
     <string name="id_transicion_boton_mas">TransicionBotonMas</string>
     <string name="id_transicion_boton_ruta">TransicionBotonRuta</string>
     <string name="popup_coche">COCHE</string>
@@ -96,11 +97,4 @@
     <string name="titulo_ruta_vacia">No hay lugares en tu ruta</string>
     <string name="instrucciones_ruta_vacia">Usa el buscador de arriba para añadir lugares a la ruta. Si quieres eliminar un lugar de tu ruta deslízalo hacia la izquierda.</string>
     <string name="error_ajustes_mapa">error</string>
-
-    <!-- strings para dapter -->
-    <string name="id_transicion_imagen_lugar">Transicion imagen tarjeta lugar grande</string>
-    <string name="id_transicion_nombre_lugar">Transicion nombre tarjeta lugar grande</string>
-    <string name="id_transicion_horario_lugar">Transicion horario tarjeta lugar grande</string>
-    <string name="id_transicion_botonMas_lugar">Transicion botonMas tarjeta lugar grande</string>
-    <string name="id_transicion_botonRuta_lugar">Transicion botonRuta tarjeta lugar grande</string>
 </resources>

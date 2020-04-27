@@ -46,33 +46,33 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="?android:attr/dividerVertical" />
+
                 <LinearLayout
+                    android:id="@+id/layout_info_ruta"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:id="@+id/layout_info_ruta">
+                    android:padding="16dp">
 
                     <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imagen_distancia_cardview"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/imagen_distancia_cardview">
-                    </androidx.appcompat.widget.AppCompatImageView>
+                        android:layout_height="wrap_content"></androidx.appcompat.widget.AppCompatImageView>
+
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:id="@+id/texto_distancia_cardview"
-                        />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
                     <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imagen_duracion_cardview"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/imagen_duracion_cardview">
-                    </androidx.appcompat.widget.AppCompatImageView>
+                        android:layout_height="wrap_content"></androidx.appcompat.widget.AppCompatImageView>
+
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:id="@+id/texto_duracion_cardview"
-                        />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
             </LinearLayout>
             <View android:id="@+id/tile_divider2"

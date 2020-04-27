@@ -34,7 +34,7 @@
                 android:id="@+id/nombre_lugar_grande"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:transitionName="@string/id_transicion_nombre_lugar"
+                android:transitionName="@string/id_transicion_nombre"
                 android:textColor="#FFFFFF"
                 android:textSize="30sp" />
 
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textColor="#FFFFFF"
-                android:transitionName="@string/id_transicion_horario_lugar" />
+                android:transitionName="@string/id_transicion_horario" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -58,7 +58,7 @@
                     android:layout_height="@dimen/alto_boton_tarjeta"
                     android:background="@drawable/estilo_boton_tarjeta"
                     android:text="@string/ver_mas"
-                    android:transitionName="@string/id_transicion_botonMas_lugar"
+                    android:transitionName="@string/id_transicion_boton_mas"
                     android:textSize="@dimen/tamano_letra_boton" />
 
                 <Button
@@ -68,7 +68,7 @@
                     android:layout_marginLeft="8dp"
                     android:background="@drawable/estilo_boton_tarjeta"
                     android:text="@string/como_llegar"
-                    android:transitionName="@string/id_transicion_botonRuta_lugar"
+                    android:transitionName="@string/id_transicion_boton_ruta"
                     android:textSize="@dimen/tamano_letra_boton" />
 
                 <ImageView
@@ -81,7 +81,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
                     android:layout_marginBottom="8dp"
-                    android:transitionName="@string/id_transicion_imagen_lugar"
+                    android:transitionName="@string/id_transicion_imagen"
                     app:srcCompat="@drawable/degradado_tarjeta" />
             </LinearLayout>
 

@@ -139,6 +139,7 @@
                         android:id="@+id/horario"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:transitionName="@string/id_transicion_horario"
                         android:textSize="15sp" />
                     <View android:id="@+id/horario_divider_info_2"
                         android:layout_width="match_parent"
