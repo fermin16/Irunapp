@@ -47,10 +47,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
-import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.Modelos.Preferencias;
+import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
 import com.example.myapplication.activityInfo;
+import com.example.myapplication.mensajesHandler;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.material.snackbar.Snackbar;
@@ -102,7 +103,7 @@ import retrofit2.Response;
 import static android.content.Context.LOCATION_SERVICE;
 
 
-public class PestanaMapa extends Fragment implements OnMapReadyCallback {
+public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensajesHandler {
 
     //Macros:
     //Macros relacionadas con el mapa y la camara:
@@ -121,11 +122,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
             .include(BOUND_CORNER_SO)
             .build();
 
-    //Macros para mensajes del handler
-    private static final int MSG_CLICK_CARD = 1;
-    private static final int MSG_QUERY = 2;
-    private static final int MSG_AMPLIA_CARD = 3;
-    private static final int MSG_RUTA = 4;
+
 
     //Macros para iconos (marker del mapa):
     private static final String MAKI_ICON_CAFE = "cafe-15";
@@ -178,7 +175,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
     private Context contextoBroadcast;
-    private static Handler manejador; //Handler que maneja los mensajes del hilo hijo.
+    public static Handler manejador; //Handler que maneja los mensajes del hilo hijo.
 
     //Componentes marcadores:
     private Symbol markerSelected; //Variable que indica si un marcador esta o no seleccionado.
@@ -282,7 +279,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                 super.handleMessage(msg);
                 if(msg.what == MSG_QUERY) {
                     ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
-                    pestanaLugares.updateList(lista_puntos);
                     mostrarPuntos(lista_puntos);
                 }
                 else{
@@ -296,12 +292,12 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                         if(simbolo.getLatLng().getLatitude() == cardclick.getLatitude() && simbolo.getLatLng().getLongitude() == cardclick.getLongitude()) {
                             salir = true;
                             selectMarker(simbolo,true);
-                            selectCard();
                         }
                         i++;
                     }
                     //Si era un click sobre el boton mostrar mas
                     if(msg.what == MSG_AMPLIA_CARD) {
+                        selectCard(true);
                         // Ordinary Intent for launching a new activity
                         Intent intent = new Intent(getActivity(), activityInfo.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -333,7 +329,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
 
                         startActivity(intent, options.toBundle());
                     }
-                    else if(msg.what == MSG_RUTA){
+                    else if(msg.what == MSG_RUTA_TAB_LUGARES || msg.what == MSG_AMPLIA_CARD_LUGARES){
+                        selectCard(false);
+                        LocationRecyclerViewAdapter.MyViewHolder.iniciaComponentesRuta(recyclerLayoutManager.findViewByPosition(recyclerLayoutManager.findFirstVisibleItemPosition()));
+                        modoRuta = rutaSeleccionada;
+                        check_modo_ruta();
+                    }
+                    if(msg.what == MSG_RUTA || msg.what == MSG_RUTA_TAB_LUGARES){
+                        selectCard(true);
                         getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
                     }
                 }
@@ -634,7 +637,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                     symbolManager.addClickListener(symbol -> {
                         simboloActivado = 1;
                         selectMarker(symbol,true);
-                        selectCard();
+                        selectCard(true);
                     });
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
@@ -811,6 +814,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
             }
             // Actualizar el adapter del recyclerView:
             updateAdapter(listaPuntos);
+            pestanaLugares.updateList(listaPuntos);
             loading_style.release();
         }
     }
@@ -845,11 +849,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
 
     /**Metodo que permite seleccionar un cardview del mapa de acuerdo con el simbolo seleccionado
      * en definitiva guarda el card asociado al simbolo seleccionado y hace el efecto de scroll. **/
-    private void selectCard(){
+    private void selectCard(boolean Smooth){
         if(markerSelected != null) {
             int index = lista_symbol.indexOf(markerSelected);
             cardSelected = prevQuery.get(index);
-            recyclerView.smoothScrollToPosition(index);
+            if(!Smooth)
+                recyclerView.scrollToPosition(index);
+            else
+                recyclerView.smoothScrollToPosition(index);
         }
     }
 
@@ -894,11 +901,11 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                                 .setDuration(ANIMACION_TARJETAS)
                                 .setListener(null);
 
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                recyclerView.setVisibility(View.GONE);
-                                updateAdapter(new ArrayList<>());
-                            }
+                        new Handler().postDelayed(() -> {
+                            recyclerView.setVisibility(View.GONE);
+                            ArrayList voidList = new ArrayList<>();
+                            updateAdapter(voidList);
+                            pestanaLugares.updateList(voidList);
                         },ANIMACION_TARJETAS);
                     }
                     //Habia más puntos ademas del seleccionado pero en la ultima query no se recupero (ya no esta en alcance)
@@ -1023,22 +1030,15 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         },ANIMACION_TARJETAS);
     }
 
-    public void check_modo_ruta(){
-        if(modoRuta == DirectionsCriteria.PROFILE_DRIVING)
-            imagendistancia.setImageResource(R.drawable.modo_coche);
-        else if(modoRuta == DirectionsCriteria.PROFILE_CYCLING)
-            imagendistancia.setImageResource(R.drawable.modo_bici);
-        else
-            imagendistancia.setImageResource(R.drawable.modo_andar);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-
-        if (isVisibleToUser) {
-            check_modo_ruta();
+    public void check_modo_ruta() {
+        if (modoRuta != null) {
+            if (modoRuta == DirectionsCriteria.PROFILE_DRIVING)
+                imagendistancia.setImageResource(R.drawable.modo_coche);
+            else if (modoRuta == DirectionsCriteria.PROFILE_CYCLING)
+                imagendistancia.setImageResource(R.drawable.modo_bici);
+            else
+                imagendistancia.setImageResource(R.drawable.modo_andar);
+            rutaSeleccionada = null;
         }
     }
 
@@ -1074,14 +1074,12 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                 ParseGeoPoint puntoSeleccionado = ((lugar) cardSelected).getLocalizacion();
                 check_modo_ruta();
                 getroute(Point.fromLngLat(puntoSeleccionado.getLongitude(), puntoSeleccionado.getLatitude()));
-                rutaSeleccionada = null;
             }
         }
     }
 
     @Override
     public void onPause() {
-
         dormir(); //Pausar el hilo hijo
         super.onPause();
         mapView.onPause();
@@ -1287,7 +1285,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
 
                     if (elementoVisible != elementoActualRecyclerView) {
                         selectMarker(lista_symbol.get(elementoVisible),false);
-                        selectCard();
+                        selectCard(true);
                         elementoActualRecyclerView = elementoVisible;
                     }
                 }
@@ -1313,7 +1311,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateAdapter(ArrayList<ParseObject> listaParse){
-        // if(listaParse.size() <= lista_symbol.size()) {
         if (!listas_iguales(listaParse)) {
             boolean update_info = true; //Valor booleano para saber ssi una ruta esta activa y no borrar la distancia y tiempo
             //Comprobar que si hay una tarjeta (y por tanto marker seleccionado)
@@ -1332,7 +1329,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
             recyclerView.setAdapter(locationAdapter);
         }
         prevQuery = listaParse;
-        //  }
     }
 
     /** Metodo que chequea que la query actual y la anterior sean iguales, comprueba tamaño y objeto a objeto.
@@ -1396,6 +1392,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
         private MapboxMap map;
         private Context contextoApp;
         private boolean update_info;
+        private ArrayList<View> list_view;
 
         public LocationRecyclerViewAdapter(List<PestanaMapa.SingleRecyclerViewLocation> locationList, MapboxMap mapBoxMap, Context contextoApp, boolean update_info) {
             super();
@@ -1403,12 +1400,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
             this.map = mapBoxMap;
             this.contextoApp = contextoApp;
             this.update_info = update_info;
+            list_view = new ArrayList<>();
         }
 
         @Override
         public PestanaMapa.LocationRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.cardview_puntos, parent, false);
+            list_view.add(itemView);
             return new PestanaMapa.LocationRecyclerViewAdapter.MyViewHolder(itemView);
         }
 
@@ -1432,7 +1431,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
             });
             holder.coordenadas = singleRecyclerViewLocation.getLocationCoordinates();
             holder.contextoApp = contextoApp;
-
         }
 
         @Override
@@ -1498,7 +1496,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback {
                 cardview.setOnClickListener(this);
             }
 
-            public void iniciaComponentesRuta(View view){
+            public static void iniciaComponentesRuta(View view){
                 boolean vistaResfrescada = false;
                 if(imagenduracion != null) {
                     if(!imagenduracion.equals(view.findViewById(R.id.imagen_duracion_cardview))){

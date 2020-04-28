@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,11 +29,13 @@ import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.ui.main.PestanaMapa;
 import com.google.android.material.tabs.TabLayout;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.parse.ParseGeoPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapter.MyViewHolder> {
+public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapter.MyViewHolder> implements mensajesHandler{
 
     Context mContext;
     List<lugar> mData;
@@ -68,7 +71,7 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
     @SuppressLint("RestrictedApi")
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
-        lugar place =mData.get(position);
+        lugar place = mData.get(position);
         if(place != null) {
             byte[] foto = place.getFoto();
             if (foto != null) {
@@ -119,6 +122,12 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
 
                             intent.putExtras(bundle);
 
+                            Message msg = new Message();
+                            ParseGeoPoint punto = place.getLocalizacion();
+                            msg.obj = new LatLng(punto.getLatitude(),punto.getLongitude());
+                            msg.what = MSG_AMPLIA_CARD_LUGARES;
+                            PestanaMapa.manejador.sendMessage(msg);
+
                             mContext.startActivity(intent, options.toBundle());
                         });
                         holder.botonComoLlegar.setOnClickListener(view -> {
@@ -134,6 +143,12 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
                                     } else {
                                         PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_WALKING;
                                     }
+                                    Message msg = new Message();
+                                    ParseGeoPoint punto = place.getLocalizacion();
+                                    msg.obj = new LatLng(punto.getLatitude(),punto.getLongitude());
+                                    msg.what = MSG_RUTA_TAB_LUGARES;
+                                    PestanaMapa.manejador.sendMessage(msg);
+
                                     //Movernos al tab del mapa:
                                     TabLayout tabhost = (TabLayout) ((Activity)mContext).findViewById(R.id.tabs);
                                     tabhost.getTabAt(1).select();

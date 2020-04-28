@@ -4,20 +4,29 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.myapplication.ui.main.PestanaLugares;
 import com.example.myapplication.ui.main.PestanaMapa;
+import com.google.android.material.tabs.TabLayout;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.parse.ParseObject;
+
+import java.util.ArrayList;
 
 public class activityInfo extends AppCompatActivity {
 
@@ -107,7 +116,12 @@ public class activityInfo extends AppCompatActivity {
                         } else {
                             PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_WALKING;
                         }
+
                         super.onBackPressed();
+
+                        TabLayout tabhost = (TabLayout) ((Activity) PestanaLugares.getPestana().getActivity()).findViewById(R.id.tabs);
+                        tabhost.getTabAt(1).select();
+
                         return true;
                     });
                     MenuPopupHelper menuHelper = new MenuPopupHelper(activityInfo.this, (MenuBuilder) popup.getMenu(), v);

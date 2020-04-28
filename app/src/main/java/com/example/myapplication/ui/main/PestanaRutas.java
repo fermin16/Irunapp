@@ -44,13 +44,10 @@ public class PestanaRutas extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.activity_lista_rutas, container, false);
 
-        FloatingActionButton btn = (FloatingActionButton) root.findViewById(R.id.floatingActionButton);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent (v.getContext(), CrearRuta.class);
-                startActivityForResult(intent, 0);
-            }
+        FloatingActionButton btn = root.findViewById(R.id.floatingActionButton);
+        btn.setOnClickListener(v -> {
+            Intent intent = new Intent (v.getContext(), CrearRuta.class);
+            startActivityForResult(intent, 0);
         });
 
         RecyclerView recyclerView = root.findViewById(R.id.lista_rutas);
@@ -61,7 +58,7 @@ public class PestanaRutas extends Fragment {
         listaRutas.add(new Ruta(0, "Lugar 1", "Cerrado"));
         listaRutas.add(new Ruta(0, "Lugar 2", "Abierto todo el día"));
 
-        ListaRutasAdapter adapterListaRutasAdapter = new ListaRutasAdapter(getActivity(), listaRutas);
+        ListaRutasAdapter adapterListaRutasAdapter = new ListaRutasAdapter(getContext(), listaRutas);
         GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.numero_columnas));
 
         recyclerView.setLayoutManager(manager); //IMPORTANTE

@@ -36,13 +36,10 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
         holder.imagenPrincipal.setImageResource(mData.get(position).getImagenPrincipal());
         holder.nombreRuta.setText(mData.get(position).getNombreRuta());
         holder.descripcion.setText(mData.get(position).getDescripcion());
-        holder.botonVerMapa.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO cargar la ruta
-                // mostrar la ruta en el mapa
-                // TODO cambiar a la pestaña de mapa
-            }
+        holder.botonVerMapa.setOnClickListener(view -> {
+            // TODO cargar la ruta
+            // mostrar la ruta en el mapa
+            // TODO cambiar a la pestaña de mapa
         });
     }
 

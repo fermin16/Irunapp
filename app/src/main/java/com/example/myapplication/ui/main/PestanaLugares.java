@@ -44,8 +44,6 @@ public class PestanaLugares extends Fragment {
             // fire the event
             listaLugaresAdapter.notifyDataSetChanged();
         }
-        else
-            System.out.println("HOLAAAAA");
     }
 
     @Override
