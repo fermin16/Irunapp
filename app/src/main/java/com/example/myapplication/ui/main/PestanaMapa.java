@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -52,6 +53,7 @@ import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
 import com.example.myapplication.activityInfo;
 import com.example.myapplication.mensajesHandler;
+import com.example.myapplication.tipoLugar;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.material.snackbar.Snackbar;
@@ -103,7 +105,7 @@ import retrofit2.Response;
 import static android.content.Context.LOCATION_SERVICE;
 
 
-public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensajesHandler {
+public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensajesHandler, tipoLugar {
 
     //Macros:
     //Macros relacionadas con el mapa y la camara:
@@ -122,10 +124,15 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             .include(BOUND_CORNER_SO)
             .build();
 
-
-
     //Macros para iconos (marker del mapa):
-    private static final String MAKI_ICON_CAFE = "cafe-15";
+    private static final String SIMBOLO_NATURAL = "LUGAR NATURAL";
+    private static final String SIMBOLO_SIN_CLSIFICAR = "SIN CLASIFICAR";
+    private static final String SIMBOLO_MONUMENTO = "MONUMENTO";
+    private static final String SIMBOLO_MUSEO = "MUSEO";
+    private static final String SIMBOLO_EDIFICIO_HISTORICO = "EDIFICIO HISTORICO";
+    private static final String SIMBOLO_GALERIA = "GALERIA DE ARTE";
+    private static final String SIMBOLO_CASAS = "CASAS REGIONALES";
+
     private final float TAMANO_MIN_ICONO = 2.0f; //Tamaño minimo del icono para la animación
     private final float TAMANO_MAX_ICONO = 4.0f; //Tamaño maximo del icono para la animación
     private final int ANIMACION_ICONO = 300; //Animación del tamaño del icono en milisegundos
@@ -143,10 +150,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     private final int TAB_2_PUNTOS = 30;
     private final int TAB_3_PUNTOS = 50;
     private final int ANIMACION_TARJETAS = 500; //Tiempo animación tarjetas en milisegundos
-
-    //Macros de subactivities:
-    private static final int SUBACTIVITY_INFO = 1; //Campo para llamar a la actividad de crear alerta.
-    private static final String PUNTO = "punto";
 
     //Macros para Ruta:
     private static final int DURACION_VIBRACION = 100;
@@ -367,7 +370,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         BotonBuscaPuntos = root.findViewById(R.id.BuscaPuntos);
         BotonBuscaPuntos.setEnabled(false);
         BotonBuscaPuntos.setOnClickListener(v -> {
-            despertar();
+            despertar(true);
             BotonBuscaPuntos.setEnabled(false);
         });
 
@@ -426,25 +429,25 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         semaforo_ajustes = new Semaphore(1);
         tab_distancia = root.findViewById(R.id.kilometros);
         tab_distancia.setOnTabSelectedListener(index -> {
-            setAjustesMapa(index, tab_distancia.getId());
+            setAjustesMapa(index, tab_distancia.getId(),true);
         });
 
         tab_frecuencia = root.findViewById(R.id.frecuencia);
         tab_frecuencia.setOnTabSelectedListener(index -> {
-            setAjustesMapa(index, tab_frecuencia.getId());
+            setAjustesMapa(index, tab_frecuencia.getId(),true);
         });
 
         tab_puntos = root.findViewById(R.id.numpuntos);
         tab_puntos.setOnTabSelectedListener(index -> {
-            setAjustesMapa(index, tab_puntos.getId());
+            setAjustesMapa(index, tab_puntos.getId(),true);
         });
 
         tab_distancia.selectTab(selected_tab_distancia,false);
-        setAjustesMapa(selected_tab_distancia,tab_distancia.getId());
+        setAjustesMapa(selected_tab_distancia,tab_distancia.getId(),false);
         tab_frecuencia.selectTab(tiempo_refresco,false);
-        setAjustesMapa(tiempo_refresco,tab_frecuencia.getId());
+        setAjustesMapa(tiempo_refresco,tab_frecuencia.getId(),false);
         tab_puntos.selectTab(max_puntos,false);
-        setAjustesMapa(max_puntos, tab_puntos.getId());
+        setAjustesMapa(max_puntos, tab_puntos.getId(),false);
 
         //Inicializar los dos estilos de mapa:
         BasicStyle = new Style.Builder().fromUri(getString(R.string.map_style_basic));
@@ -465,7 +468,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                         findMe(); //Mostrar localizacion
                         if(hijo != null && hijo.isAlive()) {//Si el hijo estaba dormido, reactivarlo:
                             if (pause)
-                                despertar();
+                                despertar(true);
                         }
                         else {//Si el hijo no estaba creado aun:
                             //Comenzar a obtener los puntos del mapa
@@ -639,6 +642,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                         selectMarker(symbol,true);
                         selectCard(true);
                     });
+                    setSymbols(style);
                     if(mapListener !=null)
                         mapboxMap.removeOnMapClickListener(mapListener);
                     //Añadir Listener al mapa:
@@ -657,6 +661,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     enableLocationComponent(style);
                 };
                 mapboxMap.setStyle(newStyle,loadedStyle);
+
                 //Limitar el mapa y la vista:
                 mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
                 mapboxMap.setMinZoomPreference(ZOOM_MIN);
@@ -701,7 +706,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                             units2 = "km";
                             aux2 = max_distancia;
                         }
-                        getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), getString(R.string.obteniendoPuntos)+" "+aux2+" "+units2+" "+getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show());
+
                         if(BotonBuscaPuntos.isEnabled())
                             getActivity().runOnUiThread(() -> BotonBuscaPuntos.setEnabled(false));
                     }
@@ -726,6 +731,22 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         hijo.start();
     }
 
+    public void setSymbols(Style style){
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_tree);
+        style.addImage(SIMBOLO_NATURAL,bm);
+        bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_house);
+        style.addImage(SIMBOLO_CASAS,bm);
+        bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_historic_building);
+        style.addImage(SIMBOLO_EDIFICIO_HISTORICO,bm);
+        bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_art_gallery);
+        style.addImage(SIMBOLO_GALERIA,bm);
+        bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_monument);
+        style.addImage(SIMBOLO_MONUMENTO,bm);
+        bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_museum);
+        style.addImage(SIMBOLO_MUSEO,bm);
+        bm = BitmapFactory.decodeResource(getResources(), R.drawable.symbol_sin_clasificar);
+        style.addImage(SIMBOLO_SIN_CLSIFICAR,bm);
+    }
     /** Método que realiza la query a la BBDD para obtener los puntos cercanos **/
     private void queryPuntos(Location myLocation ){
         try {
@@ -781,6 +802,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 //Añadir nuevos puntos
                 for (ParseObject punto : listaPuntos) {
                     ParseGeoPoint loc = ((lugar) punto).getLocalizacion();
+                    int tipoPunto = ((lugar)punto).getTipo();
                     //Si el marker seleccionado está en la lista poner el tamaño de su icono ampliado y poner noMarker a false (El marker se ha recuperado en la ultima query)
                     if (markerSelected != null && (loc.getLatitude() == markerSelected.getLatLng().getLatitude() && loc.getLongitude() == markerSelected.getLatLng().getLongitude())) {
                         icon_size = TAMANO_MAX_ICONO;
@@ -788,10 +810,23 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     }
                     else
                         icon_size = TAMANO_MIN_ICONO;
+                    String iconoPunto = SIMBOLO_SIN_CLSIFICAR;
+                    if(tipoPunto == LUGAR_NATURAL)
+                        iconoPunto = SIMBOLO_NATURAL ;
+                    else if(tipoPunto == MONUMENTO)
+                        iconoPunto = SIMBOLO_MONUMENTO ;
+                    else if(tipoPunto == MUSEO)
+                        iconoPunto = SIMBOLO_MUSEO;
+                    else if(tipoPunto == EDIFICIO_HISTORICO)
+                        iconoPunto = SIMBOLO_EDIFICIO_HISTORICO ;
+                    else if(tipoPunto == GALERIA_ARTE)
+                        iconoPunto = SIMBOLO_GALERIA ;
+                    else if(tipoPunto == CASAS_REGIONALES)
+                        iconoPunto = SIMBOLO_CASAS ;
                     // Add symbol at specified lat/lon
                     Symbol symbol = symbolManager.create(new SymbolOptions()
                             .withLatLng(new LatLng(loc.getLatitude(), loc.getLongitude()))
-                            .withIconImage(MAKI_ICON_CAFE)
+                            .withIconImage(iconoPunto)
                             .withIconSize(icon_size)
                             .withDraggable(false)); //No permitir el movimiento del icono
                     if(icon_size == TAMANO_MAX_ICONO)
@@ -828,8 +863,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         alertDialog = new AlertDialog.Builder(getActivity())
                 .setMessage(R.string.puntos_no_localizados)
                 .setPositiveButton(R.string.volver_buscar, (paramDialogInterface, paramInt) -> {
-                    if (hijo != null) {
-                        despertar();
+                    if (hijo != null && hijo.isAlive()) {
+                        despertar(true);
                     }
                 }).setNegativeButton(R.string.cancelar_busqueda, (dialog, which) -> {
                     Toast.makeText(getActivity(), R.string.busqueda_detenida, Toast.LENGTH_LONG).show();
@@ -931,7 +966,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     /** Metodo para configurar los ajustes del mapa mediante los tabView del menu desplegable,
      * se recie el id del TaView y el index del mismo.
      **/
-    private void setAjustesMapa(int index, int tabViewId){
+    private void setAjustesMapa(int index, int tabViewId, boolean muestraMensaje){
         try {
             //Si el hijo no está muerto:
             if(hijo != null && hijo.isAlive()){
@@ -971,15 +1006,29 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             }
             semaforo_ajustes.release();
             if(pause)
-                despertar();
-        } catch (InterruptedException e) {
+                despertar(false);
+            if(muestraMensaje) {
+                String units;
+                Double aux;
+                if (max_distancia < 1) {
+                    units = "m";
+                    aux = max_distancia * 1000;
+                } else {
+                    units = "km";
+                    aux = max_distancia;
+                }
+                Toast.makeText(getActivity(), getString(R.string.obteniendoPuntos) + " " + aux + " " + units + " " + getString(R.string.obteniendoPuntos2), Toast.LENGTH_LONG).show();
+            }
+            } catch (InterruptedException e) {
             Toast.makeText(getActivity(), R.string.error_ajustes_mapa, Toast.LENGTH_SHORT).show();
         }
     }
 
     /* Metodo que se encarga de despertar al hijo*/
-    public void despertar(){
+    public void despertar(boolean mensajePausa){
         pause = false;
+        if(mensajePausa)
+            Toast.makeText(getActivity(), getString(R.string.busqueda_reanudada), Toast.LENGTH_LONG).show();
         if(hijo != null && hijo.isAlive()) {
             synchronized (hijo) {
                 hijo.notifyAll(); //Notificar al hijo que puede continuar su ejecucion
@@ -1057,7 +1106,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)); //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
             if(navigationMapRoute != null)
                 navigationMapRoute.onStart();
-            despertar();
+            if(pause)
+                despertar(true);
         }catch(SecurityException ex){
             Log.v("Última localización","No se pudo obtener la última localizacion del usuario");
         }
@@ -1067,7 +1117,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     public void onResume() {
         super.onResume();
         mapView.onResume();
-        despertar();
+        if(pause)
+            despertar(true);
         if(rutaSeleccionada != null){
             if(cardSelected != null) {
                 modoRuta = rutaSeleccionada;

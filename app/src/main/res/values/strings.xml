@@ -53,6 +53,7 @@
     <string name="cancelar_busqueda">Cancelar</string>
     <string name="puntos_no_localizados">No se han localizado puntos a su alrededor ¿Desea buscar de nuevo?</string>
     <string name="busqueda_detenida">La búsqueda ha sido detenida</string>
+    <string name="busqueda_reanudada">La búsqueda ha sido reanudada</string>
     <string name="title_activity_amplia_card">ampliaCard</string>
     <string name="error_ruta"> No se ha podido generar la ruta, no se ha encontrado su localización</string>
     <string name="iniciar_ruta">¿Desea iniciar la ruta al lugar al lugar seleccionado?</string>

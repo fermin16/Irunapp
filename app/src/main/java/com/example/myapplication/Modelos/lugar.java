@@ -81,6 +81,7 @@ public class lugar extends ParseObject {
         return getString("mas");
     }
 
+    public int getTipo(){ return getInt("tipo");}
 
 }
 
