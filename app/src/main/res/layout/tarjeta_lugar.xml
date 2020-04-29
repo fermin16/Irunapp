@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/Theme.MaterialComponents.Light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -36,6 +37,10 @@
                 android:layout_height="wrap_content"
                 android:transitionName="@string/id_transicion_nombre"
                 android:textColor="#FFFFFF"
+                android:singleLine="true"
+                android:focusable="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="30sp" />
 
             <TextView
@@ -43,7 +48,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="TextView"
+                android:scrollbars="vertical"
                 android:textColor="#FFFFFF"
+                android:lines="3"
+                android:focusable="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:transitionName="@string/id_transicion_horario" />
 
             <LinearLayout
@@ -54,37 +64,24 @@
 
                 <Button
                     android:id="@+id/boton_vm"
-                    android:layout_width="@dimen/ancho_boton_tarjeta"
-                    android:layout_height="@dimen/alto_boton_tarjeta"
-                    android:background="@drawable/estilo_boton_tarjeta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/ver_mas"
-                    android:transitionName="@string/id_transicion_boton_mas"
-                    android:textSize="@dimen/tamano_letra_boton" />
+                    android:textSize="@dimen/tamano_letra_boton"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_mas" />
 
                 <Button
                     android:id="@+id/boton_cm"
-                    android:layout_width="@dimen/ancho_boton_tarjeta"
-                    android:layout_height="@dimen/alto_boton_tarjeta"
-                    android:layout_marginLeft="8dp"
-                    android:background="@drawable/estilo_boton_tarjeta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/como_llegar"
-                    android:transitionName="@string/id_transicion_boton_ruta"
-                    android:textSize="@dimen/tamano_letra_boton" />
+                    android:textSize="@dimen/tamano_letra_boton"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
+                    android:transitionName="@string/id_transicion_boton_ruta" />
 
-                <ImageView
-                    android:id="@+id/degradado"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/alto_degradado"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:transitionName="@string/id_transicion_imagen"
-                    app:srcCompat="@drawable/degradado_tarjeta" />
             </LinearLayout>
 
         </LinearLayout>
     </RelativeLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

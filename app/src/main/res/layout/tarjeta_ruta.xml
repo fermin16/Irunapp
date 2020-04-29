@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/Theme.MaterialComponents.Light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -22,19 +23,6 @@
 
             app:srcCompat="@color/colorPrimary" />
 
-        <ImageView
-            android:id="@+id/degradado"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/alto_degradado"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            app:srcCompat="@drawable/degradado_tarjeta" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -47,13 +35,20 @@
                 android:layout_height="wrap_content"
                 android:text="nombre_ruta"
                 android:textColor="#FFFFFF"
+                android:lines="3"
+                android:focusable="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="30sp" />
 
             <TextView
                 android:id="@+id/descripcion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
+                android:singleLine="true"
+                android:focusable="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:text="descripcion_ruta"
                 android:textColor="#FFFFFF" />
 
@@ -65,14 +60,13 @@
 
                 <Button
                     android:id="@+id/boton_cm"
-                    android:layout_width="@dimen/ancho_boton_tarjeta"
-                    android:layout_height="@dimen/alto_boton_tarjeta"
-                    android:layout_marginLeft="8dp"
-                    android:background="@drawable/estilo_boton_tarjeta"
-                    android:textSize="@dimen/tamano_letra_boton"
-                    android:text="@string/ver_mapa" />
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ver_mapa"
+                    android:textSize="@dimen/tamano_letra_boton" />
             </LinearLayout>
 
         </LinearLayout>
     </RelativeLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

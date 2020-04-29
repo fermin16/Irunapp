@@ -27,8 +27,7 @@
                 android:id="@+id/imagen_principal"
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                app:srcCompat="@drawable/degradado_tarjeta"
-                android:transitionName="@string/id_transicion_imagen"/>
+                android:transitionName="@string/id_transicion_imagen" />
             <View android:id="@+id/imagen_divider_info"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

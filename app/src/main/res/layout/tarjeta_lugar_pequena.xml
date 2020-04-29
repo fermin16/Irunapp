@@ -55,6 +55,10 @@
                 android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:text="nombre del lugar"
+                android:singleLine="true"
+                android:focusable="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <RelativeLayout

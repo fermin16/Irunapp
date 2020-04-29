@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.os.Bundle;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.appcompat.widget.Toolbar;
@@ -24,6 +25,8 @@ public class ActivityInicio extends AppCompatActivity {
         setContentView(R.layout.activity_inicio);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = findViewById(R.id.view_pager);
+        getSupportActionBar().setElevation(0);
+        viewPager.setOffscreenPageLimit(3);
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
@@ -33,7 +36,7 @@ public class ActivityInicio extends AppCompatActivity {
         setSupportActionBar(toolbar);*/
     }
 
-    @Override
+    /*Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
@@ -46,5 +49,5 @@ public class ActivityInicio extends AppCompatActivity {
         // TODO gestionar los clicks en los items del menú
         Toast.makeText(this, "Ítem seleccionado: " + item.toString(), Toast.LENGTH_SHORT).show();
         return true;
-    }
+    }*/
 }
