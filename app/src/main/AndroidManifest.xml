@@ -16,7 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activityInfo" />
-        <activity android:name=".ActivityInicio">
+        <activity android:name=".ActivityInicio"
+                android:resizeableActivity="true"
+                android:supportsPictureInPicture="true"
+                android:configChanges=
+                    "screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

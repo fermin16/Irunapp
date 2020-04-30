@@ -225,6 +225,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     private static ImageView imagenduracion;
     public static String rutaSeleccionada; //Ruta para seleccionar desde activity Info.
     private boolean isVisibleRoute;
+    private boolean onNavigationMode;
 
     //Componentes comunicación con la lista:
     private PestanaLugares pestanaLugares;
@@ -466,14 +467,9 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     }
                     else{ //Si se han activado
                         findMe(); //Mostrar localizacion
-                        if(hijo != null && hijo.isAlive()) {//Si el hijo estaba dormido, reactivarlo:
-                            if (pause)
-                                despertar(true);
-                        }
-                        else {//Si el hijo no estaba creado aun:
-                            //Comenzar a obtener los puntos del mapa
-                            buscaPuntos();
-                        }
+                        if (pause)
+                            despertar(true);
+
                     }
                 }
             }
@@ -532,18 +528,20 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     //Hacer el indicador visible
                     locationComponent.setLocationComponentEnabled(true);
 
-                    //Establecer el compas (brujula)
-                    locationComponent.setRenderMode(RenderMode.COMPASS);
+                    Location miubicacion = locationComponent.getLastKnownLocation();
+                    if(compruebaRangoUbicacion(miubicacion)) {
+                        //Establecer el compas (brujula)
+                        locationComponent.setRenderMode(RenderMode.COMPASS);
 
-                    //Colocar el modo de la camara en Tracking
-                    locationComponent.setCameraMode(CameraMode.TRACKING);
+                        //Colocar el modo de la camara en Tracking
+                        locationComponent.setCameraMode(CameraMode.TRACKING);
 
-                    //Hacer zoom a la ubicacion del usuario
-                    locationComponent.zoomWhileTracking(ZOOM_FIND);
-
-                    //Comenzar a printear los puntos en el mapa
-                    if(hijo == null || !hijo.isAlive())
-                        buscaPuntos();
+                        //Hacer zoom a la ubicacion del usuario
+                        locationComponent.zoomWhileTracking(ZOOM_FIND);
+                        //Comenzar a printear los puntos en el mapa
+                        if(hijo == null || !hijo.isAlive())
+                            buscaPuntos();
+                    }
                 }
             }
         }
@@ -602,11 +600,20 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                         //Hacer el indicador visible
                         locationComponent.setLocationComponentEnabled(true);
 
-                        //Colocar el modo de la camara en Tracking
-                        locationComponent.setCameraMode(CameraMode.TRACKING);
+                        Location miubicacion = locationComponent.getLastKnownLocation();
+                        if(compruebaRangoUbicacion(miubicacion)) {
+                            //Colocar el modo de la camara en Tracking
+                            locationComponent.setCameraMode(CameraMode.TRACKING);
 
-                        //Hacer zoom a la ubicacion del usuario
-                        locationComponent.zoomWhileTracking(ZOOM_FIND);
+                            //Establecer el compas (brujula)
+                            locationComponent.setRenderMode(RenderMode.COMPASS);
+
+                            //Colocar el modo de la camara en Tracking
+                            locationComponent.setCameraMode(CameraMode.TRACKING);
+
+                            //Hacer zoom a la ubicacion del usuario
+                            locationComponent.zoomWhileTracking(ZOOM_FIND);
+                        }
                     }
                     else{
                         enableLocationComponent(mapboxMap.getStyle());
@@ -621,6 +628,32 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 Toast.makeText(getActivity(), getString(R.string.cargando_mapa),Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    /**
+     * Función que comprueba so una ubicación está dentro de rango.
+     * @param miubicacion
+     * @return
+     */
+    private boolean compruebaRangoUbicacion(Location miubicacion){
+        if(miubicacion!=null) {
+            LatLng coordenadas = new LatLng(miubicacion.getLatitude(),miubicacion.getLongitude());
+            if (!RESTRICTED_BOUNDS_AREA.contains(coordenadas)) {
+                getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getString(R.string.ubicacionErronea), Toast.LENGTH_LONG).show());
+                dormir();
+                return false;
+            }
+            else {
+                if(hijo == null || !hijo.isAlive())
+                    buscaPuntos();
+                else
+                    despertar(false);
+                return true;
+            }
+        }
+        else
+            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getString(R.string.ubicacionNoEncontrada), Toast.LENGTH_LONG).show());
+        return false;
     }
 
     /** Este método permite cambiar de estilo de mapa evitando posibles riesgos a la hora de obtener la ubicación o de hacer un cambio rápido de estilos**/
@@ -696,16 +729,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                         synchronized (hijo){
                             hijo.wait();
                         }
-                        String units2;
-                        Double aux2;
-                        if(max_distancia < 1) {
-                            units2 = "m";
-                            aux2 = max_distancia*1000;
-                        }
-                        else{
-                            units2 = "km";
-                            aux2 = max_distancia;
-                        }
 
                         if(BotonBuscaPuntos.isEnabled())
                             getActivity().runOnUiThread(() -> BotonBuscaPuntos.setEnabled(false));
@@ -716,7 +739,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                         myLocation = locationComponent.getLastKnownLocation();
                         /*Si la ubicacion no es nula, hacer una query que obtenga todos los punto a una distancia menor o igual
                          * a MAX_DISTANCIA y mostrarlos en el mapa. Para ello obtener la localizacion actual del usuario */
-                        if (myLocation != null) {
+                        if (compruebaRangoUbicacion(myLocation)) {
                             queryPuntos(myLocation);
                             //Esperar un tiempo y actualizar los puntos cercanos.
                             Thread.sleep(tiempo_refresco);
@@ -1005,7 +1028,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 Preferencias.guardaPuntos(getActivity(),index);
             }
             semaforo_ajustes.release();
-            if(pause)
                 despertar(false);
             if(muestraMensaje) {
                 String units;
@@ -1028,12 +1050,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     public void despertar(boolean mensajePausa){
         pause = false;
         if(mensajePausa)
-            Toast.makeText(getActivity(), getString(R.string.busqueda_reanudada), Toast.LENGTH_LONG).show();
+            getActivity().runOnUiThread(() ->Toast.makeText(getActivity(), getString(R.string.busqueda_reanudada), Toast.LENGTH_LONG).show());
         if(hijo != null && hijo.isAlive()) {
             synchronized (hijo) {
                 hijo.notifyAll(); //Notificar al hijo que puede continuar su ejecucion
             }
         }
+        else if(locationComponent!=null && locationComponent.isLocationComponentActivated())
+            buscaPuntos();
     }
 
     /** Metodo para dormir o pausar al hijo **/
@@ -1129,9 +1153,11 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onPause() {
         dormir(); //Pausar el hilo hijo
+        getActivity().enterPictureInPictureMode();
         super.onPause();
         mapView.onPause();
     }
@@ -1226,9 +1252,21 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     .shouldSimulateRoute(simularRuta)
                     .build();
             vibrate();
+//            onNavigationMode = true;
+//            getActivity().enterPictureInPictureMode();
             NavigationLauncher.startNavigation(getActivity(), options);
         }
     }
+//
+//    @Override
+//    public void onPictureInPictureModeChanged(boolean isInPIPMode) {
+//        if (isInPIPMode) {
+//            getActivity().findViewById(R.id.tabs).setVisibility(View.INVISIBLE);
+//        } else {
+//            getActivity().findViewById(R.id.tabs).setVisibility(View.VISIBLE);
+//        }
+//        super.onPictureInPictureModeChanged(isInPIPMode);
+//    }
 
     private void getroute(Point puntoDestino) {
         if (locationComponent !=null) {

@@ -60,6 +60,8 @@
     <string name="iniciar">Iniciar</string>
     <string name="cancelar_navegavecion">Cancelar</string>
     <string name="error_calculo_tiempo">No se ha podido calcular el tiempo aproximado de la ruta, disculpe lass molestias</string>
+    <string name="ubicacionErronea">Su ubicación está fuera de rango para poder utilizar la aplicación debe estar en Pamplona</string>
+    <string name="ubicacionNoEncontrada">No hemos podido localizar su ubicación intentelo de nuevo mas tarde.</string>
 
     <!-- Strings Activity Info -->
     <!--Layout-->
