@@ -3,12 +3,17 @@ package com.example.myapplication.ui.main;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,13 +23,16 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.myapplication.EmptyRecyclerView;
 import com.example.myapplication.ListaLugaresAdapter;
 import com.example.myapplication.LugarAutoCompleteAdapter;
 import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
+import com.example.myapplication.Ruta;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -32,6 +40,7 @@ import java.util.ArrayList;
 
 public class CrearRuta extends AppCompatActivity {
 
+    private Bitmap imagenRuta;
     public ArrayList<lugar> ruta;
     private ListaLugaresAdapter listaLugaresAdapter;
 
@@ -73,22 +82,35 @@ public class CrearRuta extends AppCompatActivity {
         });
 
         FloatingActionButton botonCrearRuta = findViewById(R.id.boton_crear_ruta);
-        botonCrearRuta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO crear la ruta
+        botonCrearRuta.setOnClickListener(view -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, R.string.activar_permisos_almacenamiento, Toast.LENGTH_LONG).show();
+                }
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            }
+            else {
+                // Crear la ruta
+                String nombre = ((EditText)findViewById(R.id.nombre_ruta)).getText().toString();
+                String descripcion = ((EditText)findViewById(R.id.descripcion_ruta)).getText().toString();
+                Ruta r = Ruta.crearRuta(nombre, descripcion, imagenRuta, ruta);
+                r.guardar();
                 finish();    // Cerrar la actividad
             }
         });
 
         ImageView botonImagen = findViewById(R.id.imagen_ruta);
-        botonImagen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        botonImagen.setOnClickListener(view -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, R.string.activar_permisos_almacenamiento, Toast.LENGTH_LONG).show();
+                }
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+            }
+            else {
                 Intent i = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
+                Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, 1);
             }
         });
@@ -111,7 +133,8 @@ public class CrearRuta extends AppCompatActivity {
             cursor.close();
 
             ImageView imageView = findViewById(R.id.imagen_ruta);
-            imageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            imagenRuta = BitmapFactory.decodeFile(picturePath);
+            imageView.setImageBitmap(imagenRuta);
         }
     }
 

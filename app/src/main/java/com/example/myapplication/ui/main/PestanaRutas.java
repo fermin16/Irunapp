@@ -51,12 +51,9 @@ public class PestanaRutas extends Fragment {
         });
 
         RecyclerView recyclerView = root.findViewById(R.id.lista_rutas);
-        List<Ruta> listaRutas = new ArrayList<>();
-        // Añadir los lugares a la lista de la siguiente manera:
-        //listaLugares.add(new ItemLista(imagenPrincipal, nombreLugar, horarioLugar));
-        listaRutas.add(new Ruta(0, "Lugar 0", "Abre a las 17:00"));
-        listaRutas.add(new Ruta(0, "Lugar 1", "Cerrado"));
-        listaRutas.add(new Ruta(0, "Lugar 2", "Abierto todo el día"));
+        List<Ruta> listaRutas = Ruta.cargarRutas();
+        // TODO Añadir los lugares a la lista de la siguiente manera:
+        // listaRutas.add(new Ruta(0, "Lugar 0", "Abre a las 17:00"));
 
         ListaRutasAdapter adapterListaRutasAdapter = new ListaRutasAdapter(getContext(), listaRutas);
         GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.numero_columnas));

@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,7 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.imagenPrincipal.setImageResource(mData.get(position).getImagenPrincipal());
+        holder.imagenPrincipal.setImageBitmap(mData.get(position).getImagenPrincipal());
         holder.nombreRuta.setText(mData.get(position).getNombreRuta());
         holder.descripcion.setText(mData.get(position).getDescripcion());
         holder.botonVerMapa.setOnClickListener(view -> {
