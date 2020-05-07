@@ -1157,7 +1157,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     @Override
     public void onPause() {
         dormir(); //Pausar el hilo hijo
-        getActivity().enterPictureInPictureMode();
+//        getActivity().enterPictureInPictureMode();
         super.onPause();
         mapView.onPause();
     }
