@@ -52,14 +52,16 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<lugar> {
             textViewLugar.setText(lugar.getNombre());
 
             byte[] foto = lugar.getFoto();
-            Bitmap fotoBmp = BitmapFactory.decodeByteArray(foto, 0, foto.length);
+            if(foto != null) {
+               Bitmap fotoBmp = BitmapFactory.decodeByteArray(foto, 0, foto.length);
 
-            imageViewLugar.setImageBitmap(Bitmap.createScaledBitmap(
-                    fotoBmp,
-                    imageViewLugar.getWidth(),
-                    imageViewLugar.getHeight(),
-                    false
-            ));
+               imageViewLugar.setImageBitmap(Bitmap.createScaledBitmap(
+                       fotoBmp,
+                       imageViewLugar.getWidth(),
+                       imageViewLugar.getHeight(),
+                       false
+               ));
+           }
         }
 
         return convertView;

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.main;
+package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -35,6 +36,8 @@ import com.example.myapplication.R;
 import com.example.myapplication.Ruta;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 
@@ -52,9 +55,23 @@ public class CrearRuta extends AppCompatActivity {
         final AutoCompleteTextView buscadorLugares = findViewById(R.id.buscador_lugares);
 
         ArrayList<lugar> listaLugares = new ArrayList<>();
-        // TODO añadir los lugares a la lista
-        LugarAutoCompleteAdapter adapter = new LugarAutoCompleteAdapter(this, listaLugares);
-        buscadorLugares.setAdapter(adapter);
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("lugar");
+        query.findInBackground((queryresult, e) -> {
+            if (e == null) {
+                if(queryresult!=null && !queryresult.isEmpty()){
+                    for(ParseObject obj: queryresult){
+                        listaLugares.add((lugar)obj);
+                    }
+                    LugarAutoCompleteAdapter adapter = new LugarAutoCompleteAdapter(this, listaLugares);
+                    buscadorLugares.setAdapter(adapter);
+                }
+                else
+                    ((Activity)getApplicationContext()).runOnUiThread(() ->Toast.makeText(getApplicationContext(), getString(R.string.error_query), Toast.LENGTH_LONG).show());
+            }
+            else
+                ((Activity)getApplicationContext()).runOnUiThread(() ->Toast.makeText(getApplicationContext(), getString(R.string.error_query), Toast.LENGTH_LONG).show());
+        });
+
 
         // Establecer el adapter para la lista de lugares de la ruta
         RecyclerView recyclerView = findViewById(R.id.lista_lugares);
@@ -77,7 +94,8 @@ public class CrearRuta extends AppCompatActivity {
                 // Vaciar la barra de búsqueda y notificar al adaptador de que se ha insertado
                 // un nuevo elemento en la lista
                 buscadorLugares.setText("");
-                listaLugaresAdapter.notifyDataSetChanged();
+                //listaLugaresAdapter.notifyDataSetChanged();
+                updateList(ruta);
             }
         });
 
@@ -197,4 +215,14 @@ public class CrearRuta extends AppCompatActivity {
                     actionState, isCurrentlyActive);
         }
     };
+
+    public void updateList(ArrayList<lugar> newList){
+        if(listaLugaresAdapter!= null) {
+            // update data in our adapter
+            listaLugaresAdapter.getData().clear();
+            listaLugaresAdapter.getData().addAll(newList);
+            // fire the event
+            listaLugaresAdapter.notifyDataSetChanged();
+        }
+    }
 }

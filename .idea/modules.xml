@@ -5,7 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/Desktop-Irunapp.iml" filepath="$PROJECT_DIR$/Desktop-Irunapp.iml" group="Irunapp" />
       <module fileurl="file://$PROJECT_DIR$/Irunapp.iml" filepath="$PROJECT_DIR$/Irunapp.iml" group="Irunapp" />
       <module fileurl="file://$PROJECT_DIR$/Irunapp-git.iml" filepath="$PROJECT_DIR$/Irunapp-git.iml" group="Irunapp-git" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Irunapp/app" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Irunapp-git/app" />
     </modules>
   </component>
 </project>

@@ -77,6 +77,7 @@
     <string name="bundle_descripcion">descripcion_bundle</string>
     <string name="bundle_imagen">imagen_bundle</string>
     <!--Mensajes-->
+    <string name="error_query">Lo sentimos, no hemos podido obtener la información de los lugares</string>
     <string name="activar_permisos_almacenamiento">Esta acción requiere acceso al almacenamiento</string>
     <string name="punto_no_recibido">No se ha recibido la información asociada al punto, intentelo de nuevo más tarde.</string>
     <string name="title_activity_main2">Iruñapp</string>
