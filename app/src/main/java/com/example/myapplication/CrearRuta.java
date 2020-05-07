@@ -34,6 +34,8 @@ import com.example.myapplication.LugarAutoCompleteAdapter;
 import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
 import com.example.myapplication.Ruta;
+import com.example.myapplication.ui.main.PestanaMapa;
+import com.example.myapplication.ui.main.PestanaRutas;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.ParseObject;
@@ -130,8 +132,9 @@ public class CrearRuta extends AppCompatActivity {
                 // Si todos los campos se han rellenado, crear la ruta
                 Ruta r = Ruta.crearRuta(nombre, descripcion, imagenRuta, ruta);
                 r.guardar();
+                // Notificar para actualizar la lista de rutas
+                PestanaRutas.actualizarRutas();
                 finish();    // Cerrar la actividad
-
             }
         });
 
@@ -233,14 +236,4 @@ public class CrearRuta extends AppCompatActivity {
                     actionState, isCurrentlyActive);
         }
     };
-
-    public void updateList(ArrayList<lugar> newList){
-        if(listaLugaresAdapter!= null) {
-            // update data in our adapter
-            listaLugaresAdapter.getData().clear();
-            listaLugaresAdapter.getData().addAll(newList);
-            // fire the event
-            listaLugaresAdapter.notifyDataSetChanged();
-        }
-    }
 }

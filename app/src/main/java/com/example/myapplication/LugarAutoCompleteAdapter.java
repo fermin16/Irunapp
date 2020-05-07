@@ -70,7 +70,6 @@ public class LugarAutoCompleteAdapter extends ArrayAdapter<lugar> {
     private Filter filterLugares = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
-            // TODO modificar para que la búsqueda se realice en el servidor
             FilterResults resultados = new FilterResults();
             List<lugar> sugerencias = new ArrayList<>();
 

@@ -7,10 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 
@@ -22,6 +26,12 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
     public ListaRutasAdapter(Context mContext, List<Ruta> mData) {
         this.mContext = mContext;
         this.mData = mData;
+    }
+
+    public void restoreItem(Ruta item, int position) {
+        mData.add(position, item);
+        // notify item added by position
+        notifyItemInserted(position);
     }
 
     @NonNull
@@ -59,6 +69,9 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
+        public RelativeLayout viewFondo;
+        public RelativeLayout viewFrente;
+
         ImageView imagenPrincipal;
         TextView nombreRuta, descripcion;
         Button botonVerMapa;
@@ -69,6 +82,8 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
             nombreRuta = itemView.findViewById(R.id.nombre_ruta);
             descripcion = itemView.findViewById(R.id.descripcion);
             botonVerMapa = itemView.findViewById(R.id.boton_cm);
+            viewFrente = itemView.findViewById(R.id.item);
+            viewFondo = itemView.findViewById(R.id.fondo);
         }
     }
 

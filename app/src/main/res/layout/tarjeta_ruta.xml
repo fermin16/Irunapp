@@ -1,14 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:theme="@style/Theme.MaterialComponents.Light"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:theme="@style/Theme.MaterialComponents.Light">
 
     <RelativeLayout
+        android:id="@+id/fondo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fa315b">
+
+        <ImageView
+            android:id="@+id/delete_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_delete_black_24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@id/delete_icon"
+            android:text="@string/eliminar"
+            android:textColor="#fff"
+            android:textSize="13dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/item"
         android:layout_width="match_parent"
         android:layout_height="@dimen/alto_tarjeta_grande"
-        android:orientation="vertical">
+        android:background="#ffffff">
 
         <ImageView
             android:id="@+id/imagen_principal"
@@ -33,22 +60,22 @@
                 android:id="@+id/nombre_ruta"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:lines="3"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:text="nombre_ruta"
                 android:textColor="#FFFFFF"
-                android:lines="3"
-                android:focusable="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit="marquee_forever"
                 android:textSize="30sp" />
 
             <TextView
                 android:id="@+id/descripcion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:focusable="true"
                 android:ellipsize="marquee"
+                android:focusable="true"
                 android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
                 android:text="descripcion_ruta"
                 android:textColor="#FFFFFF" />
 
@@ -60,11 +87,11 @@
 
                 <Button
                     android:id="@+id/boton_cm"
-                    android:theme="@style/Widget.MaterialComponents.Button.Icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ver_mapa"
-                    android:textSize="@dimen/tamano_letra_boton" />
+                    android:textSize="@dimen/tamano_letra_boton"
+                    android:theme="@style/Widget.MaterialComponents.Button.Icon" />
             </LinearLayout>
 
         </LinearLayout>

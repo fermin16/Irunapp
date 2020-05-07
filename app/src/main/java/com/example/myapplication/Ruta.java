@@ -89,6 +89,10 @@ public class Ruta {
             cargarRutas();
         }
         rutas.add(this);
+        guardarRutas();
+    }
+
+    public static void guardarRutas() {
         try {
             FileOutputStream fos = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/rutas.dat");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -118,9 +122,7 @@ public class Ruta {
         } catch (IOException ex) {
             // TODO gestionar excepción
         }
-
     }
-
     public static List<Ruta> cargarRutas() {
         if (rutas == null) {
             try {
@@ -169,5 +171,11 @@ public class Ruta {
             }
         }
         return rutas;
+    }
+
+    public static Ruta eliminarRuta(int pos) {
+        Ruta r  = rutas.get(pos);
+        rutas.remove(pos);
+        return r;
     }
 }
