@@ -83,20 +83,18 @@ public class CrearRuta extends AppCompatActivity {
         recyclerView.setAdapter(listaLugaresAdapter);
         ((EmptyRecyclerView)recyclerView).setEmptyView(findViewById(R.id.lista_vacia));
 
-        buscadorLugares.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                RecyclerView listaLugares = view.findViewById(R.id.lugares_ruta);
-                lugar lugar = (com.example.myapplication.Modelos.lugar)adapterView.getItemAtPosition(i);
-                // Añadir el punto a la ruta
-                ruta.add(lugar);
+        buscadorLugares.setOnItemClickListener((adapterView, view, i, l) -> {
 
-                // Vaciar la barra de búsqueda y notificar al adaptador de que se ha insertado
-                // un nuevo elemento en la lista
-                buscadorLugares.setText("");
-                //listaLugaresAdapter.notifyDataSetChanged();
-                updateList(ruta);
-            }
+            // Obtener el punto seleccionado
+            lugar lugar = (com.example.myapplication.Modelos.lugar)adapterView.getItemAtPosition(i);
+
+            // Añadir el punto a la ruta
+            ruta.add(lugar);
+
+            // Vaciar la barra de búsqueda y notificar al adaptador de que se ha insertado
+            // un nuevo elemento en la lista
+            buscadorLugares.setText("");
+            listaLugaresAdapter.notifyDataSetChanged();
         });
 
         FloatingActionButton botonCrearRuta = findViewById(R.id.boton_crear_ruta);
@@ -108,12 +106,32 @@ public class CrearRuta extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
             }
             else {
-                // Crear la ruta
-                String nombre = ((EditText)findViewById(R.id.nombre_ruta)).getText().toString();
-                String descripcion = ((EditText)findViewById(R.id.descripcion_ruta)).getText().toString();
+                // Comprobar que todos los campos han sido rellenados y mostrar un mensaje en caso de que alguno de ellos no lo esté
+                EditText editTextNombre = findViewById(R.id.nombre_ruta);
+                EditText editTextDescripcion = findViewById(R.id.descripcion_ruta);
+                String nombre = editTextNombre.getText().toString();
+                String descripcion = editTextDescripcion.getText().toString();
+
+                if (nombre.trim().equalsIgnoreCase("")) {
+                    editTextNombre.setError("Debes rellenar este campo");
+                    return;
+                }
+
+                if (descripcion.trim().equalsIgnoreCase("")) {
+                    editTextDescripcion.setError("Debes rellenar este campo");
+                    return;
+                }
+
+                if (ruta.size() == 0) {
+                    Toast.makeText(this, "Debes añadir al menos un lugar a tu ruta", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Si todos los campos se han rellenado, crear la ruta
                 Ruta r = Ruta.crearRuta(nombre, descripcion, imagenRuta, ruta);
                 r.guardar();
                 finish();    // Cerrar la actividad
+
             }
         });
 

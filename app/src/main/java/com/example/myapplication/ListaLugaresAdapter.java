@@ -192,13 +192,15 @@ public class ListaLugaresAdapter extends RecyclerView.Adapter<ListaLugaresAdapte
             this.itemView = itemView;
 
             imagenPrincipal = itemView.findViewById(R.id.imagen_principal);
-            nombreLugar = itemView.findViewById(R.id.nombre_lugar_grande);
+
             if (tarjetaGrande) {
+                nombreLugar = itemView.findViewById(R.id.nombre_lugar_grande);
                 botonVerMas = itemView.findViewById(R.id.boton_vm);
                 botonComoLlegar = itemView.findViewById(R.id.boton_cm);
                 horario = itemView.findViewById(R.id.horario_lugar);
             }
             else {
+                nombreLugar = itemView.findViewById(R.id.nombre_lugar);
                 viewFrente = itemView.findViewById(R.id.item);
                 viewFondo = itemView.findViewById(R.id.fondo);
             }

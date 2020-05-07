@@ -34,7 +34,15 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.imagenPrincipal.setImageBitmap(mData.get(position).getImagenPrincipal());
+        Bitmap imagenRuta = mData.get(position).getImagenPrincipal();
+
+        // Si no hay imagen, establecer la imagen por defecto para las rutas
+        if (imagenRuta == null) {
+            // TODO establecer la imagen por defecto para la ruta
+        }
+        else {
+            holder.imagenPrincipal.setImageBitmap(imagenRuta);
+        }
         holder.nombreRuta.setText(mData.get(position).getNombreRuta());
         holder.descripcion.setText(mData.get(position).getDescripcion());
         holder.botonVerMapa.setOnClickListener(view -> {

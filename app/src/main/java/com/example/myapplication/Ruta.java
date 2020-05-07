@@ -39,8 +39,33 @@ public class Ruta {
     private Ruta(String nombreRuta, String descripcion, Bitmap imagen, List<ParseGeoPoint> lugares) {
         this.nombreRuta = nombreRuta;
         this.descripcion = descripcion;
-        this.imagenPrincipal = imagen;
+        this.imagenPrincipal = redimensionarImagen(imagen);
         this.lugares = lugares;
+    }
+
+    private Bitmap redimensionarImagen(Bitmap img) {
+        if (img == null)
+            return null;
+
+        // TODO redimensionar la imagen si es muy grande
+        int ancho = img.getWidth();
+        int alto = img.getHeight();
+
+        Bitmap res = img;
+
+        if (ancho / alto > 1) {
+            // Redimensionar manteniendo el ancho al máximo
+            if (ancho > 640) {
+                res = Bitmap.createScaledBitmap(img, 640, 640 * alto / ancho, false);
+            }
+        }
+        else {
+            // Redimensionar manteniendo el alto al máximo
+            if (alto > 480) {
+                res = Bitmap.createScaledBitmap(img, 480 * ancho / alto, 480, false);
+            }
+        }
+        return res;
     }
 
     public Bitmap getImagenPrincipal() {
@@ -73,10 +98,15 @@ public class Ruta {
             for (Ruta r : rutas) {
                 oos.writeObject(r.nombreRuta);
                 oos.writeObject(r.descripcion);
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                r.imagenPrincipal.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                oos.writeInt(stream.toByteArray().length);
-                oos.write(stream.toByteArray());
+                if (r.imagenPrincipal == null) {
+                    oos.writeInt(0);
+                }
+                else {
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    r.imagenPrincipal.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    oos.writeInt(stream.toByteArray().length);
+                    oos.write(stream.toByteArray());
+                }
                 oos.writeInt(r.lugares.size());
                 for (ParseGeoPoint p : r.lugares) {
                     oos.writeDouble(p.getLatitude());
@@ -99,23 +129,38 @@ public class Ruta {
                 rutas = new ArrayList<>();
                 int numRutas = ois.readInt();
 
+                // Variables que se van a usaar en el bucle
+                String nombre, descr;
+                int imSize, numLugares;
+                Bitmap imagen;
+                byte[] imBytes;
+                double lat, lng;
+                ArrayList<ParseGeoPoint> lugares;
+
+                // Cargar las rutas
                 for (int i = 0; i < numRutas; i++) {
-                    String nombre = (String)ois.readObject();
-                    String descr = (String)ois.readObject();
-                    int imSize = ois.readInt();
-                    byte[] imBytes = new byte[imSize];
-                    ois.readFully(imBytes, 0, imSize);
-                    Bitmap imagen = BitmapFactory.decodeByteArray(imBytes, 0, imBytes.length);
-                    int numLugares = ois.readInt();
-                    ArrayList<ParseGeoPoint> lugares = new ArrayList<>();
+                    nombre = (String)ois.readObject();
+                    descr = (String)ois.readObject();
+                    imSize = ois.readInt();
+
+                    if (imSize == 0) {
+                        imagen = null;
+                    }
+                    else {
+                        imBytes = new byte[imSize];
+                        ois.readFully(imBytes, 0, imSize);
+                        imagen = BitmapFactory.decodeByteArray(imBytes, 0, imBytes.length);
+                    }
+                    numLugares = ois.readInt();
+                    lugares = new ArrayList<>();
+                    // Cargar los puntos de la ruta
                     for (int j = 0; j < numLugares; j++) {
-                        double lat = ois.readDouble();
-                        double lng = ois.readDouble();
+                        lat = ois.readDouble();
+                        lng = ois.readDouble();
                         lugares.add(new ParseGeoPoint(lat, lng));
                     }
                     rutas.add(new Ruta(nombre, descr, imagen, lugares));
                 }
-
                 ois.close();
             }
             catch (IOException | ClassNotFoundException ex) {
