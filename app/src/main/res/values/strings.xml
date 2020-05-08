@@ -62,6 +62,11 @@
     <string name="error_calculo_tiempo">No se ha podido calcular el tiempo aproximado de la ruta, disculpe lass molestias</string>
     <string name="ubicacionErronea">Su ubicación está fuera de rango para poder utilizar la aplicación debe estar en Pamplona</string>
     <string name="ubicacionNoEncontrada">No hemos podido localizar su ubicación intentelo de nuevo mas tarde.</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="cerrar_navegacion">Cerrar</string>
+    <string name="info_ruta">Información de la ruta:</string>
+    <string name="DistanciaRuta"> Distancia:</string>
+    <string name="TiempoRuta"> Duración:</string>
 
     <!-- Strings Activity Info -->
     <!--Layout-->

@@ -3,6 +3,7 @@ package com.example.myapplication.ui.main;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -30,6 +32,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
@@ -48,6 +51,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.d.lib.tabview.TabView;
+import com.example.myapplication.ActivityInicio;
 import com.example.myapplication.Modelos.Preferencias;
 import com.example.myapplication.Modelos.lugar;
 import com.example.myapplication.R;
@@ -57,6 +61,7 @@ import com.example.myapplication.tipoLugar;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -103,6 +108,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.Context.LOCATION_SERVICE;
+import static androidx.navigation.fragment.NavHostFragment.findNavController;
 
 
 public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensajesHandler, tipoLugar {
@@ -176,6 +182,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     private PermissionsManager permissionsManager;
     private LocationComponent locationComponent; //Variable para obtener la localizacion actual
     private AlertDialog alertDialog; //Guardar una variable para el alertDialog que permitira cerrarlo cuando deba crearse uno nuevo
+    private  Snackbar snackbar; //Snackbar para mostrar información
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
     private Context contextoBroadcast;
     public static Handler manejador; //Handler que maneja los mensajes del hilo hijo.
@@ -225,7 +232,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     private static ImageView imagenduracion;
     public static String rutaSeleccionada; //Ruta para seleccionar desde activity Info.
     private boolean isVisibleRoute;
-    private boolean onNavigationMode;
+    private boolean rutaMultipunto; //Variable que indica si la ruta es multipunto
 
     //Componentes comunicación con la lista:
     private PestanaLugares pestanaLugares;
@@ -243,6 +250,20 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if(snackbar != null && snackbar.isShown()) {
+                    updateNavigationRoute();
+                    snackbar.dismiss();
+                }
+                else {
+                    setEnabled(false); //this is important line
+                    requireActivity().onBackPressed();
+                }
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -284,6 +305,15 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 if(msg.what == MSG_QUERY) {
                     ArrayList<ParseObject> lista_puntos = (ArrayList<ParseObject>) msg.obj;
                     mostrarPuntos(lista_puntos);
+                }
+                else if(msg.what == MSG_RUTA_MULTIPLE){
+                    ArrayList<ParseGeoPoint> puntosRuta = (ArrayList<ParseGeoPoint>) msg.obj;
+                    ArrayList<Point> ruta = new ArrayList<>();
+                    for(ParseGeoPoint geoPoint: puntosRuta){
+                        ruta.add(Point.fromLngLat(geoPoint.getLongitude(),geoPoint.getLatitude()));
+                    }
+                    modoRuta = rutaSeleccionada;
+                    getroute(ruta);
                 }
                 else{
                     if(BotonFlotante.isOpened())
@@ -341,7 +371,9 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     }
                     if(msg.what == MSG_RUTA || msg.what == MSG_RUTA_TAB_LUGARES){
                         selectCard(true);
-                        getroute(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
+                        ArrayList<Point> puntos = new ArrayList<>();
+                        puntos.add(Point.fromLngLat(cardclick.getLongitude(),cardclick.getLatitude()));
+                        getroute(puntos);
                     }
                 }
             }
@@ -651,8 +683,17 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 return true;
             }
         }
-        else
-            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), getString(R.string.ubicacionNoEncontrada), Toast.LENGTH_LONG).show());
+        else {
+            snackbar = Snackbar.make(recyclerView, getResources().getString(R.string.ubicacionNoEncontrada), Snackbar.LENGTH_INDEFINITE);
+            snackbar.setAction(getResources().getString(R.string.reintentar), view -> {
+                TabLayout tabhost = (TabLayout) ((Activity)this.getContext()).findViewById(R.id.tabs);
+                tabhost.getTabAt(1).select();
+                findMe();
+            });
+            snackbar.setActionTextColor(Color.RED);
+
+            getActivity().runOnUiThread(() ->snackbar.show());
+        }
         return false;
     }
 
@@ -687,6 +728,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                 BotonFlotante.close(true);
                             deselectMarker();
                         }
+                        updateNavigationRoute();
                         return false;
                     });
                     symbolManager.setIconAllowOverlap(true);
@@ -926,6 +968,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             animateCamera(symbol);
         if((markerSelected == null) || (!symbol.equals(markerSelected))) {
             deselectMarker();
+            updateNavigationRoute();
             noMarker = false; //Lo ponemos a false evitando asi que si es la primera query y no teniamos un punto seleccionado al deseleccionar no se borre el punto.s
             markerAnimator = new ValueAnimator();
             markerAnimator.setObjectValues(TAMANO_MAX_ICONO, TAMANO_MIN_ICONO);
@@ -944,10 +987,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         if (markerSelected != null){
             int index = lista_symbol.indexOf(markerSelected);
             if(lista_symbol.remove(markerSelected)) {
-                if (isVisibleRoute) {
-                    updateNavigationRoute();
-                    isVisibleRoute = false;
-                }
                 if (noMarker) {
                     //Solo estaba disponible el punto seleccionado:
                     if (lista_symbol.isEmpty()) {
@@ -1099,7 +1138,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 .setListener(null);
         new Handler().postDelayed(() -> {
             recyclerView.setVisibility(View.GONE);
-            BotonTarjetas.setEnabled(true);
+            if(!BotonTarjetas.isEnabled() && !rutaMultipunto)
+                BotonTarjetas.setEnabled(true);
         },ANIMACION_TARJETAS);
     }
 
@@ -1148,7 +1188,9 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                 modoRuta = rutaSeleccionada;
                 ParseGeoPoint puntoSeleccionado = ((lugar) cardSelected).getLocalizacion();
                 check_modo_ruta();
-                getroute(Point.fromLngLat(puntoSeleccionado.getLongitude(), puntoSeleccionado.getLatitude()));
+                ArrayList<Point> puntos = new ArrayList<>();
+                puntos.add(Point.fromLngLat(puntoSeleccionado.getLongitude(), puntoSeleccionado.getLatitude()));
+                getroute(puntos);
             }
         }
     }
@@ -1268,17 +1310,28 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
 //        super.onPictureInPictureModeChanged(isInPIPMode);
 //    }
 
-    private void getroute(Point puntoDestino) {
+    private void getroute(List<Point> puntosDestino) {
         if (locationComponent !=null) {
             Location localizacionActual = locationComponent.getLastKnownLocation();
-            if (localizacionActual != null) {
+            if (compruebaRangoUbicacion(localizacionActual)) {
+                int tamanoLista = puntosDestino.size();
                 routeLoading.setVisibility(View.VISIBLE);
                 Point PuntoOrigen = Point.fromLngLat(localizacionActual.getLongitude(), localizacionActual.getLatitude());
-                NavigationRoute.builder(getActivity()).
-                        accessToken(getString(R.string.map_token))
-                        .origin(PuntoOrigen)
-                        .destination(puntoDestino)
-                        .profile(modoRuta)
+                NavigationRoute.Builder builder = NavigationRoute.builder(getActivity())
+                        .accessToken(getString(R.string.map_token))
+                        .origin(PuntoOrigen);
+                if(tamanoLista == 1)
+                    builder.destination(puntosDestino.get(0));
+                else {
+                    for (int i = 0; i < tamanoLista; i++) {
+                        Point waypoint = puntosDestino.get(i);
+                        if(i == tamanoLista-1)
+                            builder.destination(waypoint);
+                        else
+                            builder.addWaypoint(waypoint);
+                    }
+                }
+                        builder.profile(modoRuta)
                         .alternatives(true)
                         .build()
                         .getRoute(new Callback<DirectionsResponse>() {
@@ -1288,19 +1341,45 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                     currentRoute = response.body().routes().get(0);
 
                                     //Printear y dibujar las distancias y sus simbolos
-                                    updateNavigationRoute();
-                                    String distancia = String.format("%.2f",currentRoute.distance()/1000);
-                                    textodistancia.setText("  "+distancia+" KM   ");
-                                    try {
-                                        String duracion = String.format("%06d", currentRoute.duration().intValue());
-                                        DateFormat format = new SimpleDateFormat("HHmmss", Locale.US);
-                                        Date date = format.parse(duracion);
-                                        textoDuracion.setText(date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
-                                    } catch (ParseException e) {
-                                        Toast.makeText(getActivity(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
+                                    if(tamanoLista == 1) {
+                                        updateNavigationRoute();
+                                        rutaMultipunto = false;
+                                        String distancia = String.format("%.2f",currentRoute.distance()/1000);
+                                        textodistancia.setText("  "+distancia+" KM   ");
+                                        try {
+                                            String duracion = String.format("%06d", currentRoute.duration().intValue());
+                                            DateFormat format = new SimpleDateFormat("HHmmss", Locale.US);
+                                            Date date = format.parse(duracion);
+                                            textoDuracion.setText(date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
+                                        } catch (ParseException e) {
+                                            Toast.makeText(getActivity(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
+                                        }
+                                        imagendistancia.setVisibility(View.VISIBLE);
+                                        imagenduracion.setVisibility(View.VISIBLE);
+                                    }else {
+                                        updateNavigationRoute();
+                                        rutaMultipunto = true;
+                                        String distancia = String.format("%.2f",currentRoute.distance()/1000);
+                                        try {
+                                            String duracion = String.format("%06d", currentRoute.duration().intValue());
+                                            DateFormat format = new SimpleDateFormat("HHmmss", Locale.US);
+                                            Date date = format.parse(duracion);
+                                            snackbar = Snackbar.make(recyclerView, getResources().getString(R.string.info_ruta)+"\n"+getResources().getString(R.string.DistanciaRuta)+" "+distancia+"KM "+getResources().getString(R.string.DistanciaRuta)+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), Snackbar.LENGTH_INDEFINITE);
+                                            snackbar.setAction(getResources().getString(R.string.cerrar_navegacion), view -> {
+                                                updateNavigationRoute();
+                                            });
+                                            snackbar.setActionTextColor(Color.CYAN);
+                                            getActivity().runOnUiThread(() ->snackbar.show());
+                                            if(BotonTarjetas.getColorNormal() == ContextCompat.getColor(getActivity(), R.color.botonTarjetasNormal))
+                                                BotonTarjetas.performClick();
+                                            else
+                                                BotonTarjetas.setEnabled(false);
+                                            dormir();
+                                        } catch (ParseException e) {
+                                            Toast.makeText(getActivity(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
+                                        }
+
                                     }
-                                    imagendistancia.setVisibility(View.VISIBLE);
-                                    imagenduracion.setVisibility(View.VISIBLE);
                                     navigationMapRoute.addRoute(currentRoute);
                                     routeLoading.setVisibility(View.INVISIBLE);
                                     if(alertDialog != null)
@@ -1312,7 +1391,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                     isVisibleRoute = true;
                                 }
                             }
-
                             @Override
                             public void onFailure(Call<DirectionsResponse> call, Throwable t) {
                                 Snackbar.make(mapView, R.string.error_ruta, Snackbar.LENGTH_SHORT).show();
@@ -1324,16 +1402,35 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
         Snackbar.make(mapView, R.string.error_ruta, Snackbar.LENGTH_SHORT).show();
     }
 
+    private void cerrarRutaMultiPunto(){
+        updateNavigationRoute();
+        BotonTarjetas.setEnabled(true);
+        BotonTarjetas.performClick();
+        despertar(true);
+        rutaMultipunto = false;
+    }
+
     private void updateNavigationRoute() {
         if(navigationMapRoute != null){
-            navigationMapRoute.updateRouteArrowVisibilityTo(false);
-            navigationMapRoute.updateRouteVisibilityTo(false);
-            if(BotonNavegacion.isEnabled())
-                BotonNavegacion.setEnabled(false);
-            textodistancia.setText("");
-            textoDuracion.setText("");
-            imagendistancia.setVisibility(View.INVISIBLE);
-            imagenduracion.setVisibility(View.INVISIBLE);
+            if(isVisibleRoute) {
+                navigationMapRoute.updateRouteArrowVisibilityTo(false);
+                navigationMapRoute.updateRouteVisibilityTo(false);
+                if (BotonNavegacion.isEnabled())
+                    BotonNavegacion.setEnabled(false);
+                if (!rutaMultipunto) {
+                    textodistancia.setText("");
+                    textoDuracion.setText("");
+                    imagendistancia.setVisibility(View.INVISIBLE);
+                    imagenduracion.setVisibility(View.INVISIBLE);
+                } else {
+                    snackbar.dismiss();
+                    BotonTarjetas.setEnabled(true);
+                    BotonTarjetas.performClick();
+                    despertar(true);
+                    rutaMultipunto = false;
+                }
+                isVisibleRoute = false;
+            }
         }
         else{
             navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
@@ -1341,15 +1438,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     }
 
 
-
-    /****
-     **********************************************************
-     **********************************************************
-     **********************************************************
-     **********************************************************
-     **********************************************************
-     **********************************************************
-     * Parte para las infoWindows que se mostraran en el mapa **/
+        /****
+         **********************************************************
+         **********************************************************
+         **********************************************************
+         **********************************************************
+         **********************************************************
+         **********************************************************
+         * Parte para las infoWindows que se mostraran en el mapa **/
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void initRecyclerView(List<ParseObject> listaParse) {

@@ -1,7 +1,10 @@
 package com.example.myapplication;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +15,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.ui.main.PestanaMapa;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.tabs.TabLayout;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.parse.ParseGeoPoint;
 
 import java.util.List;
 
-public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.MyViewHolder> {
+public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.MyViewHolder> implements mensajesHandler{
 
     Context mContext;
     List<Ruta> mData;
@@ -42,6 +53,7 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
         return new MyViewHolder(v);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Bitmap imagenRuta = mData.get(position).getImagenPrincipal();
@@ -56,9 +68,30 @@ public class ListaRutasAdapter extends RecyclerView.Adapter<ListaRutasAdapter.My
         holder.nombreRuta.setText(mData.get(position).getNombreRuta());
         holder.descripcion.setText(mData.get(position).getDescripcion());
         holder.botonVerMapa.setOnClickListener(view -> {
-            // TODO cargar la ruta
-            // mostrar la ruta en el mapa
-            // TODO cambiar a la pestaña de mapa
+            PopupMenu popup = new PopupMenu(mContext, view);
+            popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.modoCoche) {
+                    PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_DRIVING;
+                } else if (item.getItemId() == R.id.modoBicicleta) {
+                    PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_CYCLING;
+                } else {
+                    PestanaMapa.rutaSeleccionada = DirectionsCriteria.PROFILE_WALKING;
+                }
+                Message msg = new Message();
+                msg.obj = mData.get(position).getLugares();
+                msg.what = MSG_RUTA_MULTIPLE;
+                PestanaMapa.manejador.sendMessage(msg);
+
+                //Movernos al tab del mapa:
+                TabLayout tabhost = (TabLayout) ((Activity)mContext).findViewById(R.id.tabs);
+                tabhost.getTabAt(1).select();
+                return true;
+            });
+            MenuPopupHelper menuHelper = new MenuPopupHelper(mContext, (MenuBuilder) popup.getMenu(), view);
+            menuHelper.setForceShowIcon(true);
+            menuHelper.show();
         });
     }
 

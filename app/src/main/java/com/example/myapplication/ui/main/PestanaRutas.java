@@ -100,14 +100,11 @@ public class PestanaRutas extends Fragment {
 
             // Mostrar el mensaje de deshacer en caso de que se haya eliminado accidentalmente
             Snackbar snackbar = Snackbar.make(recyclerView, getResources().getString(R.string.ruta_eliminada), Snackbar.LENGTH_LONG);
-            snackbar.setAction(getResources().getString(R.string.deshacer), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            snackbar.setAction(getResources().getString(R.string.deshacer), view -> {
 
-                    // Volver a añadir el item a la lista
-                    listaRutasAdapter.restoreItem(eliminada, deletedIndex);
-                    Ruta.guardarRutas();
-                }
+                // Volver a añadir el item a la lista
+                listaRutasAdapter.restoreItem(eliminada, deletedIndex);
+                Ruta.guardarRutas();
             });
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();

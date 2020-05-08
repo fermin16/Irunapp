@@ -8,5 +8,5 @@ public interface mensajesHandler {
     public static final int MSG_RUTA = 4;
     public static final int MSG_RUTA_TAB_LUGARES = 5;
     public static final int MSG_AMPLIA_CARD_LUGARES = 6;
-
+    public static final int MSG_RUTA_MULTIPLE = 7;
 }
