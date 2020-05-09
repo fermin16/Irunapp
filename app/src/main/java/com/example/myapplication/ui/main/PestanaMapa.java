@@ -1377,7 +1377,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                             String duracion = String.format("%06d", currentRoute.duration().intValue());
                                             DateFormat format = new SimpleDateFormat("HHmmss", Locale.US);
                                             Date date = format.parse(duracion);
-                                            snackbar = Snackbar.make(recyclerView, getResources().getString(R.string.info_ruta)+"\n"+getResources().getString(R.string.DistanciaRuta)+" "+distancia+"KM "+getResources().getString(R.string.DistanciaRuta)+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), Snackbar.LENGTH_INDEFINITE);
+                                            snackbar = Snackbar.make(recyclerView, getResources().getString(R.string.info_ruta)+"\n"+getResources().getString(R.string.TiempoRuta)+" "+distancia+"KM "+getResources().getString(R.string.DistanciaRuta)+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), Snackbar.LENGTH_INDEFINITE);
                                             snackbar.setAction(getResources().getString(R.string.cerrar_navegacion), view -> {
                                                 updateNavigationRoute();
                                             });
