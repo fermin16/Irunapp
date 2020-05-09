@@ -185,6 +185,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     private  Snackbar snackbar; //Snackbar para mostrar información
     private BroadcastReceiver mGpsSwitchStateReceiver; //BoradcastReciver para saber cuando un usuario activa o desactiva gps
     private Context contextoBroadcast;
+    private boolean serviciosDesactivados; //Variable que indica si los servicios se han desactivado
     public static Handler manejador; //Handler que maneja los mensajes del hilo hijo.
 
     //Componentes marcadores:
@@ -491,24 +492,27 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                if (intent.getAction().matches("android.location.PROVIDERS_CHANGED")){ //Si han cambiado los proveedores de servicio o de locaizacion
-                    //Comprobar los servicios de red y ubicacion:
-                    if(!checkLocationServices()) {
-                        dormir(); //Poner el hijo en pausa
-                        Toast.makeText(context,getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show();
+                    if (intent.getAction().matches("android.location.PROVIDERS_CHANGED")) { //Si han cambiado los proveedores de servicio o de locaizacion
+                        //Comprobar los servicios de red y ubicacion:
+                        boolean check = checkLocationServices();
+                        if (!check && !serviciosDesactivados) {
+                            dormir(); //Poner el hijo en pausa
+                            Toast.makeText(context, getString(R.string.serviciosDesactivados), Toast.LENGTH_LONG).show();
+                            serviciosDesactivados = true;
+                        } else if(check){ //Si se han activado
+                            findMe(); //Mostrar localizacion
+                            serviciosDesactivados = false;
+                            if (pause)
+                                despertar(true);
+                        }
                     }
-                    else{ //Si se han activado
-                        findMe(); //Mostrar localizacion
-                        if (pause)
-                            despertar(true);
-
-                    }
-                }
             }
         };
         contextoBroadcast = getActivity();
         //Registrar el broadcastReciever (tambien se pede hacer desde el manifest pero para ello deberiamos crear una clase que extienda a BroadcastReciver)
-        contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+        IntentFilter filter = new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION);
+        filter.addAction(Intent.ACTION_PROVIDER_CHANGED);
+        contextoBroadcast.registerReceiver(mGpsSwitchStateReceiver, filter);
         set_style(BasicStyle);
         initRecyclerView(null);
 
@@ -602,7 +606,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             //Notificar al usuario que tiene desactivados los servicios de ubicacion.
             alertDialog = new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.gps_desactivado)
-                    .setPositiveButton(R.string.activar_gps, (paramDialogInterface, paramInt) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION)).setNegativeButton(R.string.cancelar_gps, (dialog, which) -> Toast.makeText(getActivity(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show())
+                    .setPositiveButton(R.string.activar_gps, (paramDialogInterface, paramInt) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION))
+                    .setNegativeButton(R.string.cancelar_gps, (dialog, which) -> Toast.makeText(getActivity(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show())
                     .show();
             return false;
         }
@@ -610,12 +615,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             //Notificar al usuario que tiene desactivados los servicios de red.
             alertDialog = new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.net_desactivada)
-                    .setPositiveButton(R.string.activar_gps, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION);
-                        }
-                    }).setNegativeButton(R.string.cancelar_gps, null)
+                    .setPositiveButton(R.string.activar_gps, (paramDialogInterface, paramInt) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),ACTIVAR_UBICACION))
+                    .setNegativeButton(R.string.cancelar_gps, (dialog, which) -> Toast.makeText(getActivity(),getString(R.string.serviciosDesactivados),Toast.LENGTH_LONG).show())
                     .show();
             return false;
         }
@@ -634,6 +635,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
 
                         Location miubicacion = locationComponent.getLastKnownLocation();
                         if(compruebaRangoUbicacion(miubicacion)) {
+                            if(snackbar != null && snackbar.isShown() && !rutaMultipunto)
+                                snackbar.dismiss();
                             //Colocar el modo de la camara en Tracking
                             locationComponent.setCameraMode(CameraMode.TRACKING);
 
@@ -860,7 +863,8 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             else if((!listaPuntos.isEmpty() && !lista_symbol.isEmpty()) || (!listaPuntos.isEmpty() && lista_symbol.isEmpty())){
                 //Considerar que el marker seleccionado no esta en la lista de la query
                 noMarker=true;
-                BotonTarjetas.setEnabled(true);
+                if(!rutaMultipunto)
+                    BotonTarjetas.setEnabled(true);
                 //Limpiar la lista de puntos y volver a añadirlos:
                 lista_symbol.clear();
                 float icon_size;
@@ -940,7 +944,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
     private void animateCamera(Symbol symbol){
         CameraPosition position = new CameraPosition.Builder()
                 .target(new LatLng(symbol.getLatLng())) // Sets the new camera position
-                .zoom(ZOOM_FIND) // Sets the zoom
+                .zoom(ZOOM_MIN) // Sets the zoom
                 .build(); // Creates a CameraPosition from the builder
 
         mapboxMap.animateCamera(CameraUpdateFactory
@@ -1335,6 +1339,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                         .alternatives(true)
                         .build()
                         .getRoute(new Callback<DirectionsResponse>() {
+                            @RequiresApi(api = Build.VERSION_CODES.N)
                             @Override
                             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
                                 if(response.body() != null && response.body().routes().size() >= 1){
@@ -1358,6 +1363,14 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                         imagenduracion.setVisibility(View.VISIBLE);
                                     }else {
                                         updateNavigationRoute();
+                                        deselectMarker();
+                                        //Animar la camara hasta una posición determinada de la ruta
+                                        CameraPosition position = new CameraPosition.Builder()
+                                                .target(new LatLng(localizacionActual)) // Sets the new camera position
+                                                .zoom(ZOOM_MIN) // Sets the zoom
+                                                .build(); // Creates a CameraPosition from the builder
+                                        mapboxMap.animateCamera(CameraUpdateFactory
+                                                .newCameraPosition(position), CAMERA_ANIMATION);
                                         rutaMultipunto = true;
                                         String distancia = String.format("%.2f",currentRoute.distance()/1000);
                                         try {
@@ -1374,7 +1387,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                                 BotonTarjetas.performClick();
                                             else
                                                 BotonTarjetas.setEnabled(false);
-                                            dormir();
                                         } catch (ParseException e) {
                                             Toast.makeText(getActivity(), R.string.error_calculo_tiempo, Toast.LENGTH_SHORT).show();
                                         }
@@ -1385,7 +1397,7 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                                     if(alertDialog != null)
                                         alertDialog.dismiss();
                                     alertDialog = new AlertDialog.Builder(getActivity())
-                                            .setMessage(R.string.iniciar_ruta )
+                                            .setMessage(R.string.iniciar_ruta_predefinida)
                                             .setPositiveButton(R.string.iniciar, (paramDialogInterface, paramInt) -> startNavigation(mapView)).setNegativeButton(R.string.cancelar_navegavecion,null).show();
                                     BotonNavegacion.setEnabled(true);
                                     isVisibleRoute = true;
@@ -1400,14 +1412,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             }
         }
         Snackbar.make(mapView, R.string.error_ruta, Snackbar.LENGTH_SHORT).show();
-    }
-
-    private void cerrarRutaMultiPunto(){
-        updateNavigationRoute();
-        BotonTarjetas.setEnabled(true);
-        BotonTarjetas.performClick();
-        despertar(true);
-        rutaMultipunto = false;
     }
 
     private void updateNavigationRoute() {
@@ -1426,7 +1430,6 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
                     snackbar.dismiss();
                     BotonTarjetas.setEnabled(true);
                     BotonTarjetas.performClick();
-                    despertar(true);
                     rutaMultipunto = false;
                 }
                 isVisibleRoute = false;

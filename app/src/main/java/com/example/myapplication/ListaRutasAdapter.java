@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -21,11 +20,8 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.ui.main.PestanaMapa;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.tabs.TabLayout;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.parse.ParseGeoPoint;
 
 import java.util.List;
 

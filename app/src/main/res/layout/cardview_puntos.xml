@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <com.google.android.material.card.MaterialCardView
         style="@style/Widget.MaterialComponents.CardView"
@@ -17,12 +17,13 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
+
                 <ImageView
-                    android:layout_width="300dp"
-                    android:layout_height="100dp"
-                    android:scaleType="centerCrop"
                     android:id="@+id/imagen"
-                    android:transitionName="@string/id_transicion_imagen"/>
+                    android:layout_width="300dp"
+                    android:layout_height="75dp"
+                    android:scaleType="centerCrop"
+                    android:transitionName="@string/id_transicion_imagen" />
             </RelativeLayout>
             <View android:id="@+id/tile_divider"
                 android:layout_width="match_parent"

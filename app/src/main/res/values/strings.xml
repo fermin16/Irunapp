@@ -57,6 +57,7 @@
     <string name="title_activity_amplia_card">ampliaCard</string>
     <string name="error_ruta"> No se ha podido generar la ruta, no se ha encontrado su localización</string>
     <string name="iniciar_ruta">¿Desea iniciar la ruta al lugar al lugar seleccionado?</string>
+    <string name="iniciar_ruta_predefinida">¿Desea iniciar la ruta seleccionada?</string>
     <string name="iniciar">Iniciar</string>
     <string name="cancelar_navegavecion">Cancelar</string>
     <string name="error_calculo_tiempo">No se ha podido calcular el tiempo aproximado de la ruta, disculpe lass molestias</string>
