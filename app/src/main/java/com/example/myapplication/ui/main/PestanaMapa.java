@@ -534,24 +534,25 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
      * (en caso de no haberlos pedido antes) y si el usuario acepta podra utilizar el mapa en caso
      * contrario se terminara el activity.*/
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-        permissionsManager = new PermissionsManager(new PermissionsListener() {
-            @Override
-            public void onExplanationNeeded(List<String> permissionsToExplain) {
-                Toast.makeText(getActivity(), getString(R.string.activarPermisosAjustes),Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onPermissionResult(boolean granted) {
-                if (granted) {
-                    enableLocationComponent(loadedMapStyle);
-                } else {
-                    if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION))
-                        Toast.makeText(getActivity(), getString(R.string.activarPermisos),Toast.LENGTH_LONG).show();
-                    else
-                        onExplanationNeeded(null);
+            permissionsManager = new PermissionsManager(new PermissionsListener() {
+                @Override
+                public void onExplanationNeeded(List<String> permissionsToExplain) {
+                    Toast.makeText(getActivity(), getString(R.string.activarPermisosAjustes), Toast.LENGTH_LONG).show();
                 }
-            }
-        });
+
+                @Override
+                public void onPermissionResult(boolean granted) {
+                    if (granted) {
+                        enableLocationComponent(loadedMapStyle);
+                        findMe();
+                    } else {
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION))
+                            Toast.makeText(getActivity(), getString(R.string.activarPermisos), Toast.LENGTH_LONG).show();
+                        else
+                            onExplanationNeeded(null);
+                    }
+                }
+            });
         //Comprobar si se han concedido los permisos de ubicacion:
         if (permissionsManager.areLocationPermissionsGranted(getActivity())) {
             if(checkLocationServices()) {//Comprobar si estan activados los servicios de red y ubicacion.
@@ -582,7 +583,10 @@ public class PestanaMapa extends Fragment implements OnMapReadyCallback, mensaje
             }
         }
         else{ //Si no se han concedido permisos y el usuario no ha marcado la opcion no volver a preguntar, solicitarlos
-            permissionsManager.requestLocationPermissions(getActivity());
+            //permissionsManager.requestLocationPermissions(getActivity());
+            String[] permisos = new String[1];
+            permisos[0] = Manifest.permission.ACCESS_COARSE_LOCATION;
+            requestPermissions(permisos,0);
         }
     }
 

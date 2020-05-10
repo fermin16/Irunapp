@@ -75,7 +75,7 @@
                     android:id="@+id/boton_cm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/como_llegar"
+                    android:text="@string/RUTA"
                     android:textSize="@dimen/tamano_letra_boton"
                     android:theme="@style/Widget.MaterialComponents.Button.Icon"
                     android:transitionName="@string/id_transicion_boton_ruta" />
